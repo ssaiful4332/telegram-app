@@ -132,8 +132,6 @@
             color: #8b949e;
             margin-bottom: 10px;
         }
-        
-        /* লাইক এবং ভিউ কাউন্ট সেকশন */
         .card-footer-info {
             display: flex;
             justify-content: space-between;
@@ -159,7 +157,6 @@
             color: #ff4444;
             font-weight: bold;
         }
-
         .unlock-btn {
             width: 100%;
             background: linear-gradient(135deg, #238636, #2ea043);
@@ -248,7 +245,7 @@
     <div id="card-container">
         
         <!-- ভিডিও কার্ড ১ -->
-        <div class="card" data-category="viral" data-title="ভাইরাল এক্সক্লুসিভ হট ভিডিও প্যাকেজ ১">
+        <div class="card" data-category="viral" data-title="ভাইরাল এক্সক্লুসিভ হট ভিডিও প্যাকেজ ১" data-id="video_1">
             <div class="card-img-container">
                 <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe" class="card-img" alt="Thumbnail">
                 <div class="badge">18+ Viral</div>
@@ -257,18 +254,17 @@
                 <div class="card-title">ভাইরাল এক্সক্লুসিভ হট ভিডিও প্যাকেজ ১</div>
                 <div class="card-desc">ফুল এইচডি কোয়ালিটি আনসেন্সরড ভিডিও 🥵</div>
                 
-                <!-- লাইক এবং ভিউ কাউন্ট -->
                 <div class="card-footer-info">
-                    <span>👀 দেখা হয়েছে: <b>1.4k</b> বার</span>
-                    <button class="like-btn" onclick="toggleLike(this)">❤️ <span class="like-count">342</span></button>
+                    <span>👀 দেখা হয়েছে: <b class="view-count">125</b> বার</span>
+                    <button class="like-btn" onclick="toggleLike('video_1', this)">❤️ <span class="like-count">45</span></button>
                 </div>
 
-                <button class="unlock-btn" onclick="openAdLockModal('https://t.me/SSFileStorebot?start=5170965')">🔓 Watch / Unlock Video 1</button>
+                <button class="unlock-btn" onclick="openAdLockModal('https://t.me/SSFileStorebot?start=5170965', 'video_1')">🔓 Watch / Unlock Video 1</button>
             </div>
         </div>
 
         <!-- ভিডিও কার্ড ২ -->
-        <div class="card" data-category="leaked" data-title="স্পেশাল প্রাইভেট লিকড ভিডিও কালেকশন">
+        <div class="card" data-category="leaked" data-title="স্পেশাল প্রাইভেট লিকড ভিডিও কালেকশন" data-id="video_2">
             <div class="card-img-container">
                 <img src="https://images.unsplash.com/photo-1579546929518-9e396f3cc809" class="card-img" alt="Thumbnail">
                 <div class="badge" style="background: #238636;">Hot 🔞</div>
@@ -278,16 +274,16 @@
                 <div class="card-desc">নতুন ও আনকাট ভিডিও ক্লিপস 🔥</div>
                 
                 <div class="card-footer-info">
-                    <span>👀 দেখা হয়েছে: <b>2.1k</b> বার</span>
-                    <button class="like-btn" onclick="toggleLike(this)">❤️ <span class="like-count">512</span></button>
+                    <span>👀 দেখা হয়েছে: <b class="view-count">210</b> বার</span>
+                    <button class="like-btn" onclick="toggleLike('video_2', this)">❤️ <span class="like-count">88</span></button>
                 </div>
 
-                <button class="unlock-btn" onclick="openAdLockModal('https://t.me/SSFileStorebot?start=0600192')">🔓 Watch / Unlock Video 2</button>
+                <button class="unlock-btn" onclick="openAdLockModal('https://t.me/SSFileStorebot?start=0600192', 'video_2')">🔓 Watch / Unlock Video 2</button>
             </div>
         </div>
 
         <!-- ভিডিও কার্ড ৩ -->
-        <div class="card" data-category="hot" data-title="মদীয় ও রোমান্টিক প্রাইভেট ভিডিও ফুল এইচডি">
+        <div class="card" data-category="hot" data-title="মদীয় ও রোমান্টিক প্রাইভেট ভিডিও ফুল এইচডি" data-id="video_3">
             <div class="card-img-container">
                 <img src="https://images.unsplash.com/photo-1550684848-fac1c5b4e853" class="card-img" alt="Thumbnail">
                 <div class="badge" style="background: #1f6feb;">New 🔞</div>
@@ -297,16 +293,16 @@
                 <div class="card-desc">সম্পূর্ণ আনকাট এবং ক্লিয়ার ভিডিও ফাইল 📥</div>
                 
                 <div class="card-footer-info">
-                    <span>👀 দেখা হয়েছে: <b>980</b> বার</span>
-                    <button class="like-btn" onclick="toggleLike(this)">❤️ <span class="like-count">189</span></button>
+                    <span>👀 দেখা হয়েছে: <b class="view-count">95</b> বার</span>
+                    <button class="like-btn" onclick="toggleLike('video_3', this)">❤️ <span class="like-count">32</span></button>
                 </div>
 
-                <button class="unlock-btn" onclick="openAdLockModal('https://t.me/SSFileStorebot?start=2350480')">🔓 Watch / Unlock Video 3</button>
+                <button class="unlock-btn" onclick="openAdLockModal('https://t.me/SSFileStorebot?start=2350480', 'video_3')">🔓 Watch / Unlock Video 3</button>
             </div>
         </div>
 
         <!-- ভিডিও কার্ড ৪ -->
-        <div class="card" data-category="viral" data-title="সিগরেট এমএমএস ও ভাইরাল ভিডিও প্যাক">
+        <div class="card" data-category="viral" data-title="সিগরেট এমএমএস ও ভাইরাল ভিডিও প্যাক" data-id="video_4">
             <div class="card-img-container">
                 <img src="https://images.unsplash.com/photo-1541701494587-cb58502866ab" class="card-img" alt="Thumbnail">
                 <div class="badge" style="background: #e3b341; color: #000;">VIP 🔞</div>
@@ -316,11 +312,11 @@
                 <div class="card-desc">সেরা এবং লেটেস্ট ভাইরাল কন্টেন্ট 😳🔥</div>
                 
                 <div class="card-footer-info">
-                    <span>👀 দেখা হয়েছে: <b>3.5k</b> বার</span>
-                    <button class="like-btn" onclick="toggleLike(this)">❤️ <span class="like-count">840</span></button>
+                    <span>👀 দেখা হয়েছে: <b class="view-count">340</b> বার</span>
+                    <button class="like-btn" onclick="toggleLike('video_4', this)">❤️ <span class="like-count">150</span></button>
                 </div>
 
-                <button class="unlock-btn" onclick="openAdLockModal('https://t.me/SSFileStorebot?start=5585645')">🔓 Watch / Unlock Video 4</button>
+                <button class="unlock-btn" onclick="openAdLockModal('https://t.me/SSFileStorebot?start=5585645', 'video_4')">🔓 Watch / Unlock Video 4</button>
             </div>
         </div>
 
@@ -344,27 +340,57 @@
             document.getElementById('user-name').innerText = tg.initDataUnsafe.user.first_name + ' 💀❤️';
         }
 
-        // লাইক বাড়ানোর বা কমানোর ফাংশন
-        function toggleLike(btn) {
+        // পেজ লোড হওয়ার সাথে সাথে সেভ থাকা ভিউ ও লাইক লোড করা
+        document.addEventListener("DOMContentLoaded", () => {
+            document.querySelectorAll('.card').forEach(card => {
+                let id = card.getAttribute('data-id');
+                
+                // ভিউ ডাটা লোড
+                let views = localStorage.getItem(id + '_views') || (Math.floor(Math.random() * 100) + 50);
+                localStorage.setItem(id + '_views', views);
+                card.querySelector('.view-count').innerText = views;
+
+                // লাইক ডাটা লোড
+                let likes = localStorage.getItem(id + '_likes') || (Math.floor(Math.random() * 30) + 10);
+                localStorage.setItem(id + '_likes', likes);
+                card.querySelector('.like-count').innerText = likes;
+
+                // লাইক করা থাকলে স্ট্যাটাস ঠিক রাখা
+                if (localStorage.getItem(id + '_liked') === 'true') {
+                    card.querySelector('.like-btn').classList.add('liked');
+                }
+            });
+        });
+
+        // রিয়েল লাইক টগল ফাংশন
+        function toggleLike(id, btn) {
             let countSpan = btn.querySelector('.like-count');
-            let currentLikes = parseInt(countSpan.innerText);
-            
-            if (btn.classList.contains('liked')) {
+            let currentLikes = parseInt(localStorage.getItem(id + '_likes'));
+            let isLiked = localStorage.getItem(id + '_liked') === 'true';
+
+            if (isLiked) {
+                currentLikes -= 1;
+                localStorage.setItem(id + '_liked', 'false');
                 btn.classList.remove('liked');
-                countSpan.innerText = currentLikes - 1;
             } else {
+                currentLikes += 1;
+                localStorage.setItem(id + '_liked', 'true');
                 btn.classList.add('liked');
-                countSpan.innerText = currentLikes + 1;
             }
+
+            localStorage.setItem(id + '_likes', currentLikes);
+            countSpan.innerText = currentLikes;
         }
 
         let adsWatched = 0;
         const totalAdsRequired = 3;
         let selectedVideoUrl = "";
+        let selectedVideoId = "";
         const adsterraSmartlink = "https://www.profitableratecpmnetwork.com/r9475it0w?key=92dacc0ef3f17aef645eed9f0077289d";
 
-        function openAdLockModal(url) {
+        function openAdLockModal(url, id) {
             selectedVideoUrl = url;
+            selectedVideoId = id;
             adsWatched = 0;
             resetModalContent();
             document.getElementById('adModal').style.display = 'flex';
@@ -385,13 +411,22 @@
 
         function watchNextAd() {
             window.open(adsterraSmartlink, "_blank");
-
             adsWatched++;
 
             if (adsWatched < totalAdsRequired) {
                 document.getElementById('adStatusText').innerHTML = `ভিডিওটি আনলক করতে বাকি আছে: <b style="color: #e3b341;">${adsWatched}/${totalAdsRequired}</b>`;
                 document.getElementById('watchAdBtn').innerText = `📺 পরবর্তী অ্যাড দেখুন (${adsWatched + 1}/৩)`;
             } else {
+                // ভিডিও ভিউ সফল হলে ভিউ কাউন্ট ১ বাড়িয়ে দেওয়া হবে
+                let currentViews = parseInt(localStorage.getItem(selectedVideoId + '_views')) + 1;
+                localStorage.setItem(selectedVideoId + '_views', currentViews);
+                
+                // স্ক্রিনের ভিউ কাউন্ট আপডেট করা
+                let card = document.querySelector(`[data-id="${selectedVideoId}"]`);
+                if(card) {
+                    card.querySelector('.view-count').innerText = currentViews;
+                }
+
                 document.querySelector('.modal-content').innerHTML = `
                     <span class="close-modal" onclick="closeModal()">&times;</span>
                     <h3 style="color: #2ea043;">✅ আনলক সফল হয়েছে!</h3>
