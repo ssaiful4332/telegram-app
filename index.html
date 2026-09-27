@@ -14,12 +14,20 @@
             --btn-color: #7b1fa2;
             --border-color: #2a2040;
         }
+        body.light-theme {
+            --bg-color: #f4f4f9;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --border-color: #dddddd;
+            --accent-color: #7b1fa2;
+        }
         body {
             font-family: Arial, sans-serif, 'SolaimanLipi';
             background-color: var(--bg-color);
             color: var(--text-color);
             margin: 0;
             padding: 8px;
+            transition: 0.3s;
         }
         .header {
             display: flex;
@@ -36,18 +44,18 @@
             margin: 0;
             font-size: 18px;
             letter-spacing: 1px;
-            color: #d1c4e9;
+            color: var(--accent-color);
         }
         .header-right {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
         }
-        .share-app-btn {
-            background: #2a2040;
+        .action-btn {
+            background: var(--border-color);
             border: 1px solid var(--border-color);
-            color: #d1c4e9;
-            padding: 5px 10px;
+            color: var(--text-color);
+            padding: 6px 10px;
             border-radius: 8px;
             font-size: 11px;
             cursor: pointer;
@@ -66,9 +74,6 @@
             font-size: 14px;
             box-sizing: border-box;
             outline: none;
-        }
-        .search-input:focus {
-            border-color: var(--accent-color);
         }
         .categories {
             display: flex;
@@ -93,6 +98,7 @@
         }
         .cat-btn.active, .cat-btn:hover {
             background: var(--btn-color);
+            color: white;
             border-color: var(--btn-color);
         }
         .card {
@@ -147,7 +153,7 @@
         .like-btn {
             background: none;
             border: none;
-            color: #b0bec5;
+            color: inherit;
             cursor: pointer;
             font-size: 13px;
             display: flex;
@@ -172,10 +178,6 @@
             align-items: center;
             justify-content: center;
             gap: 8px;
-            box-shadow: 0 4px 10px rgba(123, 31, 162, 0.3);
-        }
-        .unlock-btn:active {
-            opacity: 0.85;
         }
         #no-result {
             text-align: center;
@@ -184,7 +186,7 @@
             display: none;
         }
 
-        /* টোস্ট নোটিফিকেশন স্টাইল */
+        /* টোস্ট নোটিফিকেশন */
         #toast {
             visibility: hidden;
             min-width: 200px;
@@ -200,7 +202,6 @@
             transform: translateX(-50%);
             font-size: 13px;
             border: 1px solid var(--border-color);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
         }
         #toast.show {
             visibility: visible;
@@ -239,8 +240,28 @@
             cursor: pointer;
             color: #8b949e;
         }
-        .close-modal:hover {
-            color: #fff;
+        .close-modal:hover { color: #fff; }
+
+        /* সেটিংস অপশন লিস্ট স্টাইল */
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--border-color);
+            padding: 10px 14px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            font-size: 13px;
+            text-align: left;
+        }
+        .setting-item button {
+            background: var(--btn-color);
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -249,8 +270,8 @@
     <div class="header">
         <h2>UNLIMITED VIDS</h2>
         <div class="header-right">
-            <button class="share-app-btn" onclick="shareApp()">🔗 Share</button>
-            <span id="user-name" style="font-size: 12px; color: #ffeb3b; font-weight: bold;">USER 🌙</span>
+            <button class="action-btn" onclick="openSettingsModal()">⚙️ Settings</button>
+            <button class="action-btn" onclick="shareApp()">🔗 Share</button>
         </div>
     </div>
 
@@ -314,20 +335,36 @@
 
     <div id="adModal" class="modal">
         <div class="modal-content">
-            <span class="close-modal" onclick="closeModal()">&times;</span>
-            <h3 style="color: #d1c4e9; margin-top: 10px; font-size: 18px;">🔒 Watch 3 ads to unlock</h3>
-            <p id="adStatusText" style="color: #b0bec5; font-size: 14px; margin: 12px 0;">Progress: <b style="color: #ffeb3b;">0/3</b></p>
-            <button id="watchAdBtn" onclick="watchNextAd()" style="width: 100%; background: #7b1fa2; color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer;">🔓 UNLOCK VIDEO</button>
+            <span class="close-modal" onclick="closeModal()">&#10005;</span>
+            <h3 style="color: inherit; margin-top: 10px; font-size: 18px;">🔒 Watch 3 ads to unlock</h3>
+            <p id="adStatusText" style="font-size: 14px; margin: 12px 0;">Progress: <b style="color: #ffeb3b;">0/3</b></p>
+            <button id="watchAdBtn" onclick="watchNextAd()" style="width: 100%; background: var(--btn-color); color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer;">🔓 UNLOCK VIDEO</button>
+        </div>
+    </div>
+
+    <div id="settingsModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeSettingsModal()">&#10005;</span>
+            <h3 style="color: inherit; margin-top: 5px; font-size: 18px; margin-bottom: 15px;">⚙️ App Settings</h3>
+            
+            <div class="setting-item">
+                <span>🎨 Dark / Light Mode</span>
+                <button onclick="toggleTheme()">Switch</button>
+            </div>
+            <div class="setting-item">
+                <span>📢 Support Channel</span>
+                <button onclick="window.open('https://t.me/YourBotUsername', '_blank')">Join</button>
+            </div>
+            <div class="setting-item">
+                <span>🗑️ Clear Cache</span>
+                <button onclick="clearAppData()" style="background: #d32f2f;">Clear</button>
+            </div>
         </div>
     </div>
 
     <script>
         let tg = window.Telegram.WebApp;
         tg.expand();
-        
-        if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
-            document.getElementById('user-name').innerText = tg.initDataUnsafe.user.first_name + ' 🌙';
-        }
 
         function showToast(message) {
             let toast = document.getElementById("toast");
@@ -339,15 +376,38 @@
         function shareApp() {
             let appUrl = window.location.href;
             if (navigator.share) {
-                navigator.share({
-                    title: 'UNLIMITED VIDS',
-                    text: 'সেরা সব ভিডিও কালেকশন দেখতে জয়েন করুন!',
-                    url: appUrl,
-                }).catch(() => {});
+                navigator.share({ title: 'UNLIMITED VIDS', url: appUrl }).catch(() => {});
             } else {
                 navigator.clipboard.writeText(appUrl);
                 showToast("✅ লিংক কপি করা হয়েছে!");
             }
+        }
+
+        // সেটিংস মডাল কন্ট্রোল
+        function openSettingsModal() {
+            document.getElementById('settingsModal').style.display = 'flex';
+        }
+        function closeSettingsModal() {
+            document.getElementById('settingsModal').style.display = 'none';
+        }
+
+        // থিম টগল (ডার্ক/লাইট)
+        function toggleTheme() {
+            document.body.classList.toggle('light-theme');
+            let isLight = document.body.classList.contains('light-theme');
+            localStorage.setItem('light_theme', isLight);
+            showToast(isLight ? "☀️ Light Mode Activated" : "🌙 Dark Mode Activated");
+        }
+
+        // আগের থিম লোড করা
+        if (localStorage.getItem('light_theme') === 'true') {
+            document.body.classList.add('light-theme');
+        }
+
+        function clearAppData() {
+            localStorage.clear();
+            showToast("🗑️ ডাটা সফলভাবে ক্লিয়ার হয়েছে!");
+            setTimeout(() => { location.reload(); }, 1000);
         }
 
         // রিয়েল লাইক ও ভিউ ডাটা ম্যানেজমেন্ট (LocalStorage)
@@ -415,11 +475,11 @@
         }
 
         function resetModalContent() {
-            document.querySelector('.modal-content').innerHTML = `
-                <span class="close-modal" onclick="closeModal()">&times;</span>
-                <h3 style="color: #d1c4e9; margin-top: 10px; font-size: 18px;">🔒 Watch 3 ads to unlock</h3>
-                <p id="adStatusText" style="color: #b0bec5; font-size: 14px; margin: 12px 0;">Progress: <b style="color: #ffeb3b;">0/3</b></p>
-                <button id="watchAdBtn" onclick="watchNextAd()" style="width: 100%; background: #7b1fa2; color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer;">🔓 UNLOCK VIDEO</button>
+            document.querySelector('#adModal .modal-content').innerHTML = `
+                <span class="close-modal" onclick="closeModal()">&#10005;</span>
+                <h3 style="color: inherit; margin-top: 10px; font-size: 18px;">🔒 Watch 3 ads to unlock</h3>
+                <p id="adStatusText" style="font-size: 14px; margin: 12px 0;">Progress: <b style="color: #ffeb3b;">0/3</b></p>
+                <button id="watchAdBtn" onclick="watchNextAd()" style="width: 100%; background: var(--btn-color); color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer;">🔓 UNLOCK VIDEO</button>
             `;
         }
 
@@ -441,10 +501,10 @@
                 }
 
                 showToast("✅ ভিডিও আনলক সফল হয়েছে!");
-                document.querySelector('.modal-content').innerHTML = `
-                    <span class="close-modal" onclick="closeModal()">&times;</span>
+                document.querySelector('#adModal .modal-content').innerHTML = `
+                    <span class="close-modal" onclick="closeModal()">&#10005;</span>
                     <h3 style="color: #4caf50; margin-top: 10px; font-size: 18px;">✅ Unlocked Successfully!</h3>
-                    <p style="color: #b0bec5; font-size: 13px; margin: 10px 0;">আপনার ভিডিওর লিংক নিচে দেওয়া হলো:</p>
+                    <p style="font-size: 13px; margin: 10px 0;">আপনার ভিডিওর লিংক নিচে দেওয়া হলো:</p>
                     <a href="${selectedVideoUrl}" target="_blank" onclick="closeModal()" style="display: block; background: #4caf50; color: white; text-decoration: none; padding: 12px; border-radius: 10px; font-weight: bold; font-size: 14px;">▶ WATCH / DOWNLOAD NOW</a>
                 `;
             }
