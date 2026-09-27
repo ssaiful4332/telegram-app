@@ -275,10 +275,12 @@
         </div>
     </div>
 
+    <!-- সার্চ বার -->
     <div class="search-box">
         <input type="text" id="searchInput" class="search-input" placeholder="🔍 সার্চ করুন..." onkeyup="filterContent()">
     </div>
 
+    <!-- ক্যাটেগরি ফিল্টার বাটন -->
     <div class="categories">
         <button class="cat-btn active" onclick="filterCategory('all', this)">📹 All Videos</button>
         <button class="cat-btn" onclick="filterCategory('new', this)">🔥 New Collection</button>
@@ -293,8 +295,10 @@
 
     <div id="no-result">কোনো কনটেন্ট পাওয়া যায়নি! ❌</div>
 
+    <!-- কনটেন্ট কন্টেইনার -->
     <div id="card-container">
         
+        <!-- ভিডিও কার্ড ১ -->
         <div class="card" data-category="bangla" data-title="!! কণ্ঠ শিল্পী সুমাইয়ার ভাইরাল চোদাচুদির ভিডিও না দেখলে পুরাই মিস 🍑" data-id="video_1">
             <div class="card-img-container">
                 <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe" class="card-img" alt="Thumbnail">
@@ -312,6 +316,7 @@
             </div>
         </div>
 
+        <!-- ভিডিও কার্ড ২ -->
         <div class="card" data-category="indian" data-title="!! আপন সৎ মাকে চুদে সৎ মায়ের ভোদারের জ্বালা মিটিয়ে দিল কথা শুনলে ধোনের মাল আউট না দেখলে মিস🍑" data-id="video_2">
             <div class="card-img-container">
                 <img src="https://images.unsplash.com/photo-1579546929518-9e396f3cc809" class="card-img" alt="Thumbnail">
@@ -331,8 +336,10 @@
 
     </div>
 
+    <!-- টোস্ট নোটিফিকেশন এলিমেন্ট -->
     <div id="toast">বিজ্ঞপ্তি</div>
 
+    <!-- অ্যাড লক পপআপ মডাল -->
     <div id="adModal" class="modal">
         <div class="modal-content">
             <span class="close-modal" onclick="closeModal()">&#10005;</span>
@@ -342,6 +349,7 @@
         </div>
     </div>
 
+    <!-- সেটিংস পপআপ মডাল -->
     <div id="settingsModal" class="modal">
         <div class="modal-content">
             <span class="close-modal" onclick="closeSettingsModal()">&#10005;</span>
@@ -353,7 +361,7 @@
             </div>
             <div class="setting-item">
                 <span>📢 Support Channel</span>
-                <button onclick="window.open('https://t.me/YourBotUsername', '_blank')">Join</button>
+                <button onclick="window.open('https://t.me/freeIinkshare56', '_blank')">Join</button>
             </div>
             <div class="setting-item">
                 <span>🗑️ Clear Cache</span>
