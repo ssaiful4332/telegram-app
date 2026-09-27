@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DESI HUB - Mini App</title>
+    <title>UNLIMITED VIDS</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
-            --bg-color: #0d1117;
-            --card-bg: #161b22;
+            --bg-color: #0b0713;
+            --card-bg: #151022;
             --text-color: #ffffff;
-            --accent-color: #0088cc;
-            --btn-color: #1f6feb;
-            --border-color: #30363d;
+            --accent-color: #9c27b0;
+            --btn-color: #7b1fa2;
+            --border-color: #2a2040;
         }
         body {
             font-family: Arial, sans-serif, 'SolaimanLipi';
@@ -27,16 +27,15 @@
             align-items: center;
             background: var(--card-bg);
             padding: 12px 15px;
-            border-radius: 10px;
+            border-radius: 12px;
             margin-bottom: 12px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
             border: 1px solid var(--border-color);
         }
         .header h2 {
             margin: 0;
-            font-size: 20px;
+            font-size: 18px;
             letter-spacing: 1px;
-            color: #58a6ff;
+            color: #d1c4e9;
         }
         .search-box {
             margin-bottom: 12px;
@@ -46,16 +45,14 @@
             padding: 10px 15px;
             background: var(--card-bg);
             border: 1px solid var(--border-color);
-            border-radius: 8px;
+            border-radius: 10px;
             color: var(--text-color);
             font-size: 14px;
             box-sizing: border-box;
             outline: none;
-            transition: 0.3s;
         }
         .search-input:focus {
-            border-color: var(--btn-color);
-            box-shadow: 0 0 5px rgba(31, 111, 235, 0.4);
+            border-color: var(--accent-color);
         }
         .categories {
             display: flex;
@@ -74,7 +71,7 @@
             border: 1px solid var(--border-color);
             padding: 8px 16px;
             border-radius: 20px;
-            font-size: 14px;
+            font-size: 13px;
             cursor: pointer;
             transition: 0.3s;
         }
@@ -82,24 +79,18 @@
             background: var(--btn-color);
             border-color: var(--btn-color);
         }
-        .section-title {
-            font-size: 18px;
-            color: #58a6ff;
-            margin: 15px 0 10px 5px;
-        }
         .card {
             background: var(--card-bg);
-            border-radius: 12px;
+            border-radius: 14px;
             overflow: hidden;
             margin-bottom: 15px;
             border: 1px solid var(--border-color);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
         }
         .card-img-container {
             position: relative;
             width: 100%;
-            height: 180px;
+            height: 190px;
             overflow: hidden;
         }
         .card-img {
@@ -107,51 +98,43 @@
             height: 100%;
             object-fit: cover;
         }
-        .badge {
+        .duration-badge {
             position: absolute;
-            top: 10px;
-            left: 10px;
-            background: #ff4444;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.75);
             color: white;
             padding: 3px 8px;
             font-size: 12px;
-            border-radius: 4px;
+            border-radius: 6px;
             font-weight: bold;
-            z-index: 2;
         }
         .card-body {
             padding: 12px;
         }
         .card-title {
-            font-size: 16px;
+            font-size: 14px;
             font-weight: bold;
-            margin-bottom: 6px;
-        }
-        .card-desc {
-            font-size: 13px;
-            color: #8b949e;
             margin-bottom: 10px;
+            line-height: 1.4;
         }
         .card-footer-info {
             display: flex;
             justify-content: space-between;
             align-items: center;
             font-size: 13px;
-            color: #8b949e;
+            color: #b0bec5;
             margin-bottom: 12px;
-            border-top: 1px solid var(--border-color);
-            padding-top: 8px;
         }
         .like-btn {
             background: none;
             border: none;
-            color: #8b949e;
+            color: #b0bec5;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 13px;
             display: flex;
             align-items: center;
             gap: 5px;
-            transition: 0.2s;
         }
         .like-btn.liked {
             color: #ff4444;
@@ -159,21 +142,18 @@
         }
         .unlock-btn {
             width: 100%;
-            background: linear-gradient(135deg, #238636, #2ea043);
+            background: linear-gradient(135deg, #7b1fa2, #9c27b0);
             color: white;
             border: none;
             padding: 12px;
-            border-radius: 8px;
-            font-size: 15px;
+            border-radius: 10px;
+            font-size: 14px;
             font-weight: bold;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
-        }
-        .unlock-btn:active {
-            opacity: 0.8;
         }
         #no-result {
             text-align: center;
@@ -198,12 +178,11 @@
         .modal-content {
             background-color: var(--card-bg);
             padding: 20px;
-            border-radius: 12px;
+            border-radius: 14px;
             width: 85%;
             max-width: 350px;
             text-align: center;
             border: 1px solid var(--border-color);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
         }
         .close-modal {
             float: right;
@@ -212,123 +191,72 @@
             cursor: pointer;
             color: #8b949e;
         }
-        .close-modal:hover {
-            color: #fff;
-        }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <h2>『DESI HUB』</h2>
-        <span id="user-name" style="font-size: 14px; font-weight: bold; color: #e3b341;">SAIFUL SIR 💀❤️</span>
+        <h2>UNLIMITED VIDS</h2>
+        <span id="user-name" style="font-size: 13px; color: #ffeb3b;">USER 🌙</span>
     </div>
 
-    <!-- সার্চ বার -->
     <div class="search-box">
-        <input type="text" id="searchInput" class="search-input" placeholder="🔍 ভিডিও বা কনটেন্ট সার্চ করুন..." onkeyup="filterContent()">
+        <input type="text" id="searchInput" class="search-input" placeholder="🔍 সার্চ করুন..." onkeyup="filterContent()">
     </div>
 
-    <!-- ক্যাটেগরি ফিল্টার বাটন -->
     <div class="categories">
-        <button class="cat-btn active" onclick="filterCategory('all', this)">All Posts</button>
-        <button class="cat-btn" onclick="filterCategory('leaked', this)">Leaked 🔞</button>
-        <button class="cat-btn" onclick="filterCategory('viral', this)">Viral Videos 🔥</button>
-        <button class="cat-btn" onclick="filterCategory('hot', this)">Hot Collection</button>
+        <button class="cat-btn active" onclick="filterCategory('all', this)">All Videos</button>
+        <button class="cat-btn" onclick="filterCategory('bangla', this)">বাংলা যোগাযোগ</button>
+        <button class="cat-btn" onclick="filterCategory('indian', this)">Indian Collection</button>
+        <button class="cat-btn" onclick="filterCategory('viral', this)">Viral OC</button>
     </div>
-
-    <div class="section-title">Latest 18+ Exclusive Videos</div>
 
     <div id="no-result">কোনো কনটেন্ট পাওয়া যায়নি! ❌</div>
 
-    <!-- কনটেন্ট কন্টেইনার -->
     <div id="card-container">
         
-        <!-- ভিডিও কার্ড ১ -->
-        <div class="card" data-category="viral" data-title="ভাইরাল এক্সক্লুসিভ হট ভিডিও প্যাকেজ ১" data-id="video_1">
+        <div class="card" data-category="bangla" data-title="!! কণ্ঠ শিল্পী সুমাইয়ার ভাইরাল চোদাচুদির ভিডিও না দেখলে পুরাই মিস 🍑" data-id="video_1">
             <div class="card-img-container">
                 <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe" class="card-img" alt="Thumbnail">
-                <div class="badge">18+ Viral</div>
+                <div class="duration-badge">01:44</div>
             </div>
             <div class="card-body">
-                <div class="card-title">ভাইরাল এক্সক্লুসিভ হট ভিডিও প্যাকেজ ১</div>
-                <div class="card-desc">ফুল এইচডি কোয়ালিটি আনসেন্সরড ভিডিও 🥵</div>
+                <div class="card-title">!! কণ্ঠ শিল্পী সুমাইয়ার ভাইরাল চোদাচুদির ভিডিও না দেখলে পুরাই মিস 🍑</div>
                 
                 <div class="card-footer-info">
-                    <span>👀 দেখা হয়েছে: <b class="view-count">15</b> বার</span>
-                    <button class="like-btn" onclick="toggleLike('video_1', this)">❤️ <span class="like-count">5</span></button>
+                    <button class="like-btn" onclick="toggleLike('video_1', this)">❤️ <span class="like-count">14</span> Likes</button>
+                    <span>👀 <b class="view-count">391</b> Views</span>
                 </div>
 
-                <button class="unlock-btn" onclick="openAdLockModal('https://t.me/SSFileStorebot?start=5170965', 'video_1')">🔓 Watch / Unlock Video 1</button>
+                <button class="unlock-btn" onclick="openAdLockModal('https://t.me/SSFileStorebot?start=5170965', 'video_1')">▶ WATCH / DOWNLOAD NOW</button>
             </div>
         </div>
 
-        <!-- ভিডিও কার্ড ২ -->
-        <div class="card" data-category="leaked" data-title="স্পেশাল প্রাইভেট লিকড ভিডিও কালেকশন" data-id="video_2">
+        <div class="card" data-category="indian" data-title="!! আপন সৎ মাকে চুদে সৎ মায়ের ভোদারের জ্বালা মিটিয়ে দিল কথা শুনলে ধোনের মাল আউট না দেখলে মিস🍑" data-id="video_2">
             <div class="card-img-container">
                 <img src="https://images.unsplash.com/photo-1579546929518-9e396f3cc809" class="card-img" alt="Thumbnail">
-                <div class="badge" style="background: #238636;">Hot 🔞</div>
+                <div class="duration-badge">11:20</div>
             </div>
             <div class="card-body">
-                <div class="card-title">স্পেশাল প্রাইভেট লিকড ভিডিও কালেকশন</div>
-                <div class="card-desc">নতুন ও আনকাট ভিডিও ক্লিপস 🔥</div>
+                <div class="card-title">!! আপন সৎ মাকে চুদে সৎ মায়ের ভোদারের জ্বালা মিটিয়ে দিল কথা শুনলে ধোনের মাল আউট না দেখলে মিস🍑</div>
                 
                 <div class="card-footer-info">
-                    <span>👀 দেখা হয়েছে: <b class="view-count">22</b> বার</span>
-                    <button class="like-btn" onclick="toggleLike('video_2', this)">❤️ <span class="like-count">8</span></button>
+                    <button class="like-btn" onclick="toggleLike('video_2', this)">❤️ <span class="like-count">24</span> Likes</button>
+                    <span>👀 <b class="view-count">1036</b> Views</span>
                 </div>
 
-                <button class="unlock-btn" onclick="openAdLockModal('https://t.me/SSFileStorebot?start=0600192', 'video_2')">🔓 Watch / Unlock Video 2</button>
-            </div>
-        </div>
-
-        <!-- ভিডিও কার্ড ৩ -->
-        <div class="card" data-category="hot" data-title="মদীয় ও রোমান্টিক প্রাইভেট ভিডিও ফুল এইচডি" data-id="video_3">
-            <div class="card-img-container">
-                <img src="https://images.unsplash.com/photo-1550684848-fac1c5b4e853" class="card-img" alt="Thumbnail">
-                <div class="badge" style="background: #1f6feb;">New 🔞</div>
-            </div>
-            <div class="card-body">
-                <div class="card-title">মদীয় ও রোমান্টিক প্রাইভেট ভিডিও ফুল এইচডি</div>
-                <div class="card-desc">সম্পূর্ণ আনকাট এবং ক্লিয়ার ভিডিও ফাইল 📥</div>
-                
-                <div class="card-footer-info">
-                    <span>👀 দেখা হয়েছে: <b class="view-count">10</b> বার</span>
-                    <button class="like-btn" onclick="toggleLike('video_3', this)">❤️ <span class="like-count">3</span></button>
-                </div>
-
-                <button class="unlock-btn" onclick="openAdLockModal('https://t.me/SSFileStorebot?start=2350480', 'video_3')">🔓 Watch / Unlock Video 3</button>
-            </div>
-        </div>
-
-        <!-- ভিডিও কার্ড ৪ -->
-        <div class="card" data-category="viral" data-title="সিগরেট এমএমএস ও ভাইরাল ভিডিও প্যাক" data-id="video_4">
-            <div class="card-img-container">
-                <img src="https://images.unsplash.com/photo-1541701494587-cb58502866ab" class="card-img" alt="Thumbnail">
-                <div class="badge" style="background: #e3b341; color: #000;">VIP 🔞</div>
-            </div>
-            <div class="card-body">
-                <div class="card-title">সিগরেট এমএমএস ও ভাইরাল ভিডিও প্যাক</div>
-                <div class="card-desc">সেরা এবং লেটেস্ট ভাইরাল কন্টেন্ট 😳🔥</div>
-                
-                <div class="card-footer-info">
-                    <span>👀 দেখা হয়েছে: <b class="view-count">30</b> বার</span>
-                    <button class="like-btn" onclick="toggleLike('video_4', this)">❤️ <span class="like-count">12</span></button>
-                </div>
-
-                <button class="unlock-btn" onclick="openAdLockModal('https://t.me/SSFileStorebot?start=5585645', 'video_4')">🔓 Watch / Unlock Video 4</button>
+                <button class="unlock-btn" onclick="openAdLockModal('https://t.me/SSFileStorebot?start=0600192', 'video_2')">▶ WATCH / DOWNLOAD NOW</button>
             </div>
         </div>
 
     </div>
 
-    <!-- অ্যাড লক পপআপ মডাল -->
     <div id="adModal" class="modal">
         <div class="modal-content">
             <span class="close-modal" onclick="closeModal()">&times;</span>
-            <h3 style="color: #58a6ff; margin-top: 10px;">🔒 ভিডিও লক করা আছে</h3>
-            <p id="adStatusText" style="color: #8b949e; font-size: 14px;">ভিডিওটি আনলক করতে মোট ৩টি অ্যাড দেখতে হবে: <b style="color: #e3b341;">0/3</b></p>
-            <button id="watchAdBtn" onclick="watchNextAd()" style="width: 100%; background: #1f6feb; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px;">📺 অ্যাড দেখুন (১/৩)</button>
+            <h3 style="color: #d1c4e9; margin-top: 10px;">🔒 Watch 3 ads to unlock</h3>
+            <p id="adStatusText" style="color: #b0bec5; font-size: 14px;">Progress: <b style="color: #ffeb3b;">0/3</b></p>
+            <button id="watchAdBtn" onclick="watchNextAd()" style="width: 100%; background: #7b1fa2; color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px;">🔓 UNLOCK VIDEO</button>
         </div>
     </div>
 
@@ -337,24 +265,24 @@
         tg.expand();
         
         if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
-            document.getElementById('user-name').innerText = tg.initDataUnsafe.user.first_name + ' 💀❤️';
+            document.getElementById('user-name').innerText = tg.initDataUnsafe.user.first_name + ' 🌙';
         }
 
-        // ছোট এবং স্বাভাবিক ভিউ ও লাইক ডাটা সেট করা
+        // রিয়েল লাইক ও ভিউ ডাটা ম্যানেজমেন্ট
         document.addEventListener("DOMContentLoaded", () => {
             document.querySelectorAll('.card').forEach(card => {
                 let id = card.getAttribute('data-id');
                 
                 let views = localStorage.getItem(id + '_views');
                 if (!views) {
-                    views = Math.floor(Math.random() * 15) + 10; // ১০ থেকে ২৫ এর মধ্যে দেখাবে
+                    views = card.querySelector('.view-count').innerText;
                     localStorage.setItem(id + '_views', views);
                 }
                 card.querySelector('.view-count').innerText = views;
 
                 let likes = localStorage.getItem(id + '_likes');
                 if (!likes) {
-                    likes = Math.floor(Math.random() * 8) + 3; // ৩ থেকে ১০ এর মধ্যে দেখাবে
+                    likes = card.querySelector('.like-count').innerText;
                     localStorage.setItem(id + '_likes', likes);
                 }
                 card.querySelector('.like-count').innerText = likes;
@@ -405,9 +333,9 @@
         function resetModalContent() {
             document.querySelector('.modal-content').innerHTML = `
                 <span class="close-modal" onclick="closeModal()">&times;</span>
-                <h3 style="color: #58a6ff; margin-top: 10px;">🔒 ভিডিও লক করা আছে</h3>
-                <p id="adStatusText" style="color: #8b949e; font-size: 14px;">ভিডিওটি আনলক করতে মোট ৩টি অ্যাড দেখতে হবে: <b style="color: #e3b341;">0/3</b></p>
-                <button id="watchAdBtn" onclick="watchNextAd()" style="width: 100%; background: #1f6feb; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px;">📺 অ্যাড দেখুন (১/৩)</button>
+                <h3 style="color: #d1c4e9; margin-top: 10px;">🔒 Watch 3 ads to unlock</h3>
+                <p id="adStatusText" style="color: #b0bec5; font-size: 14px;">Progress: <b style="color: #ffeb3b;">0/3</b></p>
+                <button id="watchAdBtn" onclick="watchNextAd()" style="width: 100%; background: #7b1fa2; color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px;">🔓 UNLOCK VIDEO</button>
             `;
         }
 
@@ -416,8 +344,8 @@
             adsWatched++;
 
             if (adsWatched < totalAdsRequired) {
-                document.getElementById('adStatusText').innerHTML = `ভিডিওটি আনলক করতে বাকি আছে: <b style="color: #e3b341;">${adsWatched}/${totalAdsRequired}</b>`;
-                document.getElementById('watchAdBtn').innerText = `📺 পরবর্তী অ্যাড দেখুন (${adsWatched + 1}/৩)`;
+                document.getElementById('adStatusText').innerHTML = `Progress: <b style="color: #ffeb3b;">${adsWatched}/3</b>`;
+                document.getElementById('watchAdBtn').innerText = `🔓 UNLOCK VIDEO (${adsWatched}/3)`;
             } else {
                 let currentViews = parseInt(localStorage.getItem(selectedVideoId + '_views')) + 1;
                 localStorage.setItem(selectedVideoId + '_views', currentViews);
@@ -429,9 +357,9 @@
 
                 document.querySelector('.modal-content').innerHTML = `
                     <span class="close-modal" onclick="closeModal()">&times;</span>
-                    <h3 style="color: #2ea043;">✅ আনলক সফল হয়েছে!</h3>
-                    <p style="color: #8b949e; font-size: 14px;">আপনার ভিডিওর লিংক নিচে দেওয়া হলো:</p>
-                    <a href="${selectedVideoUrl}" target="_blank" onclick="closeModal()" style="display: block; background: #238636; color: white; text-decoration: none; padding: 12px; border-radius: 8px; font-weight: bold; margin-top: 15px;">🔓 ভিডিও ওপেন করুন</a>
+                    <h3 style="color: #4caf50;">✅ Unlocked Successfully!</h3>
+                    <p style="color: #b0bec5; font-size: 14px;">আপনার ভিডিওর লিংক নিচে দেওয়া হলো:</p>
+                    <a href="${selectedVideoUrl}" target="_blank" onclick="closeModal()" style="display: block; background: #4caf50; color: white; text-decoration: none; padding: 12px; border-radius: 10px; font-weight: bold; margin-top: 15px;">▶ WATCH / DOWNLOAD NOW</a>
                 `;
             }
         }
