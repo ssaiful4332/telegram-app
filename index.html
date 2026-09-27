@@ -1,32 +1,391 @@
-<!-- অ্যাড কাউন্টার ও প্রোগ্রেস দেখানোর জন্য ছোট্ট একটি সেকশন -->
-<div id="ad-lock-section" style="background: #161b22; padding: 15px; border-radius: 10px; text-align: center; border: 1px solid #30363d; margin-bottom: 15px;">
-    <h3 style="color: #58a6ff; margin-top: 0;">🔒 ভিডিওটি লক করা আছে</h3>
-    <p id="ad-status" style="color: #8b949e; font-size: 14px;">ভিডিও আনলক করতে নিচের বাটনে ক্লিক করে ৩টি অ্যাড দেখুন: <b style="color: #e3b341;">0/3</b></p>
-    <button id="watch-ad-btn" onclick="watchAd()" style="background: #1f6feb; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%;">📺 অ্যাড দেখুন (১/৩)</button>
-</div>
-
-<script>
-    let adsWatched = 0;
-    const totalAdsRequired = 3;
-    const targetVideoUrl = "https://t.me/SSFileStorebot?start=5170965"; // আসল ভিডিওর লিংক
-
-    function watchAd() {
-        // এখানে আপনার অ্যাড নেটওয়ার্কের অ্যাড কোড বা পপ-আপ ওপেন হওয়ার ফাংশন দিতে হবে
-        // যেমন: Adsterra বা অন্য কোনো মোটিভাইড অ্যাড লিংক নতুন ট্যাবে ওপেন হতে পারে
-        window.open("https://your-ad-link.com", "_blank"); // অ্যাড লিংক 
-
-        adsWatched++;
-
-        if (adsWatched < totalAdsRequired) {
-            document.getElementById('ad-status').innerHTML = `ভিডিও আনলক করতে আরও বাকি আছে: <b style="color: #e3b341;">${adsWatched}/${totalAdsRequired}</b>`;
-            document.getElementById('watch-ad-btn').innerText = `📺 পরবর্তী অ্যাড দেখুন (${adsWatched + 1}/৩)`;
-        } else {
-            // ৩টি অ্যাড দেখা শেষ হলে লক হটিয়ে ভিডিও লিংক দিয়ে দেওয়া হবে
-            document.getElementById('ad-lock-section').innerHTML = `
-                <h3 style="color: #2ea043; margin-top: 0;">✅ আনলক সফল হয়েছে!</h3>
-                <p style="color: #8b949e; font-size: 14px;">আপনার ভিডিওটি নিচে দেখতে পান:</p>
-                <a href="${targetVideoUrl}" target="_blank" style="display: block; background: #238636; color: white; text-decoration: none; padding: 12px; border-radius: 8px; font-weight: bold;">🔓 ভিডিও ওপেন করুন</a>
-            `;
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DESI HUB - Mini App</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root {
+            --bg-color: #0d1117;
+            --card-bg: #161b22;
+            --text-color: #ffffff;
+            --accent-color: #0088cc;
+            --btn-color: #1f6feb;
+            --border-color: #30363d;
         }
-    }
-</script>
+        body {
+            font-family: Arial, sans-serif, 'SolaimanLipi';
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 10px;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--card-bg);
+            padding: 12px 15px;
+            border-radius: 10px;
+            margin-bottom: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            border: 1px solid var(--border-color);
+        }
+        .header h2 {
+            margin: 0;
+            font-size: 20px;
+            letter-spacing: 1px;
+            color: #58a6ff;
+        }
+        /* সার্চ বার স্টাইল */
+        .search-box {
+            margin-bottom: 12px;
+        }
+        .search-input {
+            width: 100%;
+            padding: 10px 15px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-color);
+            font-size: 14px;
+            box-sizing: border-box;
+            outline: none;
+            transition: 0.3s;
+        }
+        .search-input:focus {
+            border-color: var(--btn-color);
+            box-shadow: 0 0 5px rgba(31, 111, 235, 0.4);
+        }
+        /* ক্যাটেগরি ফিল্টার স্টাইল */
+        .categories {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+            white-space: nowrap;
+            margin-bottom: 15px;
+        }
+        .categories::-webkit-scrollbar {
+            display: none;
+        }
+        .cat-btn {
+            background: var(--card-bg);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .cat-btn.active, .cat-btn:hover {
+            background: var(--btn-color);
+            border-color: var(--btn-color);
+        }
+        .section-title {
+            font-size: 18px;
+            color: #58a6ff;
+            margin: 15px 0 10px 5px;
+        }
+        /* কার্ড অ্যানিমেশন ও স্টাইল */
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 15px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(31, 111, 235, 0.2);
+        }
+        .card-img-container {
+            position: relative;
+            width: 100%;
+            height: 180px;
+            overflow: hidden;
+        }
+        .card-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+        .card:hover .card-img {
+            transform: scale(1.05);
+        }
+        .badge {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: #ff4444;
+            color: white;
+            padding: 3px 8px;
+            font-size: 12px;
+            border-radius: 4px;
+            font-weight: bold;
+            z-index: 2;
+        }
+        .card-body {
+            padding: 12px;
+        }
+        .card-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 6px;
+        }
+        .card-desc {
+            font-size: 13px;
+            color: #8b949e;
+            margin-bottom: 12px;
+        }
+        .unlock-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #238636, #2ea043);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: opacity 0.2s;
+        }
+        .unlock-btn:active {
+            opacity: 0.8;
+        }
+        /* নো রেজাল্ট মেসেজ */
+        #no-result {
+            text-align: center;
+            color: #8b949e;
+            padding: 20px;
+            display: none;
+        }
+
+        /* মডাল বা পপ-আপ স্টাইল (অ্যাড দেখার জন্য) */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 100;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.8);
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            width: 85%;
+            max-width: 350px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+        }
+        .close-modal {
+            float: right;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #8b949e;
+        }
+        .close-modal:hover {
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h2>『DESI HUB』</h2>
+        <span id="user-name" style="font-size: 14px; font-weight: bold; color: #e3b341;">SAIFUL SIR 💀❤️</span>
+    </div>
+
+    <!-- সার্চ বার -->
+    <div class="search-box">
+        <input type="text" id="searchInput" class="search-input" placeholder="🔍 ভিডিও বা কনটেন্ট সার্চ করুন..." onkeyup="filterContent()">
+    </div>
+
+    <!-- ক্যাটেগরি ফিল্টার বাটন -->
+    <div class="categories">
+        <button class="cat-btn active" onclick="filterCategory('all', this)">All Posts</button>
+        <button class="cat-btn" onclick="filterCategory('leaked', this)">Leaked 🔞</button>
+        <button class="cat-btn" onclick="filterCategory('viral', this)">Viral Videos 🔥</button>
+        <button class="cat-btn" onclick="filterCategory('hot', this)">Hot Collection</button>
+    </div>
+
+    <div class="section-title">Latest 18+ Exclusive Videos</div>
+
+    <div id="no-result">কোনো কনটেন্ট পাওয়া যায়নি! ❌</div>
+
+    <!-- কনটেন্ট কন্টেইনার -->
+    <div id="card-container">
+        
+        <!-- ভিডিও কার্ড ১ -->
+        <div class="card" data-category="viral" data-title="ভাইরাল এক্সক্লুসিভ হট ভিডিও প্যাকেজ ১" onclick="openAdLockModal('https://t.me/SSFileStorebot?start=5170965')">
+            <div class="card-img-container">
+                <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe" class="card-img" alt="Thumbnail">
+                <div class="badge">18+ Viral</div>
+            </div>
+            <div class="card-body">
+                <div class="card-title">ভাইরাল এক্সক্লুসিভ হট ভিডিও প্যাকেজ ১</div>
+                <div class="card-desc">ফুল এইচডি কোয়ালিটি আনসেন্সরড ভিডিও 🥵</div>
+                <button class="unlock-btn">🔓 Watch / Unlock Video 1</button>
+            </div>
+        </div>
+
+        <!-- ভিডিও কার্ড ২ -->
+        <div class="card" data-category="leaked" data-title="স্পেশাল প্রাইভেট লিকড ভিডিও কালেকশন" onclick="openAdLockModal('https://t.me/SSFileStorebot?start=0600192')">
+            <div class="card-img-container">
+                <img src="https://images.unsplash.com/photo-1579546929518-9e396f3cc809" class="card-img" alt="Thumbnail">
+                <div class="badge" style="background: #238636;">Hot 🔞</div>
+            </div>
+            <div class="card-body">
+                <div class="card-title">স্পেশাল প্রাইভেট লিকড ভিডিও কালেকশন</div>
+                <div class="card-desc">নতুন ও আনকাট ভিডিও ক্লিপস 🔥</div>
+                <button class="unlock-btn">🔓 Watch / Unlock Video 2</button>
+            </div>
+        </div>
+
+        <!-- ভিডিও কার্ড ৩ -->
+        <div class="card" data-category="hot" data-title="মদীয় ও রোমান্টিক প্রাইভেট ভিডিও ফুল এইচডি" onclick="openAdLockModal('https://t.me/SSFileStorebot?start=2350480')">
+            <div class="card-img-container">
+                <img src="https://images.unsplash.com/photo-1550684848-fac1c5b4e853" class="card-img" alt="Thumbnail">
+                <div class="badge" style="background: #1f6feb;">New 🔞</div>
+            </div>
+            <div class="card-body">
+                <div class="card-title">মদীয় ও রোমান্টিক প্রাইভেট ভিডিও ফুল এইচডি</div>
+                <div class="card-desc">সম্পূর্ণ আনকাট এবং ক্লিয়ার ভিডিও ফাইল 📥</div>
+                <button class="unlock-btn">🔓 Watch / Unlock Video 3</button>
+            </div>
+        </div>
+
+        <!-- ভিডিও কার্ড ৪ -->
+        <div class="card" data-category="viral" data-title="সিগরেট এমএমএস ও ভাইরাল ভিডিও প্যাক" onclick="openAdLockModal('https://t.me/SSFileStorebot?start=5585645')">
+            <div class="card-img-container">
+                <img src="https://images.unsplash.com/photo-1541701494587-cb58502866ab" class="card-img" alt="Thumbnail">
+                <div class="badge" style="background: #e3b341; color: #000;">VIP 🔞</div>
+            </div>
+            <div class="card-body">
+                <div class="card-title">সিগরেট এমএমএস ও ভাইরাল ভিডিও প্যাক</div>
+                <div class="card-desc">সেরা এবং লেটেস্ট ভাইরাল কন্টেন্ট 😳🔥</div>
+                <button class="unlock-btn">🔓 Watch / Unlock Video 4</button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- অ্যাড লক পপআপ মডাল -->
+    <div id="adModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal()">&times;</span>
+            <h3 style="color: #58a6ff; margin-top: 10px;">🔒 ভিডিও লক করা আছে</h3>
+            <p id="adStatusText" style="color: #8b949e; font-size: 14px;">ভিডিওটি আনলক করতে মোট ৩টি অ্যাড দেখতে হবে: <b style="color: #e3b341;">0/3</b></p>
+            <button id="watchAdBtn" onclick="watchNextAd()" style="width: 100%; background: #1f6feb; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px;">📺 অ্যাড দেখুন (১/৩)</button>
+        </div>
+    </div>
+
+    <script>
+        // Telegram Web App init
+        let tg = window.Telegram.WebApp;
+        tg.expand();
+        
+        if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+            document.getElementById('user-name').innerText = tg.initDataUnsafe.user.first_name + ' 💀❤️';
+        }
+
+        let adsWatched = 0;
+        const totalAdsRequired = 3;
+        let selectedVideoUrl = "";
+
+        // কার্ডে ক্লিক করলে অ্যাড লক পপআপ আসবে
+        function openAdLockModal(url) {
+            selectedVideoUrl = url;
+            adsWatched = 0; // চাইলে প্রতিবার রিসেট বা আগের কাউন্ট সেভ রাখতে পারেন
+            updateModalUI();
+            document.getElementById('adModal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('adModal').style.display = 'none';
+        }
+
+        // অ্যাড দেখার ফাংশন
+        function watchNextAd() {
+            // এখানে আপনার অ্যাড নেটওয়ার্কের লিংক (যেমন Adsterra লিংক) বসাতে পারেন
+            window.open("https://your-ad-network-link.com", "_blank");
+
+            adsWatched++;
+
+            if (adsWatched < totalAdsRequired) {
+                updateModalUI();
+            } else {
+                // ৩টি অ্যাড দেখা শেষ হলে সরাসরি ভিডিও লিংক ওপেন হবে
+                document.getElementById('adModal').innerHTML = `
+                    <div style="text-align: center;">
+                        <h3 style="color: #2ea043;">✅ আনলক সফল হয়েছে!</h3>
+                        <p style="color: #8b949e; font-size: 14px;">আপনার ভিডিওর লিংক নিচে দেওয়া হলো:</p>
+                        <a href="${selectedVideoUrl}" target="_blank" onclick="closeModal()" style="display: block; background: #238636; color: white; text-decoration: none; padding: 12px; border-radius: 8px; font-weight: bold; margin-top: 15px;">🔓 ভিডিও ওপেন করুন</a>
+                    </div>
+                `;
+            }
+        }
+
+        function updateModalUI() {
+            document.getElementById('adStatusText').innerHTML = `ভিডিওটি আনলক করতে বাকি আছে: <b style="color: #e3b341;">${adsWatched}/${totalAdsRequired}</b>`;
+            if (adsWatched < totalAdsRequired) {
+                document.getElementById('watchAdBtn').innerText = `📺 পরবর্তী অ্যাড দেখুন (${adsWatched + 1}/৩)`;
+            }
+        }
+
+        // ক্যাটেগরি ফিল্টার ফাংশন
+        let currentCategory = 'all';
+        function filterCategory(category, btn) {
+            currentCategory = category;
+            document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            applyFilters();
+        }
+
+        // সার্চ এবং ক্যাটেগরি কম্বাইন্ড ফিল্টার লজিক
+        function filterContent() {
+            applyFilters();
+        }
+
+        function applyFilters() {
+            let query = document.getElementById('searchInput').value.toLowerCase();
+            let cards = document.querySelectorAll('.card');
+            let hasVisible = false;
+
+            cards.forEach(card => {
+                let category = card.getAttribute('data-category');
+                let title = card.getAttribute('data-title').toLowerCase();
+
+                let matchesCategory = (currentCategory === 'all' || category === currentCategory);
+                let matchesSearch = title.includes(query);
+
+                if (matchesCategory && matchesSearch) {
+                    card.style.display = 'block';
+                    hasVisible = true;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+
+            document.getElementById('no-result').style.display = hasVisible ? 'none' : 'block';
+        }
+    </script>
+</body>
+</html>
