@@ -94,12 +94,7 @@
             margin-bottom: 15px;
             border: 1px solid var(--border-color);
             box-shadow: 0 4px 10px rgba(0,0,0,0.4);
-            cursor: pointer;
             transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-        .card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 15px rgba(31, 111, 235, 0.2);
         }
         .card-img-container {
             position: relative;
@@ -111,10 +106,6 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            transition: transform 0.3s ease;
-        }
-        .card:hover .card-img {
-            transform: scale(1.05);
         }
         .badge {
             position: absolute;
@@ -139,8 +130,36 @@
         .card-desc {
             font-size: 13px;
             color: #8b949e;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
         }
+        
+        /* লাইক এবং ভিউ কাউন্ট সেকশন */
+        .card-footer-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            color: #8b949e;
+            margin-bottom: 12px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 8px;
+        }
+        .like-btn {
+            background: none;
+            border: none;
+            color: #8b949e;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: 0.2s;
+        }
+        .like-btn.liked {
+            color: #ff4444;
+            font-weight: bold;
+        }
+
         .unlock-btn {
             width: 100%;
             background: linear-gradient(135deg, #238636, #2ea043);
@@ -155,7 +174,6 @@
             align-items: center;
             justify-content: center;
             gap: 8px;
-            transition: opacity 0.2s;
         }
         .unlock-btn:active {
             opacity: 0.8;
@@ -230,7 +248,7 @@
     <div id="card-container">
         
         <!-- ভিডিও কার্ড ১ -->
-        <div class="card" data-category="viral" data-title="ভাইরাল এক্সক্লুসিভ হট ভিডিও প্যাকেজ ১" onclick="openAdLockModal('https://t.me/SSFileStorebot?start=5170965')">
+        <div class="card" data-category="viral" data-title="ভাইরাল এক্সক্লুসিভ হট ভিডিও প্যাকেজ ১">
             <div class="card-img-container">
                 <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe" class="card-img" alt="Thumbnail">
                 <div class="badge">18+ Viral</div>
@@ -238,12 +256,19 @@
             <div class="card-body">
                 <div class="card-title">ভাইরাল এক্সক্লুসিভ হট ভিডিও প্যাকেজ ১</div>
                 <div class="card-desc">ফুল এইচডি কোয়ালিটি আনসেন্সরড ভিডিও 🥵</div>
-                <button class="unlock-btn">🔓 Watch / Unlock Video 1</button>
+                
+                <!-- লাইক এবং ভিউ কাউন্ট -->
+                <div class="card-footer-info">
+                    <span>👀 দেখা হয়েছে: <b>1.4k</b> বার</span>
+                    <button class="like-btn" onclick="toggleLike(this)">❤️ <span class="like-count">342</span></button>
+                </div>
+
+                <button class="unlock-btn" onclick="openAdLockModal('https://t.me/SSFileStorebot?start=5170965')">🔓 Watch / Unlock Video 1</button>
             </div>
         </div>
 
         <!-- ভিডিও কার্ড ২ -->
-        <div class="card" data-category="leaked" data-title="স্পেশাল প্রাইভেট লিকড ভিডিও কালেকশন" onclick="openAdLockModal('https://t.me/SSFileStorebot?start=0600192')">
+        <div class="card" data-category="leaked" data-title="স্পেশাল প্রাইভেট লিকড ভিডিও কালেকশন">
             <div class="card-img-container">
                 <img src="https://images.unsplash.com/photo-1579546929518-9e396f3cc809" class="card-img" alt="Thumbnail">
                 <div class="badge" style="background: #238636;">Hot 🔞</div>
@@ -251,12 +276,18 @@
             <div class="card-body">
                 <div class="card-title">স্পেশাল প্রাইভেট লিকড ভিডিও কালেকশন</div>
                 <div class="card-desc">নতুন ও আনকাট ভিডিও ক্লিপস 🔥</div>
-                <button class="unlock-btn">🔓 Watch / Unlock Video 2</button>
+                
+                <div class="card-footer-info">
+                    <span>👀 দেখা হয়েছে: <b>2.1k</b> বার</span>
+                    <button class="like-btn" onclick="toggleLike(this)">❤️ <span class="like-count">512</span></button>
+                </div>
+
+                <button class="unlock-btn" onclick="openAdLockModal('https://t.me/SSFileStorebot?start=0600192')">🔓 Watch / Unlock Video 2</button>
             </div>
         </div>
 
         <!-- ভিডিও কার্ড ৩ -->
-        <div class="card" data-category="hot" data-title="মদীয় ও রোমান্টিক প্রাইভেট ভিডিও ফুল এইচডি" onclick="openAdLockModal('https://t.me/SSFileStorebot?start=2350480')">
+        <div class="card" data-category="hot" data-title="মদীয় ও রোমান্টিক প্রাইভেট ভিডিও ফুল এইচডি">
             <div class="card-img-container">
                 <img src="https://images.unsplash.com/photo-1550684848-fac1c5b4e853" class="card-img" alt="Thumbnail">
                 <div class="badge" style="background: #1f6feb;">New 🔞</div>
@@ -264,12 +295,18 @@
             <div class="card-body">
                 <div class="card-title">মদীয় ও রোমান্টিক প্রাইভেট ভিডিও ফুল এইচডি</div>
                 <div class="card-desc">সম্পূর্ণ আনকাট এবং ক্লিয়ার ভিডিও ফাইল 📥</div>
-                <button class="unlock-btn">🔓 Watch / Unlock Video 3</button>
+                
+                <div class="card-footer-info">
+                    <span>👀 দেখা হয়েছে: <b>980</b> বার</span>
+                    <button class="like-btn" onclick="toggleLike(this)">❤️ <span class="like-count">189</span></button>
+                </div>
+
+                <button class="unlock-btn" onclick="openAdLockModal('https://t.me/SSFileStorebot?start=2350480')">🔓 Watch / Unlock Video 3</button>
             </div>
         </div>
 
         <!-- ভিডিও কার্ড ৪ -->
-        <div class="card" data-category="viral" data-title="সিগরেট এমএমএস ও ভাইরাল ভিডিও প্যাক" onclick="openAdLockModal('https://t.me/SSFileStorebot?start=5585645')">
+        <div class="card" data-category="viral" data-title="সিগরেট এমএমএস ও ভাইরাল ভিডিও প্যাক">
             <div class="card-img-container">
                 <img src="https://images.unsplash.com/photo-1541701494587-cb58502866ab" class="card-img" alt="Thumbnail">
                 <div class="badge" style="background: #e3b341; color: #000;">VIP 🔞</div>
@@ -277,7 +314,13 @@
             <div class="card-body">
                 <div class="card-title">সিগরেট এমএমএস ও ভাইরাল ভিডিও প্যাক</div>
                 <div class="card-desc">সেরা এবং লেটেস্ট ভাইরাল কন্টেন্ট 😳🔥</div>
-                <button class="unlock-btn">🔓 Watch / Unlock Video 4</button>
+                
+                <div class="card-footer-info">
+                    <span>👀 দেখা হয়েছে: <b>3.5k</b> বার</span>
+                    <button class="like-btn" onclick="toggleLike(this)">❤️ <span class="like-count">840</span></button>
+                </div>
+
+                <button class="unlock-btn" onclick="openAdLockModal('https://t.me/SSFileStorebot?start=5585645')">🔓 Watch / Unlock Video 4</button>
             </div>
         </div>
 
@@ -299,6 +342,20 @@
         
         if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
             document.getElementById('user-name').innerText = tg.initDataUnsafe.user.first_name + ' 💀❤️';
+        }
+
+        // লাইক বাড়ানোর বা কমানোর ফাংশন
+        function toggleLike(btn) {
+            let countSpan = btn.querySelector('.like-count');
+            let currentLikes = parseInt(countSpan.innerText);
+            
+            if (btn.classList.contains('liked')) {
+                btn.classList.remove('liked');
+                countSpan.innerText = currentLikes - 1;
+            } else {
+                btn.classList.add('liked');
+                countSpan.innerText = currentLikes + 1;
+            }
         }
 
         let adsWatched = 0;
@@ -327,7 +384,6 @@
         }
 
         function watchNextAd() {
-            // আপনার অ্যাডটেরা স্মার্টলিংক নতুন ট্যাবে ওপেন হবে
             window.open(adsterraSmartlink, "_blank");
 
             adsWatched++;
