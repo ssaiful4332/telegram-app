@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>UNLIMITED VIDS</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <style>
         :root {
             --bg-color: #0b0713;
@@ -263,6 +265,21 @@
             cursor: pointer;
             font-weight: bold;
         }
+        .google-btn {
+            width: 100%;
+            background: #ffffff;
+            color: #333333;
+            border: none;
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
     </style>
 </head>
 <body>
@@ -275,12 +292,10 @@
         </div>
     </div>
 
-    <!-- সার্চ বার -->
     <div class="search-box">
         <input type="text" id="searchInput" class="search-input" placeholder="🔍 সার্চ করুন..." onkeyup="filterContent()">
     </div>
 
-    <!-- ক্যাটেগরি ফিল্টার বাটন -->
     <div class="categories">
         <button class="cat-btn active" onclick="filterCategory('all', this)">📹 All Videos</button>
         <button class="cat-btn" onclick="filterCategory('new', this)">🔥 New Collection</button>
@@ -295,10 +310,8 @@
 
     <div id="no-result">কোনো কনটেন্ট পাওয়া যায়নি! ❌</div>
 
-    <!-- কনটেন্ট কন্টেইনার -->
     <div id="card-container">
         
-        <!-- ভিডিও কার্ড ১ -->
         <div class="card" data-category="bangla" data-title="!! কণ্ঠ শিল্পী সুমাইয়ার ভাইরাল চোদাচুদির ভিডিও না দেখলে পুরাই মিস 🍑" data-id="video_1">
             <div class="card-img-container">
                 <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe" class="card-img" alt="Thumbnail">
@@ -316,7 +329,6 @@
             </div>
         </div>
 
-        <!-- ভিডিও কার্ড ২ -->
         <div class="card" data-category="indian" data-title="!! আপন সৎ মাকে চুদে সৎ মায়ের ভোদারের জ্বালা মিটিয়ে দিল কথা শুনলে ধোনের মাল আউট না দেখলে মিস🍑" data-id="video_2">
             <div class="card-img-container">
                 <img src="https://images.unsplash.com/photo-1579546929518-9e396f3cc809" class="card-img" alt="Thumbnail">
@@ -336,10 +348,8 @@
 
     </div>
 
-    <!-- টোস্ট নোটিফিকেশন এলিমেন্ট -->
     <div id="toast">বিজ্ঞপ্তি</div>
 
-    <!-- অ্যাড লক পপআপ মডাল -->
     <div id="adModal" class="modal">
         <div class="modal-content">
             <span class="close-modal" onclick="closeModal()">&#10005;</span>
@@ -349,11 +359,22 @@
         </div>
     </div>
 
-    <!-- সেটিংস পপআপ মডাল -->
     <div id="settingsModal" class="modal">
         <div class="modal-content">
             <span class="close-modal" onclick="closeSettingsModal()">&#10005;</span>
-            <h3 style="color: inherit; margin-top: 5px; font-size: 18px; margin-bottom: 15px;">⚙️ App Settings</h3>
+            <h3 style="color: inherit; margin-top: 5px; font-size: 18px; margin-bottom: 15px;">⚙️ Personal Settings</h3>
+            
+            <div id="authSection" style="margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px;">
+                <button class="google-btn" onclick="loginWithGoogle()">
+                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18" alt="Google"> Sign in with Google
+                </button>
+            </div>
+
+            <div id="userProfileSection" style="display: none; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; text-align: left;">
+                <p style="font-size: 12px; margin: 0 0 5px 0; color: #b0bec5;">Logged in as:</p>
+                <b id="userEmailDisplay" style="font-size: 13px; color: #ffeb3b; word-break: break-all;"></b>
+                <button onclick="logoutGoogle()" style="background: #d32f2f; color: white; border: none; padding: 4px 8px; border-radius: 5px; font-size: 11px; cursor: pointer; margin-top: 8px; display: block;">Logout</button>
+            </div>
             
             <div class="setting-item">
                 <span>🎨 Dark / Light Mode</span>
@@ -374,184 +395,8 @@
         let tg = window.Telegram.WebApp;
         tg.expand();
 
-        function showToast(message) {
-            let toast = document.getElementById("toast");
-            toast.innerText = message;
-            toast.className = "show";
-            setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 2500);
-        }
-
-        function shareApp() {
-            let appUrl = window.location.href;
-            if (navigator.share) {
-                navigator.share({ title: 'UNLIMITED VIDS', url: appUrl }).catch(() => {});
-            } else {
-                navigator.clipboard.writeText(appUrl);
-                showToast("✅ লিংক কপি করা হয়েছে!");
-            }
-        }
-
-        // সেটিংস মডাল কন্ট্রোল
-        function openSettingsModal() {
-            document.getElementById('settingsModal').style.display = 'flex';
-        }
-        function closeSettingsModal() {
-            document.getElementById('settingsModal').style.display = 'none';
-        }
-
-        // থিম টগল (ডার্ক/লাইট)
-        function toggleTheme() {
-            document.body.classList.toggle('light-theme');
-            let isLight = document.body.classList.contains('light-theme');
-            localStorage.setItem('light_theme', isLight);
-            showToast(isLight ? "☀️ Light Mode Activated" : "🌙 Dark Mode Activated");
-        }
-
-        // আগের থিম লোড করা
-        if (localStorage.getItem('light_theme') === 'true') {
-            document.body.classList.add('light-theme');
-        }
-
-        function clearAppData() {
-            localStorage.clear();
-            showToast("🗑️ ডাটা সফলভাবে ক্লিয়ার হয়েছে!");
-            setTimeout(() => { location.reload(); }, 1000);
-        }
-
-        // রিয়েল লাইক ও ভিউ ডাটা ম্যানেজমেন্ট (LocalStorage)
-        document.addEventListener("DOMContentLoaded", () => {
-            document.querySelectorAll('.card').forEach(card => {
-                let id = card.getAttribute('data-id');
-                
-                let views = localStorage.getItem(id + '_views');
-                if (!views) {
-                    views = card.querySelector('.view-count').innerText;
-                    localStorage.setItem(id + '_views', views);
-                }
-                card.querySelector('.view-count').innerText = views;
-
-                let likes = localStorage.getItem(id + '_likes');
-                if (!likes) {
-                    likes = card.querySelector('.like-count').innerText;
-                    localStorage.setItem(id + '_likes', likes);
-                }
-                card.querySelector('.like-count').innerText = likes;
-
-                if (localStorage.getItem(id + '_liked') === 'true') {
-                    card.querySelector('.like-btn').classList.add('liked');
-                }
-            });
-        });
-
-        function toggleLike(id, btn) {
-            let countSpan = btn.querySelector('.like-count');
-            let currentLikes = parseInt(localStorage.getItem(id + '_likes'));
-            let isLiked = localStorage.getItem(id + '_liked') === 'true';
-
-            if (isLiked) {
-                currentLikes -= 1;
-                localStorage.setItem(id + '_liked', 'false');
-                btn.classList.remove('liked');
-                showToast("💔 লাইক তুলে নেওয়া হয়েছে");
-            } else {
-                currentLikes += 1;
-                localStorage.setItem(id + '_liked', 'true');
-                btn.classList.add('liked');
-                showToast("❤️ লাইক দেওয়া হয়েছে!");
-            }
-
-            localStorage.setItem(id + '_likes', currentLikes);
-            countSpan.innerText = currentLikes;
-        }
-
-        let adsWatched = 0;
-        const totalAdsRequired = 3;
-        let selectedVideoUrl = "";
-        let selectedVideoId = "";
-        const adsterraSmartlink = "https://www.profitableratecpmnetwork.com/r9475it0w?key=92dacc0ef3f17aef645eed9f0077289d";
-
-        function openAdLockModal(url, id) {
-            selectedVideoUrl = url;
-            selectedVideoId = id;
-            adsWatched = 0;
-            resetModalContent();
-            document.getElementById('adModal').style.display = 'flex';
-        }
-
-        function closeModal() {
-            document.getElementById('adModal').style.display = 'none';
-        }
-
-        function resetModalContent() {
-            document.querySelector('#adModal .modal-content').innerHTML = `
-                <span class="close-modal" onclick="closeModal()">&#10005;</span>
-                <h3 style="color: inherit; margin-top: 10px; font-size: 18px;">🔒 Watch 3 ads to unlock</h3>
-                <p id="adStatusText" style="font-size: 14px; margin: 12px 0;">Progress: <b style="color: #ffeb3b;">0/3</b></p>
-                <button id="watchAdBtn" onclick="watchNextAd()" style="width: 100%; background: var(--btn-color); color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer;">🔓 UNLOCK VIDEO</button>
-            `;
-        }
-
-        function watchNextAd() {
-            window.open(adsterraSmartlink, "_blank");
-            adsWatched++;
-
-            if (adsWatched < totalAdsRequired) {
-                document.getElementById('adStatusText').innerHTML = `Progress: <b style="color: #ffeb3b;">${adsWatched}/3</b>`;
-                document.getElementById('watchAdBtn').innerText = `🔓 UNLOCK VIDEO (${adsWatched}/3)`;
-                showToast(`⚡ ${adsWatched}টি অ্যাড দেখা সম্পন্ন!`);
-            } else {
-                let currentViews = parseInt(localStorage.getItem(selectedVideoId + '_views')) + 1;
-                localStorage.setItem(selectedVideoId + '_views', currentViews);
-                
-                let card = document.querySelector(`[data-id="${selectedVideoId}"]`);
-                if(card) {
-                    card.querySelector('.view-count').innerText = currentViews;
-                }
-
-                showToast("✅ ভিডিও আনলক সফল হয়েছে!");
-                document.querySelector('#adModal .modal-content').innerHTML = `
-                    <span class="close-modal" onclick="closeModal()">&#10005;</span>
-                    <h3 style="color: #4caf50; margin-top: 10px; font-size: 18px;">✅ Unlocked Successfully!</h3>
-                    <p style="font-size: 13px; margin: 10px 0;">আপনার ভিডিওর লিংক নিচে দেওয়া হলো:</p>
-                    <a href="${selectedVideoUrl}" target="_blank" onclick="closeModal()" style="display: block; background: #4caf50; color: white; text-decoration: none; padding: 12px; border-radius: 10px; font-weight: bold; font-size: 14px;">▶ WATCH / DOWNLOAD NOW</a>
-                `;
-            }
-        }
-
-        let currentCategory = 'all';
-        function filterCategory(category, btn) {
-            currentCategory = category;
-            document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            applyFilters();
-        }
-
-        function filterContent() {
-            applyFilters();
-        }
-
-        function applyFilters() {
-            let query = document.getElementById('searchInput').value.toLowerCase();
-            let cards = document.querySelectorAll('.card');
-            let hasVisible = false;
-
-            cards.forEach(card => {
-                let category = card.getAttribute('data-category');
-                let title = card.getAttribute('data-title').toLowerCase();
-
-                let matchesCategory = (currentCategory === 'all' || category === currentCategory);
-                let matchesSearch = title.includes(query);
-
-                if (matchesCategory && matchesSearch) {
-                    card.style.display = 'block';
-                    hasVisible = true;
-                } else {
-                    card.style.display = 'none';
-                }
-            });
-
-            document.getElementById('no-result').style.display = hasVisible ? 'none' : 'block';
-        }
-    </script>
-</body>
-</html>
+        // Firebase Configuration (আপনার ফায়ারবেস কনফিগার এখানে বসাতে হবে)
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            projectId: "YOUR_PROJECT_
