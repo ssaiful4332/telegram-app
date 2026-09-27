@@ -37,10 +37,29 @@
             letter-spacing: 1px;
             color: #58a6ff;
         }
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
         .user-tag {
             font-size: 13px; 
             font-weight: bold; 
             color: #f0f6fc;
+        }
+        .share-app-btn {
+            background: #21262d;
+            border: 1px solid var(--border-color);
+            color: #58a6ff;
+            padding: 6px 10px;
+            border-radius: 8px;
+            font-size: 12px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+        .share-app-btn:hover {
+            background: #30363d;
         }
         .search-box {
             margin-bottom: 12px;
@@ -186,6 +205,37 @@
             display: none;
         }
 
+        /* টোস্ট নোটিফিকেশন স্টাইল (ফিচার ৪) */
+        #toast {
+            visibility: hidden;
+            min-width: 200px;
+            background-color: #21262d;
+            color: #fff;
+            text-align: center;
+            border-radius: 8px;
+            padding: 10px;
+            position: fixed;
+            z-index: 200;
+            left: 50%;
+            bottom: 30px;
+            transform: translateX(-50%);
+            font-size: 13px;
+            border: 1px solid #30363d;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+        #toast.show {
+            visibility: visible;
+            animation: fadein 0.3s, fadeout 0.3s 2s;
+        }
+        @keyframes fadein {
+            from {bottom: 0; opacity: 0;}
+            to {bottom: 30px; opacity: 1;}
+        }
+        @keyframes fadeout {
+            from {bottom: 30px; opacity: 1;}
+            to {bottom: 0; opacity: 0;}
+        }
+
         /* মডাল স্টাইল */
         .modal {
             display: none;
@@ -225,7 +275,10 @@
 
     <div class="header">
         <h2>『DESI HUB』</h2>
-        <span id="user-name" class="user-tag">SAIFUL SIR 🥀❤️ 💀❤️</span>
+        <div class="header-right">
+            <button class="share-app-btn" onclick="shareApp()">🔗 Share</button>
+            <span id="user-name" class="user-tag">SAIFUL SIR 🥀❤️ 💀❤️</span>
+        </div>
     </div>
 
     <div class="search-box">
@@ -283,6 +336,8 @@
 
     </div>
 
+    <div id="toast">বিজ্ঞপ্তি</div>
+
     <div id="adModal" class="modal">
         <div class="modal-content">
             <span class="close-modal" onclick="closeModal()">&times;</span>
@@ -298,6 +353,29 @@
         
         if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
             document.getElementById('user-name').innerText = tg.initDataUnsafe.user.first_name + ' 🥀❤️ 💀❤️';
+        }
+
+        // টোস্ট নোটিফিকেশন ফাংশন (ফিচার ৪)
+        function showToast(message) {
+            let toast = document.getElementById("toast");
+            toast.innerText = message;
+            toast.className = "show";
+            setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 2500);
+        }
+
+        // অ্যাপ শেয়ার ফাংশন (ফিচার ৫)
+        function shareApp() {
+            let appUrl = "https://t.me/YourBotUsername/app"; // আপনার বটের মিনি অ্যাপ লিংক এখানে দিন
+            if (navigator.share) {
+                navigator.share({
+                    title: 'DESI HUB',
+                    text: 'সেরা সব এক্সক্লুসিভ ও লিকড ভিডিও দেখতে জয়েন করুন!',
+                    url: appUrl,
+                }).catch(() => {});
+            } else {
+                navigator.clipboard.writeText(appUrl);
+                showToast("✅ অ্যাপের লিংক কপি করা হয়েছে!");
+            }
         }
 
         // রিয়েল লাইক ও ভিউ কাউন্ট ম্যানেজমেন্ট (LocalStorage)
@@ -334,10 +412,12 @@
                 currentLikes -= 1;
                 localStorage.setItem(id + '_liked', 'false');
                 btn.classList.remove('liked');
+                showToast("💔 লাইক তুলে নেওয়া হয়েছে");
             } else {
                 currentLikes += 1;
                 localStorage.setItem(id + '_liked', 'true');
                 btn.classList.add('liked');
+                showToast("❤️ সফলভাবে লাইক দেওয়া হয়েছে!");
             }
 
             localStorage.setItem(id + '_likes', currentLikes);
@@ -378,6 +458,7 @@
             if (adsWatched < totalAdsRequired) {
                 document.getElementById('adStatusText').innerHTML = `ভিডিওটি আনলক করতে বাকি আছে: <b style="color: #e3b341;">${adsWatched}/${totalAdsRequired}</b>`;
                 document.getElementById('watchAdBtn').innerText = `📺 পরবর্তী অ্যাড দেখুন (${adsWatched + 1}/৩)`;
+                showToast(`⚡ ${adsWatched}টি অ্যাড দেখা সম্পন্ন!`);
             } else {
                 let currentViews = parseInt(localStorage.getItem(selectedVideoId + '_views')) + 1;
                 localStorage.setItem(selectedVideoId + '_views', currentViews);
@@ -387,6 +468,7 @@
                     card.querySelector('.view-count').innerText = currentViews;
                 }
 
+                showToast("🎉 ভিডিও সফলভাবে আনলক হয়েছে!");
                 document.querySelector('.modal-content').innerHTML = `
                     <span class="close-modal" onclick="closeModal()">&times;</span>
                     <h3 style="color: #2ea043; margin-top: 10px; font-size: 18px;">✅ আনলক সফল হয়েছে!</h3>
