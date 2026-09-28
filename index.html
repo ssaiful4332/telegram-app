@@ -559,7 +559,7 @@
                 <input type="text" id="adminTitleInput" class="admin-input" placeholder="পোস্টের সুন্দর নাম লিখুন">
 
                 <b style="color: #ffeb3b; display: block; margin-bottom: 4px;">🔗 ভিডিওর লিংক:</b>
-                <p style="font-size: 10px; color: #b0bec5; margin: 0 0 4px 0;">এখানে একটিমাত্র লিংক দিন। আনলক করার পর সরাসরি এই লিংকটি শো করবে!</p>
+                <p style="font-size: 10px; color: #b0bec5; margin: 0 0 4px 0;">এখানে আপনার কাঙ্ক্ষিত লিংকটি দিন।</p>
                 <textarea id="bulkLinksInput" class="admin-textarea" placeholder="https://t.me/YourBot?start=v1"></textarea>
                 
                 <select id="bulkCategory" class="admin-select" style="margin-bottom: 6px;">
@@ -967,13 +967,7 @@
                 updateRankSystem();
 
                 let linksArray = JSON.parse(decodeURIComponent(selectedLinksJson));
-                let unlockedLinksHtml = '';
-                
-                // এখানে চেক করা হয়েছে যদি একটি লিংক থাকে তবে একটি বাটন দেখাবে, একাধিক থাকলে একটি সুন্দর লিস্ট বা একটি কমন বাটন দেখাবে
-                linksArray.forEach((lnk, idx) => {
-                    let label = `▶ WATCH / DOWNLOAD NOW`;
-                    unlockedLinksHtml += `<a href="${lnk}" target="_blank" style="display: block; background: #4caf50; color: white; text-decoration: none; padding: 12px; border-radius: 8px; font-weight: bold; font-size: 13px; margin-bottom: 6px;">${label}</a>`;
-                });
+                let targetLink = linksArray.length > 0 ? linksArray[0] : "#";
 
                 showToast("✅ ভিডিও আনলক সফল হয়েছে!");
                 document.querySelector('#adModal .modal-content').innerHTML = `
@@ -981,7 +975,7 @@
                     <h3 style="color: #4caf50; margin-top: 10px; font-size: 18px;">✅ Unlocked Successfully!</h3>
                     <p style="font-size: 13px; margin: 10px 0;">আপনার ভিডিওর লিংক নিচে দেওয়া হলো:</p>
                     <div style="max-height: 200px; overflow-y: auto;">
-                        ${unlockedLinksHtml}
+                        <a href="${targetLink}" target="_blank" style="display: block; background: #4caf50; color: white; text-decoration: none; padding: 12px; border-radius: 8px; font-weight: bold; font-size: 13px; margin-bottom: 6px;">▶ WATCH / DOWNLOAD NOW</a>
                     </div>
                 `;
             }
