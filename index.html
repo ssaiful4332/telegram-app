@@ -208,9 +208,7 @@
             border-radius: 50%;
             cursor: pointer;
         }
-        .fav-icon.active {
-            color: #ff4444;
-        }
+        .fav-icon.active { color: #ff4444; }
         .card-title {
             font-size: 14px;
             font-weight: bold;
@@ -237,10 +235,7 @@
             align-items: center;
             gap: 5px;
         }
-        .like-btn.liked {
-            color: #ff4444;
-            font-weight: bold;
-        }
+        .like-btn.liked { color: #ff4444; font-weight: bold; }
         .card-actions-row {
             display: flex;
             gap: 6px;
@@ -351,11 +346,11 @@
         }
         .close-modal:hover { color: #fff; }
 
-        /* নির্দিষ্ট ভিডিও ফোকাস পপআপ ওভারলে স্টাইল */
+        /* ফোকাস পপআপ ওভারলে স্টাইল */
         #singleVideoFocusModal {
             display: none;
             position: fixed;
-            z-index: 300;
+            z-index: 500;
             left: 0;
             top: 0;
             width: 100%;
@@ -376,7 +371,7 @@
             position: relative;
             padding: 15px;
             box-sizing: border-box;
-            animation: popupScale 0.3s ease;
+            animation: popupScale 0.25s ease;
         }
         @keyframes popupScale {
             from { transform: scale(0.85); opacity: 0; }
@@ -814,16 +809,22 @@
             });
         }
 
-        // ইউনিক লিংকে ঢুকলে স্ক্রিনশটের মতো নির্দিষ্ট ভিডিওটি ফুল ফোকাস পপআপে দেখানোর লজিক
+        // ইউনিক লিংকে ঢুকলে পপআপ ফোকাস ওপেন করার অপ্টিমাইজড লজিক
         window.addEventListener('load', () => {
             const urlParams = new URLSearchParams(window.location.search);
-            const startAppParam = urlParams.get('startapp');
+            let startAppParam = urlParams.get('startapp');
+            
+            // টেলিগ্রামের start_param হ্যান্ডেল করার জন্য অতিরিক্ত সেফটি চেক
+            if (!startAppParam && tg && tg.initDataUnsafe && tg.initDataUnsafe.start_param) {
+                startAppParam = tg.initDataUnsafe.start_param;
+            }
+
             if (startAppParam) {
+                // একটু দ্রুত রেসপন্স পাওয়ার জন্য টাইমআউট কমিয়ে দেওয়া হয়েছে
                 setTimeout(() => {
                     let targetCard = document.getElementById(`card-${startAppParam}`);
                     if (targetCard) {
                         let cloneCard = targetCard.cloneNode(true);
-                        // পপআপের ভেতরের ইউনিক লুক ও বাটন ঠিক করা
                         let unlockBtn = cloneCard.querySelector('.unlock-btn');
                         if(unlockBtn) unlockBtn.innerText = "▶ WATCH / DOWNLOAD NOW";
                         
@@ -831,7 +832,7 @@
                         document.getElementById('focusCardContainer').appendChild(cloneCard);
                         document.getElementById('singleVideoFocusModal').style.display = 'flex';
                     }
-                }, 300);
+                }, 100);
             }
         });
 
@@ -866,7 +867,7 @@
                     card.style.display = 'none';
                 }
             });
-            default: document.getElementById('no-result').style.display = hasVisible ? 'none' : 'block';
+            document.getElementById('no-result').style.display = hasVisible ? 'none' : 'block';
         }
 
         function postComment() {
