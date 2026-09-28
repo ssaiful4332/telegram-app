@@ -376,15 +376,34 @@
     <div class="categories">
         <button class="cat-btn active" onclick="filterCategory('all', this)">📹 All Videos</button>
         <button class="cat-btn" onclick="filterCategory('favorites', this)">⭐ Favorites</button>
+        <button class="cat-btn" onclick="filterCategory('couple', this)">❤️ জামাই বউ নতুন ভিডিও</button>
         <button class="cat-btn" onclick="filterCategory('viral', this)">🔥 Viral Collection</button>
         <button class="cat-btn" onclick="filterCategory('bangla', this)">🇧🇩 নতুন কালেকশন</button>
-        <button class="cat-btn" onclick="filterCategory('couple', this)">❤️ জামাই বউ নতুন ভিডিও</button>
     </div>
 
     <div id="no-result">কোনো কনটেন্ট পাওয়া যায়নি! ❌</div>
 
     <div id="card-container">
         
+        <div class="card" data-category="couple" data-title="❤️ জামাই বউ নতুন ভিডিও - রোমান্টিক ও উপভোগ্য বিশেষ মুহূর্তের গোপন ক্লিপ!" data-id="video_5">
+            <div class="card-img-container">
+                <img src="https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2" class="card-img" alt="Thumbnail">
+                <div class="duration-badge">10:15</div>
+                <button class="fav-icon" onclick="toggleFavorite('video_5', this)">❤️</button>
+            </div>
+            <div class="card-body">
+                <div class="card-title">❤️ জামাই বউ নতুন ভিডিও - রোমান্টিক ও উপভোগ্য বিশেষ মুহূর্তের গোপন ক্লিপ!</div>
+                
+                <div class="card-footer-info">
+                    <button class="like-btn" onclick="toggleLike('video_5', this)">👍 <span class="like-count">112</span> Likes</button>
+                    <span>👀 <b class="view-count">4250</b> Views</span>
+                </div>
+
+                <button class="comment-section-btn" onclick="openCommentModal('video_5')">💬 মতামত / কমেন্ট দেখুন</button>
+                <button class="unlock-btn" onclick="openAdLockModal('https://t.me/SSFileStorebot?start=8392316', 'video_5')">▶ WATCH / DOWNLOAD NOW</button>
+            </div>
+        </div>
+
         <div class="card" data-category="viral" data-title="🔥 হট ভাইরাল এক্সক্লুসিভ ভিডিও কালেকশন ২০২৬ - না দেখলে চরম মিস করবেন!" data-id="video_1">
             <div class="card-img-container">
                 <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe" class="card-img" alt="Thumbnail">
@@ -458,25 +477,6 @@
 
                 <button class="comment-section-btn" onclick="openCommentModal('video_4')">💬 মতামত / কমেন্ট দেখুন</button>
                 <button class="unlock-btn" onclick="openAdLockModal('https://t.me/SSFileStorebot?start=5170965', 'video_4')">▶ WATCH / DOWNLOAD NOW</button>
-            </div>
-        </div>
-
-        <div class="card" data-category="couple" data-title="❤️ জামাই বউ নতুন ভিডিও - রোমান্টিক ও উপভোগ্য বিশেষ মুহূর্তের গোপন ক্লিপ!" data-id="video_5">
-            <div class="card-img-container">
-                <img src="https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2" class="card-img" alt="Thumbnail">
-                <div class="duration-badge">10:15</div>
-                <button class="fav-icon" onclick="toggleFavorite('video_5', this)">❤️</button>
-            </div>
-            <div class="card-body">
-                <div class="card-title">❤️ জামাই বউ নতুন ভিডিও - রোমান্টিক ও উপভোগ্য বিশেষ মুহূর্তের গোপন ক্লিপ!</div>
-                
-                <div class="card-footer-info">
-                    <button class="like-btn" onclick="toggleLike('video_5', this)">👍 <span class="like-count">112</span> Likes</button>
-                    <span>👀 <b class="view-count">4250</b> Views</span>
-                </div>
-
-                <button class="comment-section-btn" onclick="openCommentModal('video_5')">💬 মতামত / কমেন্ট দেখুন</button>
-                <button class="unlock-btn" onclick="openAdLockModal('https://t.me/SSFileStorebot?start=8392316', 'video_5')">▶ WATCH / DOWNLOAD NOW</button>
             </div>
         </div>
 
