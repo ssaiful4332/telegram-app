@@ -73,33 +73,44 @@
             align-items: center;
             font-weight: bold;
         }
-        .dashboard-bar {
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        .dash-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 10px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 12px;
+        }
+        .dash-card b {
+            display: block;
+            font-size: 14px;
+            margin-top: 4px;
+        }
+        .action-row {
             display: flex;
             gap: 8px;
             margin-bottom: 12px;
         }
-        .coin-bar, .refer-bar {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            padding: 8px 12px;
-            border-radius: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 12px;
+        .action-row button {
             flex: 1;
-        }
-        .coin-bar button, .refer-bar button {
-            background: #ff9800;
+            background: var(--btn-color);
             color: white;
             border: none;
-            padding: 5px 8px;
-            border-radius: 6px;
-            cursor: pointer;
+            padding: 10px;
+            border-radius: 10px;
             font-weight: bold;
-            font-size: 11px;
+            cursor: pointer;
+            font-size: 12px;
         }
-        .refer-bar button { background: #00bcd4; }
+        .spin-btn { background: #ff9800 !important; }
+        .leaderboard-btn { background: #00bcd4 !important; }
+
         .search-box {
             margin-bottom: 12px;
         }
@@ -383,18 +394,31 @@
     </div>
 
     <div class="announcement-banner">
-        <span>🔥 নতুন আপডেট! রেফার করুন এবং চ্যানেল জয়েন করে এক্সক্লুসিভ সুবিধা নিন।</span>
+        <span>🔥 নতুন আপডেট! লেভেল আপ করুন, স্পিন করুন এবং লিডারবোর্ডে থাকুন।</span>
     </div>
 
-    <div class="dashboard-bar">
-        <div class="coin-bar">
-            <span>🪙 কয়েন: <b id="userCoins" style="color: #ffeb3b;">0</b></span>
-            <button onclick="claimDailyReward()">🎁 Daily</button>
+    <div class="dashboard-grid">
+        <div class="dash-card">
+            <span>🪙 কয়েন</span>
+            <b id="userCoins" style="color: #ffeb3b;">0</b>
         </div>
-        <div class="refer-bar">
-            <span>👥 রেফার: <b id="referCount" style="color: #00e5ff;">0</b></span>
-            <button onclick="shareReferralLink()">🔗 Invite</button>
+        <div class="dash-card">
+            <span>🎖️ ইউজার র‍্যাংক</span>
+            <b id="userRank" style="color: #00e5ff;">Bronze</b>
         </div>
+        <div class="dash-card">
+            <span>👥 মোট রেফার</span>
+            <b id="referCount" style="color: #ab47bc;">0 জন</b>
+        </div>
+        <div class="dash-card">
+            <span>🔓 আনলকড ভিডিও</span>
+            <b id="unlockedCount" style="color: #66bb6a;">0টি</b>
+        </div>
+    </div>
+
+    <div class="action-row">
+        <button class="spin-btn" onclick="openSpinModal()">🎡 Lucky Spin</button>
+        <button class="leaderboard-btn" onclick="openLeaderboardModal()">🏆 Leaderboard</button>
     </div>
 
     <div class="search-box">
@@ -523,12 +547,33 @@
     <div id="adModal" class="modal">
         <div class="modal-content">
             <span class="close-modal" onclick="closeModal()">&#10005;</span>
-            <h3 style="color: inherit; margin-top: 10px; font-size: 18px;" id="modalMainTitle">🔒 Channel Join & Ads Verification</h3>
+            <h3 style="color: inherit; margin-top: 10px; font-size: 18px;" id="modalMainTitle">🔒 Watch 3 ads to unlock</h3>
             <div id="modalBodyContent">
-                <p style="font-size: 13px; margin: 10px 0; color: #b0bec5;">ভিডিও আনলক করতে প্রথমে আমাদের সাপোর্ট চ্যানেলে জয়েন করুন:</p>
-                <button onclick="verifyChannelJoin()" style="width: 100%; background: #0088cc; color: white; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-bottom: 12px;">📢 Join Channel Now</button>
-                <p id="adStatusText" style="font-size: 13px; margin: 8px 0; display:none;">অ্যাড প্রোগ্রেস: <b style="color: #ffeb3b;">0/3</b></p>
-                <button id="watchAdBtn" onclick="watchNextAd()" style="width: 100%; background: var(--btn-color); color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; display:none;">🔓 WATCH ADS (0/3)</button>
+                <p id="adStatusText" style="font-size: 14px; margin: 12px 0;">Progress: <b style="color: #ffeb3b;">0/3</b></p>
+                <button id="watchAdBtn" onclick="watchNextAd()" style="width: 100%; background: var(--btn-color); color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer;">🔓 UNLOCK VIDEO</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="spinModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeSpinModal()">&#10005;</span>
+            <h3 style="color: #ff9800; margin-top: 5px; font-size: 18px;">🎡 Daily Lucky Spin</h3>
+            <p style="font-size: 13px; color: #b0bec5; margin: 10px 0;">চাকা ঘুরিয়ে প্রতিদিন ফ্রি কয়েন জিতে নিন!</p>
+            <div id="spinBox" style="font-size: 26px; padding: 20px; background: var(--border-color); border-radius: 10px; margin-bottom: 12px; font-weight: bold; color: #ffeb3b;">🎁 ?</div>
+            <button id="spinActionBtn" onclick="executeSpin()" style="width: 100%; background: #ff9800; color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer;">SPIN NOW</button>
+        </div>
+    </div>
+
+    <div id="leaderboardModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeLeaderboardModal()">&#10005;</span>
+            <h3 style="color: #00e5ff; margin-top: 5px; font-size: 18px; margin-bottom: 12px;">🏆 Top Referrer Leaderboard</h3>
+            <div id="leaderboardList" style="text-align: left; font-size: 13px; max-height: 180px; overflow-y: auto;">
+                <div style="background: var(--border-color); padding: 8px; border-radius: 6px; margin-bottom: 6px; display: flex; justify-content: space-between;"><span>1. 👑 Rabbi Hasan</span> <b>24 Refers</b></div>
+                <div style="background: var(--border-color); padding: 8px; border-radius: 6px; margin-bottom: 6px; display: flex; justify-content: space-between;"><span>2. 🥈 Tanvir Ahmed</span> <b>18 Refers</b></div>
+                <div style="background: var(--border-color); padding: 8px; border-radius: 6px; margin-bottom: 6px; display: flex; justify-content: space-between;"><span>3. 🥉 Rakib Hossain</span> <b>12 Refers</b></div>
+                <div style="background: var(--border-color); padding: 8px; border-radius: 6px; margin-bottom: 6px; display: flex; justify-content: space-between;"><span>4. 👤 Asif Mahmud</span> <b>7 Refers</b></div>
             </div>
         </div>
     </div>
@@ -575,12 +620,13 @@
         } catch(e) {}
 
         let currentUserId = "guest_user";
+        let userNameDisplay = "Telegram User";
         try {
             if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
                 let user = tg.initDataUnsafe.user;
                 currentUserId = user.id.toString();
-                let name = user.first_name + (user.last_name ? ' ' + user.last_name : '');
-                document.getElementById('tgUserName').innerText = name + (user.username ? ' (@' + user.username + ')' : '');
+                userNameDisplay = user.first_name + (user.last_name ? ' ' + user.last_name : '');
+                document.getElementById('tgUserName').innerText = userNameDisplay + (user.username ? ' (@' + user.username + ')' : '');
             } else {
                 document.getElementById('tgUserName').innerText = "Telegram Web User (Private)";
             }
@@ -594,9 +640,27 @@
 
         let referKey = 'refers_' + currentUserId;
         let refers = parseInt(localStorage.getItem(referKey)) || 0;
-        document.getElementById('referCount').innerText = refers;
+        document.getElementById('referCount').innerText = refers + " জন";
 
-        // চেক করা যাক ইউজার রেফার লিংক থেকে এসেছে কি না
+        let unlockedKey = 'unlocked_count_' + currentUserId;
+        let unlockedCount = parseInt(localStorage.getItem(unlockedKey)) || 0;
+        document.getElementById('unlockedCount').innerText = unlockedCount + "টি";
+
+        function updateRankSystem() {
+            let rankEl = document.getElementById('userRank');
+            let rank = "Bronze 🥉";
+            if (unlockedCount >= 10 || refers >= 5) {
+                rank = "Diamond 💎";
+            } else if (unlockedCount >= 5 || refers >= 2) {
+                rank = "Gold 🥇";
+            } else if (unlockedCount >= 2 || coins >= 30) {
+                rank = "Silver 🥈";
+            }
+            rankEl.innerText = rank;
+        }
+        updateRankSystem();
+
+        // রেফারেল চেক
         try {
             let startParam = tg.initDataUnsafe && tg.initDataUnsafe.start_param;
             if (startParam && startParam.startsWith('ref_') && startParam !== 'ref_' + currentUserId) {
@@ -604,7 +668,6 @@
                 let claimedRefKey = 'claimed_ref_' + currentUserId;
                 if (!localStorage.getItem(claimedRefKey)) {
                     localStorage.setItem(claimedRefKey, 'true');
-                    // মূল রেফার ওনারকে কয়েন বা রেফার কাউন্ট বাড়িয়ে দেওয়া (লোকাল স্টোরেজ সিমুলেশন)
                     let ownerReferKey = 'refers_' + refOwner;
                     let ownerCoinsKey = 'coins_' + refOwner;
                     let currentRefers = parseInt(localStorage.getItem(ownerReferKey)) || 0;
@@ -615,35 +678,6 @@
             }
         } catch(e) {}
 
-        function claimDailyReward() {
-            let lastClaimKey = 'last_claim_' + currentUserId;
-            let lastClaimDate = localStorage.getItem(lastClaimKey);
-            let today = new Date().toDateString();
-
-            if (lastClaimDate === today) {
-                showToast("⚠️ আপনি আজ ইতিমধ্যে রিওয়ার্ড নিয়েছেন!");
-            } else {
-                coins += 5;
-                localStorage.setItem(userCoinsKey, coins);
-                localStorage.setItem(lastClaimKey, today);
-                document.getElementById('userCoins').innerText = coins;
-                showToast("🎉 সফলভাবে ৫ কয়েন বোনাস পেলেন!");
-            }
-        }
-
-        function shareReferralLink() {
-            let botUsername = "SSFileStorebot"; // আপনার টেলিগ্রাম বট ইউজারনেম এখানে দিন
-            let refUrl = `https://t.me/${botUsername}?start=ref_${currentUserId}`;
-            let shareText = `🔥 ফ্রি আনলিমিটেড ভিডিও কালেকশন দেখতে এই অ্যাপটি ভিজিট করুন:\n${refUrl}`;
-            
-            if (navigator.share) {
-                navigator.share({ title: 'UNLIMITED VIDS', text: shareText, url: refUrl }).catch(() => {});
-            } else {
-                navigator.clipboard.writeText(refUrl);
-                showToast("✅ রেফারেল লিংক কপি করা হয়েছে!");
-            }
-        }
-
         function showToast(message) {
             let toast = document.getElementById("toast");
             toast.innerText = message;
@@ -652,12 +686,13 @@
         }
 
         function shareApp() {
-            let appUrl = window.location.href;
+            let botUsername = "SSFileStorebot";
+            let refUrl = `https://t.me/${botUsername}?start=ref_${currentUserId}`;
             if (navigator.share) {
-                navigator.share({ title: 'UNLIMITED VIDS', url: appUrl }).catch(() => {});
+                navigator.share({ title: 'UNLIMITED VIDS', url: refUrl }).catch(() => {});
             } else {
-                navigator.clipboard.writeText(appUrl);
-                showToast("✅ লিংক কপি করা হয়েছে!");
+                navigator.clipboard.writeText(refUrl);
+                showToast("✅ রেফারেল লিংক কপি করা হয়েছে!");
             }
         }
 
@@ -674,6 +709,43 @@
         }
         function closeSettingsModal() {
             document.getElementById('settingsModal').style.display = 'none';
+        }
+
+        function openSpinModal() {
+            document.getElementById('spinModal').style.display = 'flex';
+        }
+        function closeSpinModal() {
+            document.getElementById('spinModal').style.display = 'none';
+        }
+
+        function openLeaderboardModal() {
+            document.getElementById('leaderboardModal').style.display = 'flex';
+        }
+        function closeLeaderboardModal() {
+            document.getElementById('leaderboardModal').style.display = 'none';
+        }
+
+        function executeSpin() {
+            let lastSpinKey = 'last_spin_' + currentUserId;
+            let lastSpinDate = localStorage.getItem(lastSpinKey);
+            let today = new Date().toDateString();
+
+            if (lastSpinDate === today) {
+                showToast("⚠️ আপনি আজ ইতিমধ্যে স্পিন করেছেন!");
+                return;
+            }
+
+            let rewards = [5, 10, 15, 20, 25, 50];
+            let randomReward = rewards[Math.floor(Math.random() * rewards.length)];
+            
+            document.getElementById('spinBox.innerText') = `🎉 +${randomReward} Coins!`;
+            coins += randomReward;
+            localStorage.setItem(userCoinsKey, coins);
+            localStorage.setItem(lastSpinKey, today);
+            document.getElementById('userCoins').innerText = coins;
+            
+            showToast(`🎉 অভিনন্দন! আপনি ${randomReward} কয়েন জিতেছেন!`);
+            updateRankSystem();
         }
 
         function toggleTheme() {
@@ -796,15 +868,8 @@
 
             let commentKey = 'comments_' + activeVideoForComments;
             let comments = JSON.parse(localStorage.getItem(commentKey)) || [];
-            
-            let userName = "User";
-            try {
-                if (tg.initDataUnsafe && tg.initDataUnsafe.user && tg.initDataUnsafe.user.first_name) {
-                    userName = tg.initDataUnsafe.user.first_name;
-                }
-            } catch(e) {}
 
-            comments.push({ user: userName, text: text });
+            comments.push({ user: userNameDisplay, text: text });
 
             localStorage.setItem(commentKey, JSON.stringify(comments));
             document.getElementById('commentInputBox').value = "";
@@ -822,42 +887,12 @@
             selectedVideoUrl = url;
             selectedVideoId = id;
             adsWatched = 0;
-            
-            let joinedKey = 'channel_joined_' + currentUserId;
-            if (!localStorage.getItem(joinedKey)) {
-                // চ্যানেল জয়েন করতে হবে প্রথমে
-                document.getElementById('modalMainTitle').innerText = "🔒 Mandatory Channel Join";
-                document.getElementById('modalBodyContent').innerHTML = `
-                    <p style="font-size: 13px; margin: 10px 0; color: #b0bec5;">ভিডিও আনলক করতে প্রথমে আমাদের সাপোর্ট চ্যানেলে জয়েন করুন:</p>
-                    <button onclick="verifyChannelJoin()" style="width: 100%; background: #0088cc; color: white; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-bottom: 12px;">📢 Join Channel Now</button>
-                    <p id="adStatusText" style="font-size: 13px; margin: 8px 0; display:none;"></p>
-                    <button id="watchAdBtn" onclick="watchNextAd()" style="width: 100%; background: var(--btn-color); color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; display:none;"></button>
-                `;
-            } else {
-                // সরাসরি অ্যাড প্রোগ্রেসে চলে যাবে
-                setupAdProgressView();
-            }
-            document.getElementById('adModal').style.display = 'flex';
-        }
-
-        function verifyChannelJoin() {
-            try {
-                tg.openTelegramLink('https://t.me/freeIinkshare56');
-            } catch(e) {
-                window.open('https://t.me/freeIinkshare56', '_blank');
-            }
-            let joinedKey = 'channel_joined_' + currentUserId;
-            localStorage.setItem(joinedKey, 'true');
-            showToast("✅ চ্যানেল জয়েন ভেরিফাই হয়েছে!");
-            setupAdProgressView();
-        }
-
-        function setupAdProgressView() {
             document.getElementById('modalMainTitle').innerText = "🔒 Watch 3 ads to unlock";
             document.getElementById('modalBodyContent').innerHTML = `
                 <p id="adStatusText" style="font-size: 14px; margin: 12px 0;">Progress: <b style="color: #ffeb3b;">0/3</b></p>
                 <button id="watchAdBtn" onclick="watchNextAd()" style="width: 100%; background: var(--btn-color); color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer;">🔓 UNLOCK VIDEO</button>
             `;
+            document.getElementById('adModal').style.display = 'flex';
         }
 
         function closeModal() {
@@ -883,6 +918,11 @@
                     let viewCountEl = card.querySelector('.view-count');
                     if(viewCountEl) viewCountEl.innerText = currentViews;
                 }
+
+                unlockedCount++;
+                localStorage.setItem(unlockedKey, unlockedCount);
+                document.getElementById('unlockedCount').innerText = unlockedCount + "টি";
+                updateRankSystem();
 
                 showToast("✅ ভিডিও আনলক সফল হয়েছে!");
                 document.querySelector('#adModal .modal-content').innerHTML = `
