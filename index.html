@@ -551,7 +551,6 @@
             <span class="close-modal" onclick="closeAdminModal()">&#10005;</span>
             <h3 style="color: #e91e63; margin-top: 5px; font-size: 18px; margin-bottom: 8px;">🛠️ Admin Control Panel</h3>
             
-            <!-- একটি কার্ডের ভেতরে একাধিক লিংক যুক্ত করার ফর্ম -->
             <div style="text-align: left; font-size: 12px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom: 10px;">
                 <b style="color: #00e5ff; display: block; margin-bottom: 4px;">🖼️ থাম্বনেইল ছবির লিংক:</b>
                 <input type="text" id="adminImageInput" class="admin-input" placeholder="https://example.com/image.jpg">
@@ -559,8 +558,8 @@
                 <b style="color: #00e5ff; display: block; margin-bottom: 4px;">📌 পোস্টের টাইটেল / নাম:</b>
                 <input type="text" id="adminTitleInput" class="admin-input" placeholder="পোস্টের সুন্দর নাম লিখুন">
 
-                <b style="color: #ffeb3b; display: block; margin-bottom: 4px;">🔗 একাধিক ভিডিওর লিংক (একই কার্ডের ভেতরে থাকবে):</b>
-                <p style="font-size: 10px; color: #b0bec5; margin: 0 0 4px 0;">প্রতি লাইনে একটি করে লিংক দিন। সবগুলো লিংক একই কার্ডের নিচে সাজানো থাকবে!</p>
+                <b style="color: #ffeb3b; display: block; margin-bottom: 4px;">🔗 একাধিক ভিডিওর লিংক (একটি মাত্র বাটনে থাকবে):</b>
+                <p style="font-size: 10px; color: #b0bec5; margin: 0 0 4px 0;">প্রতি লাইনে একটি করে লিংক দিন। আনলক করার পর সবগুলো লিংক একসঙ্গে দেখা যাবে!</p>
                 <textarea id="bulkLinksInput" class="admin-textarea" placeholder="https://t.me/YourBot?start=v1&#10;https://t.me/YourBot?start=v2&#10;https://t.me/YourBot?start=v3"></textarea>
                 
                 <select id="bulkCategory" class="admin-select" style="margin-bottom: 6px;">
@@ -574,7 +573,6 @@
 
             <b style="color: #ff5252; display: block; margin-bottom: 6px; text-align: left; font-size: 12px;">🗑️ ম্যানেজ / ডিলিট করুন:</b>
             <div id="adminVideoManageList" style="text-align: left; max-height: 120px; overflow-y: auto;">
-                <!-- ডাইনামিক ডিলিট লিস্ট -->
             </div>
         </div>
     </div>
@@ -668,7 +666,6 @@
         }
         function closeAdminModal() { document.getElementById('adminPanelModal').style.display = 'none'; }
 
-        // একটি একক কার্ডের ভেতরে একাধিক লিংক সংরক্ষণ করার ফাংশন
         function addSingleCardWithMultipleLinks() {
             let imgUrl = document.getElementById('adminImageInput').value.trim();
             let title = document.getElementById('adminTitleInput').value.trim();
@@ -703,7 +700,7 @@
                 id: newId, 
                 img: finalImg, 
                 title: finalTitle, 
-                links: linksArray, // এখানে সব লিংক একটি অ্যারে হিসেবে জমা হবে
+                links: linksArray, 
                 category: category, 
                 likes: Math.floor(Math.random() * 50) + 10, 
                 views: Math.floor(Math.random() * 200) + 100 
@@ -777,14 +774,8 @@
                 let favKey = 'fav_' + currentUserId + '_' + v.id;
                 let isFav = localStorage.getItem(favKey) === 'true';
 
-                // একাধিক লিংক থাকলে সেগুলোকে একটা একটা করে বাটনে রূপান্তর করা
-                let linksHtml = '';
-                let linksList = v.links ? v.links : [v.link]; // পুরনো একক লিংক ব্যাকআপসহ হ্যান্ডেল করার জন্য
-                
-                linksList.forEach((lnk, idx) => {
-                    let btnLabel = linksList.length > 1 ? `▶ WATCH / DOWNLOAD (Part ${idx + 1})` : `▶ WATCH / DOWNLOAD NOW`;
-                    linksHtml += `<button class="unlock-btn" onclick="openAdLockModal('${lnk}', '${v.id}')">${btnLabel}</button>`;
-                });
+                let linksList = v.links ? v.links : [v.link];
+                let encodedLinks = encodeURIComponent(JSON.stringify(linksList));
 
                 cardDiv.innerHTML = `
                     <div class="card-img-container">
@@ -801,7 +792,7 @@
                         </div>
                         <button class="comment-section-btn" onclick="openCommentModal('${v.id}')">💬 মতামত / কমেন্ট দেখুন</button>
                         <div class="multi-link-container">
-                            ${linksHtml}
+                            <button class="unlock-btn" onclick="openAdLockModal('${encodedLinks}', '${v.id}')">▶ WATCH / DOWNLOAD NOW</button>
                         </div>
                     </div>
                 `;
@@ -933,12 +924,12 @@
 
         let adsWatched = 0;
         const totalAdsRequired = 3;
-        let selectedVideoUrl = "";
+        let selectedLinksJson = "";
         let selectedVideoId = "";
         const adsterraSmartlink = "https://www.profitableratecpmnetwork.com/r9475it0w?key=92dacc0ef3f17aef645eed9f0077289d";
 
-        function openAdLockModal(url, id) {
-            selectedVideoUrl = url;
+        function openAdLockModal(encodedLinks, id) {
+            selectedLinksJson = encodedLinks;
             selectedVideoId = id;
             adsWatched = 0;
             document.getElementById('modalMainTitle').innerText = "🔒 Watch 3 ads to unlock";
@@ -975,12 +966,21 @@
                 document.getElementById('unlockedCount').innerText = unlockedCount + "টি";
                 updateRankSystem();
 
+                let linksArray = JSON.parse(decodeURIComponent(selectedLinksJson));
+                let unlockedLinksHtml = '';
+                linksArray.forEach((lnk, idx) => {
+                    let label = linksArray.length > 1 ? `▶ WATCH / DOWNLOAD (Part ${idx + 1})` : `▶ WATCH / DOWNLOAD NOW`;
+                    unlockedLinksHtml += `<a href="${lnk}" target="_blank" style="display: block; background: #4caf50; color: white; text-decoration: none; padding: 10px; border-radius: 8px; font-weight: bold; font-size: 13px; margin-bottom: 6px;">${label}</a>`;
+                });
+
                 showToast("✅ ভিডিও আনলক সফল হয়েছে!");
                 document.querySelector('#adModal .modal-content').innerHTML = `
                     <span class="close-modal" onclick="closeModal()">&#10005;</span>
                     <h3 style="color: #4caf50; margin-top: 10px; font-size: 18px;">✅ Unlocked Successfully!</h3>
-                    <p style="font-size: 13px; margin: 10px 0;">আপনার ভিডিওর লিংক নিচে দেওয়া হলো:</p>
-                    <a href="${selectedVideoUrl}" target="_blank" onclick="closeModal()" style="display: block; background: #4caf50; color: white; text-decoration: none; padding: 12px; border-radius: 10px; font-weight: bold; font-size: 14px;">▶ WATCH / DOWNLOAD NOW</a>
+                    <p style="font-size: 13px; margin: 10px 0;">আপনার ভিডিওর লিংকগুলো নিচে দেওয়া হলো:</p>
+                    <div style="max-height: 200px; overflow-y: auto;">
+                        ${unlockedLinksHtml}
+                    </div>
                 `;
             }
         }
