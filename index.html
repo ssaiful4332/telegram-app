@@ -278,7 +278,6 @@
             display: none;
         }
 
-        /* টোস্ট নোটিফিকেশন */
         #toast {
             visibility: hidden;
             min-width: 200px;
@@ -302,7 +301,6 @@
         @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
         @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
 
-        /* মডাল স্টাইল */
         .modal {
             display: none;
             position: fixed;
@@ -463,7 +461,6 @@
 
     <div id="no-result">কোনো কনটেন্ট পাওয়া যায়নি! ❌</div>
 
-    <!-- কার্ড কন্টেইনার -->
     <div id="card-container">
     </div>
 
@@ -774,7 +771,8 @@
                 let favKey = 'fav_' + currentUserId + '_' + v.id;
                 let isFav = localStorage.getItem(favKey) === 'true';
 
-                let linksList = v.links ? v.links : [v.link];
+                // এখানে লিংকগুলো নিশ্চিত করা হচ্ছে যে এটি অ্যারে আকারে সেভ হয়েছে
+                let linksList = Array.isArray(v.links) ? v.links : (v.link ? [v.link] : []);
                 let encodedLinks = encodeURIComponent(JSON.stringify(linksList));
 
                 cardDiv.innerHTML = `
@@ -968,7 +966,6 @@
 
                 showToast("✅ সব ভিডিও আনলক হয়ে গেছে!");
                 
-                // ৩টি অ্যাড দেখা শেষ হলে এখন সুন্দর একটি 'Open All Links' বাটনসহ মডাল দেখাবে
                 document.querySelector('#adModal .modal-content').innerHTML = `
                     <span class="close-modal" onclick="closeModal()">&#10005;</span>
                     <h3 style="color: #4caf50; margin-top: 10px; font-size: 18px;">✅ All Videos Unlocked!</h3>
@@ -979,15 +976,23 @@
             }
         }
 
-        // ইউজার যখন বাটনে ক্লিক করবে, তখন এক ক্লিকেই সব লিংক ওপেন হবে
+        // একসাথে সব লিংক সঠিকভাবে ওপেন করার লজিক (Delay সহ যাতে ব্রাউজার পপ-আপ ব্লক না করে)
         function openAllUnlockedLinksNow() {
-            let linksArray = JSON.parse(decodeURIComponent(selectedLinksJson));
-            linksArray.forEach((link, idx) => {
-                setTimeout(() => {
-                    window.open(link, '_blank');
-                }, idx * 400);
-            });
-            showToast("🚀 সব লিংক ওপেন করা হয়েছে!");
+            try {
+                let linksArray = JSON.parse(decodeURIComponent(selectedLinksJson));
+                if (Array.isArray(linksArray) && linksArray.length > 0) {
+                    linksArray.forEach((link, idx) => {
+                        setTimeout(() => {
+                            window.open(link, '_blank');
+                        }, idx * 600); // প্রতিটি লিংকের মাঝে সামান্য বিরতি রাখা হয়েছে
+                    });
+                    showToast(`🚀 মোট ${linksArray.length}টি লিংক ওপেন করা হয়েছে!`);
+                } else {
+                    showToast("⚠️ কোনো লিংক পাওয়া যায়নি!");
+                }
+            } catch(e) {
+                showToast("❌ লিংক ওপেন করতে সমস্যা হয়েছে!");
+            }
             closeModal();
         }
 
