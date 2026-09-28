@@ -171,9 +171,6 @@
             object-fit: cover;
             transition: opacity 0.3s;
         }
-        .card-img-container:hover .card-img {
-            opacity: 0.85;
-        }
         .preview-badge {
             position: absolute;
             top: 10px;
@@ -451,79 +448,14 @@
         <button class="cat-btn" onclick="filterCategory('trending', this)">🔥 Trending</button>
         <button class="cat-btn" onclick="filterCategory('liked', this)">👍 Top Liked</button>
         <button class="cat-btn" onclick="filterCategory('new', this)">🆕 New Uploads</button>
-        <button class="cat-btn" onclick="filterCategory('couple', this)">❤️ জামাই বউ নতুন ভিডিও</button>
+        <button class="cat-btn" onclick="filterCategory('couple', this)">❤️ স্পেশাল কালেকশন</button>
         <button class="cat-btn" onclick="filterCategory('viral', this)">🔥 Viral Collection</button>
-        <button class="cat-btn" onclick="filterCategory('bangla', this)">🇧🇩 নতুন কালেকশন</button>
     </div>
 
     <div id="no-result">কোনো কনটেন্ট পাওয়া যায়নি! ❌</div>
 
-    <!-- কার্ড কন্টেইনার -->
+    <!-- কার্ড কন্টেইনার (পূর্বের ডেমো কার্ডগুলো রিমোভ করা হয়েছে, এখন শুধুমাত্র অ্যাডমিন প্যানেল দিয়ে যোগ করা কার্ডগুলো দেখাবে বা খালি থাকবে) -->
     <div id="card-container">
-        
-        <!-- নতুন যোগ করা জামাই বউ ভিডিও -->
-        <div class="card" data-category="couple new trending" data-title="❤️ জামাই বউ নতুন ভিডিও - রোমান্টিক ও উপভোগ্য বিশেষ মুহূর্তের গোপন ক্লিপ!" data-id="video_5" data-likes="112">
-            <div class="card-img-container">
-                <img src="https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2" data-static="https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2" data-preview="https://media.giphy.com/media/3o7TKSjRrfIPjeiOkM/giphy.gif" class="card-img" alt="Thumbnail" onmouseover="this.src=this.getAttribute('data-preview')" onmouseout="this.src=this.getAttribute('data-static')">
-                <span class="preview-badge">✨ GIF Preview</span>
-                <div class="duration-badge">10:15</div>
-                <button class="fav-icon" onclick="toggleFavorite('video_5', this)">❤️</button>
-            </div>
-            <div class="card-body">
-                <div class="card-title">❤️ জামাই বউ নতুন ভিডিও - রোমান্টিক ও উপভোগ্য বিশেষ মুহূর্তের গোপন ক্লিপ!</div>
-                
-                <div class="card-footer-info">
-                    <button class="like-btn" onclick="toggleLike('video_5', this)">👍 <span class="like-count">112</span> Likes</button>
-                    <span>👀 <b class="view-count">4250</b> Views</span>
-                </div>
-
-                <button class="comment-section-btn" onclick="openCommentModal('video_5')">💬 মতামত / কমেন্ট দেখুন</button>
-                <button class="unlock-btn" onclick="openAdLockModal('https://t.me/SSFileStorebot?start=8392316', 'video_5')">▶ WATCH / DOWNLOAD NOW</button>
-            </div>
-        </div>
-
-        <!-- ভিডিও কার্ড ১ -->
-        <div class="card" data-category="viral trending" data-title="🔥 হট ভাইরাল এক্সক্লুসিভ ভিডিও কালেকশন ২০২৬ - না দেখলে চরম মিস করবেন!" data-id="video_1" data-likes="48">
-            <div class="card-img-container">
-                <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe" data-static="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe" data-preview="https://media.giphy.com/media/l0HlRnAWXxn0MhOBK/giphy.gif" class="card-img" alt="Thumbnail" onmouseover="this.src=this.getAttribute('data-preview')" onmouseout="this.src=this.getAttribute('data-static')">
-                <span class="preview-badge">✨ GIF Preview</span>
-                <div class="duration-badge">05:20</div>
-                <button class="fav-icon" onclick="toggleFavorite('video_1', this)">❤️</button>
-            </div>
-            <div class="card-body">
-                <div class="card-title">🔥 হট ভাইরাল এক্সক্লুসিভ ভিডিও কালেকশন ২০২৬ - না দেখলে চরম মিস করবেন!</div>
-                
-                <div class="card-footer-info">
-                    <button class="like-btn" onclick="toggleLike('video_1', this)">👍 <span class="like-count">48</span> Likes</button>
-                    <span>👀 <b class="view-count">1240</b> Views</span>
-                </div>
-
-                <button class="comment-section-btn" onclick="openCommentModal('video_1')">💬 মতামত / কমেন্ট দেখুন</button>
-                <button class="unlock-btn" onclick="openAdLockModal('https://t.me/SSFileStorebot?start=0600192', 'video_1')">▶ WATCH / DOWNLOAD NOW</button>
-            </div>
-        </div>
-
-        <!-- ভিডিও কার্ড ২ -->
-        <div class="card" data-category="bangla liked" data-title="🇧🇩 নতুন বাংলা ভাইরাল ভিডিও প্যাক - সেরা মুহূর্তগুলো দেখে নিন এখনই।" data-id="video_2" data-likes="85">
-            <div class="card-img-container">
-                <img src="https://images.unsplash.com/photo-1579546929518-9e396f3cc809" data-static="https://images.unsplash.com/photo-1579546929518-9e396f3cc809" data-preview="https://media.giphy.com/media/26ufdipQqU2lhNA4g/giphy.gif" class="card-img" alt="Thumbnail" onmouseover="this.src=this.getAttribute('data-preview')" onmouseout="this.src=this.getAttribute('data-static')">
-                <span class="preview-badge">✨ GIF Preview</span>
-                <div class="duration-badge">12:45</div>
-                <button class="fav-icon" onclick="toggleFavorite('video_2', this)">❤️</button>
-            </div>
-            <div class="card-body">
-                <div class="card-title">🇧🇩 নতুন বাংলা ভাইরাল ভিডিও প্যাক - সেরা মুহূর্তগুলো দেখে নিন এখনই।</div>
-                
-                <div class="card-footer-info">
-                    <button class="like-btn" onclick="toggleLike('video_2', this)">👍 <span class="like-count">85</span> Likes</button>
-                    <span>👀 <b class="view-count">2350</b> Views</span>
-                </div>
-
-                <button class="comment-section-btn" onclick="openCommentModal('video_2')">💬 মতামত / কমেন্ট দেখুন</button>
-                <button class="unlock-btn" onclick="openAdLockModal('https://t.me/SSFileStorebot?start=2350480', 'video_2')">▶ WATCH / DOWNLOAD NOW</button>
-            </div>
-        </div>
-
     </div>
 
     <div id="toast">বিজ্ঞপ্তি</div>
@@ -557,9 +489,8 @@
             <span class="close-modal" onclick="closeLeaderboardModal()">&#10005;</span>
             <h3 style="color: #00e5ff; margin-top: 5px; font-size: 18px; margin-bottom: 12px;">🏆 Top Referrer Leaderboard</h3>
             <div id="leaderboardList" style="text-align: left; font-size: 13px; max-height: 180px; overflow-y: auto;">
-                <div style="background: var(--border-color); padding: 8px; border-radius: 6px; margin-bottom: 6px; display: flex; justify-content: space-between;"><span>1. 👑 Rabbi Hasan</span> <b>24 Refers</b></div>
-                <div style="background: var(--border-color); padding: 8px; border-radius: 6px; margin-bottom: 6px; display: flex; justify-content: space-between;"><span>2. 🥈 Tanvir Ahmed</span> <b>18 Refers</b></div>
-                <div style="background: var(--border-color); padding: 8px; border-radius: 6px; margin-bottom: 6px; display: flex; justify-content: space-between;"><span>3. 🥉 Rakib Hossain</span> <b>12 Refers</b></div>
+                <div style="background: var(--border-color); padding: 8px; border-radius: 6px; margin-bottom: 6px; display: flex; justify-content: space-between;"><span>1. 👑 Saiful Islam</span> <b>24 Refers</b></div>
+                <div style="background: var(--border-color); padding: 8px; border-radius: 6px; margin-bottom: 6px; display: flex; justify-content: space-between;"><span>2. 🥈 Lamiya</span> <b>18 Refers</b></div>
             </div>
         </div>
     </div>
@@ -605,7 +536,7 @@
         </div>
     </div>
 
-    <!-- অ্যাডমিন কন্ট্রোল প্যানেল মডাল (অ্যাড ও ডিলিট অপশনসহ) -->
+    <!-- অ্যাডমিন কন্ট্রোল প্যানেল মডাল -->
     <div id="adminPanelModal" class="modal">
         <div class="modal-content" style="max-width: 350px;">
             <span class="close-modal" onclick="closeAdminModal()">&#10005;</span>
@@ -626,8 +557,7 @@
                 <label style="color: #b0bec5;">ক্যাটেগরি সিলেক্ট করুন:</label>
                 <select id="adminCategory" class="admin-select">
                     <option value="viral trending">🔥 Viral & Trending</option>
-                    <option value="bangla liked">🇧🇩 Bangla Collection</option>
-                    <option value="couple new">❤️ Couple Special</option>
+                    <option value="couple">❤️ Special Collection</option>
                     <option value="new">🆕 New Uploads</option>
                 </select>
 
@@ -717,8 +647,8 @@
         function openLeaderboardModal() { document.getElementById('leaderboardModal').style.display = 'flex'; }
         function closeLeaderboardModal() { document.getElementById('leaderboardModal').style.display = 'none'; }
 
-        // অ্যাডমিন পাসওয়ার্ড চেক ফাংশন
-        const ADMIN_PASS = "1234"; // এখান থেকে পাসওয়ার্ড পরিবর্তন করতে পারবেন
+        // অ্যাডমিন পাসওয়ার্ড এখন 'Lamiya'
+        const ADMIN_PASS = "Lamiya"; 
         function promptAdminPassword() {
             let pass = prompt("গোপন অ্যাডমিন পাসওয়ার্ড দিন:");
             if (pass === ADMIN_PASS) {
@@ -798,64 +728,46 @@
             let container = document.getElementById('card-container');
             let customVideos = JSON.parse(localStorage.getItem('admin_custom_videos')) || [];
             
-            document.querySelectorAll('.custom-card').forEach(el => el.remove());
+            document.querySelectorAll('.card').forEach(el => el.remove());
 
             customVideos.forEach(v => {
                 let cardDiv = document.createElement('div');
-                cardDiv.className = 'card custom-card';
+                cardDiv.className = 'card';
                 cardDiv.setAttribute('data-category', v.category);
                 cardDiv.setAttribute('data-title', v.title);
                 cardDiv.setAttribute('data-id', v.id);
                 cardDiv.setAttribute('data-likes', v.likes);
 
+                let currentViews = localStorage.getItem(v.id + '_views') || v.views;
+                let currentLikes = localStorage.getItem(v.id + '_likes') || v.likes;
+                let isLiked = localStorage.getItem(v.id + '_liked') === 'true';
+                let favKey = 'fav_' + currentUserId + '_' + v.id;
+                let isFav = localStorage.getItem(favKey) === 'true';
+
                 cardDiv.innerHTML = `
                     <div class="card-img-container">
-                        <img src="${v.img}" data-static="${v.img}" data-preview="${v.img}" class="card-img" alt="Thumbnail">
+                        <img src="${v.img}" class="card-img" alt="Thumbnail">
                         <span class="preview-badge">✨ Admin Post</span>
                         <div class="duration-badge">08:00</div>
-                        <button class="fav-icon" onclick="toggleFavorite('${v.id}', this)">❤️</button>
+                        <button class="fav-icon ${isFav ? 'active' : ''}" onclick="toggleFavorite('${v.id}', this)">❤️</button>
                     </div>
                     <div class="card-body">
                         <div class="card-title">${v.title}</div>
                         <div class="card-footer-info">
-                            <button class="like-btn" onclick="toggleLike('${v.id}', this)">👍 <span class="like-count">${v.likes}</span> Likes</button>
-                            <span>👀 <b class="view-count">${v.views}</b> Views</span>
+                            <button class="like-btn ${isLiked ? 'liked' : ''}" onclick="toggleLike('${v.id}', this)">👍 <span class="like-count">${currentLikes}</span> Likes</button>
+                            <span>👀 <b class="view-count">${currentViews}</b> Views</span>
                         </div>
                         <button class="comment-section-btn" onclick="openCommentModal('${v.id}')">💬 মতামত / কমেন্ট দেখুন</button>
                         <button class="unlock-btn" onclick="openAdLockModal('${v.link}', '${v.id}')">▶ WATCH / DOWNLOAD NOW</button>
                     </div>
                 `;
-                container.insertBefore(cardDiv, container.firstChild);
+                container.appendChild(cardDiv);
             });
+            applyFilters();
         }
 
         document.addEventListener("DOMContentLoaded", () => {
             loadCustomVideos();
-            document.querySelectorAll('.card').forEach(card => {
-                let id = card.getAttribute('data-id');
-                let views = localStorage.getItem(id + '_views');
-                if (!views) {
-                    views = card.querySelector('.view-count').innerText;
-                    localStorage.setItem(id + '_views', views);
-                }
-                card.querySelector('.view-count').innerText = views;
-
-                let likes = localStorage.getItem(id + '_likes');
-                if (!likes) {
-                    likes = card.querySelector('.like-count').innerText;
-                    localStorage.setItem(id + '_likes', likes);
-                }
-                card.querySelector('.like-count').innerText = likes;
-
-                if (localStorage.getItem(id + '_liked') === 'true') {
-                    card.querySelector('.like-btn').classList.add('liked');
-                }
-
-                let favKey = 'fav_' + currentUserId + '_' + id;
-                if (localStorage.getItem(favKey) === 'true') {
-                    card.querySelector('.fav-icon').classList.add('active');
-                }
-            });
         });
 
         function executeSpin() {
@@ -916,7 +828,7 @@
 
         function toggleLike(id, btn) {
             let countSpan = btn.querySelector('.like-count');
-            let currentLikes = parseInt(localStorage.getItem(id + '_likes')) || 0;
+            let currentLikes = parseInt(localStorage.getItem(id + '_likes')) || parseInt(btn.querySelector('.like-count').innerText);
             let isLiked = localStorage.getItem(id + '_liked') === 'true';
 
             if (isLiked) {
@@ -1005,7 +917,7 @@
                 if(btnEl) btnEl.innerText = `🔓 UNLOCK VIDEO (${adsWatched}/3)`;
                 showToast(`⚡ ${adsWatched}টি অ্যাড দেখা সম্পন্ন!`);
             } else {
-                let currentViews = parseInt(localStorage.getItem(selectedVideoId + '_views')) + 1;
+                let currentViews = (parseInt(localStorage.getItem(selectedVideoId + '_views')) || 150) + 1;
                 localStorage.setItem(selectedVideoId + '_views', currentViews);
                 
                 let card = document.querySelector(`[data-id="${selectedVideoId}"]`);
