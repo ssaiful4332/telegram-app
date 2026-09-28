@@ -313,12 +313,12 @@
             background-color: var(--card-bg);
             padding: 20px;
             border-radius: 14px;
-            width: 85%;
-            max-width: 330px;
+            width: 88%;
+            max-width: 350px;
             text-align: center;
             border: 1px solid var(--border-color);
             box-shadow: 0 6px 20px rgba(0,0,0,0.6);
-            max-height: 80vh;
+            max-height: 85vh;
             overflow-y: auto;
         }
         .close-modal {
@@ -330,7 +330,7 @@
         }
         .close-modal:hover { color: #fff; }
 
-        .comment-input, .admin-input, .admin-select {
+        .comment-input, .admin-input, .admin-select, .admin-textarea {
             width: 100%;
             padding: 9px;
             background: var(--border-color);
@@ -341,6 +341,10 @@
             margin-bottom: 10px;
             box-sizing: border-box;
             outline: none;
+        }
+        .admin-textarea {
+            resize: vertical;
+            height: 70px;
         }
         .comment-list {
             text-align: left;
@@ -539,33 +543,38 @@
     <div id="adminPanelModal" class="modal">
         <div class="modal-content" style="max-width: 350px;">
             <span class="close-modal" onclick="closeAdminModal()">&#10005;</span>
-            <h3 style="color: #e91e63; margin-top: 5px; font-size: 18px; margin-bottom: 10px;">🛠️ Admin Control Panel</h3>
-            <p style="font-size: 11px; color: #b0bec5; margin-bottom: 12px;">নতুন পোস্ট যোগ বা আগের পোস্ট ডিলিট করুন</p>
+            <h3 style="color: #e91e63; margin-top: 5px; font-size: 18px; margin-bottom: 8px;">🛠️ Admin Control Panel</h3>
             
-            <div style="text-align: left; font-size: 12px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; margin-bottom: 12px;">
-                <b style="color: #ffeb3b; display: block; margin-bottom: 8px;">➕ নতুন ভিডিও যোগ করুন:</b>
-                <label style="color: #b0bec5;">ছবির লিংক (Image URL):</label>
-                <input type="text" id="adminImgUrl" class="admin-input" placeholder="https://image-link.jpg">
-
-                <label style="color: #b0bec5;">ভিডিওর টাইটেল / নাম:</label>
-                <input type="text" id="adminTitle" class="admin-input" placeholder="ভিডিওর শিরোনাম এখানে লিখুন...">
-
-                <label style="color: #b0bec5;">টেলিগ্রাম বট বা ভিডিও লিংক:</label>
-                <input type="text" id="adminLink" class="admin-input" placeholder="https://t.me/YourBot?start=...">
-
-                <label style="color: #b0bec5;">ক্যাটেগরি সিলেক্ট করুন:</label>
+            <!-- সিঙ্গেল অ্যাড সেকশন -->
+            <div style="text-align: left; font-size: 12px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom: 10px;">
+                <b style="color: #ffeb3b; display: block; margin-bottom: 6px;">➕ একক ভিডিও যোগ করুন:</b>
+                <input type="text" id="adminImgUrl" class="admin-input" placeholder="ছবির লিংক (Image URL)">
+                <input type="text" id="adminTitle" class="admin-input" placeholder="ভিডিওর শিরোনাম">
+                <input type="text" id="adminLink" class="admin-input" placeholder="ভিডিওর টেলিগ্রাম লিংক">
                 <select id="adminCategory" class="admin-select">
                     <option value="viral trending">🔥 Viral & Trending</option>
                     <option value="couple">❤️ Special Collection</option>
                     <option value="new">🆕 New Uploads</option>
                 </select>
-
-                <button onclick="addNewVideoByAdmin()" style="width: 100%; background: #e91e63; color: white; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 13px; margin-top: 5px;">➕ Add Video to App</button>
+                <button onclick="addNewVideoByAdmin()" style="width: 100%; background: #e91e63; color: white; border: none; padding: 8px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 12px;">➕ Add Single Video</button>
             </div>
 
-            <b style="color: #ff5252; display: block; margin-bottom: 8px; text-align: left;">🗑️ আপনার যোগ করা পোস্ট ম্যানেজ/ডিলিট করুন:</b>
-            <div id="adminVideoManageList" style="text-align: left; max-height: 150px; overflow-y: auto;">
-                <!-- ডাইনামিক ডিলিট লিস্ট এখানে দেখাবে -->
+            <!-- বাল্ক বা একসাথে অনেক লিংক যোগ করার সেকশন -->
+            <div style="text-align: left; font-size: 12px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom: 10px;">
+                <b style="color: #00e5ff; display: block; margin-bottom: 4px;">📥 একসাথে অনেকগুলো লিংক দিন (Bulk Add):</b>
+                <p style="font-size: 10px; color: #b0bec5; margin: 0 0 6px 0;">ফরম্যাট: টাইটেল, ছবির লিংক, ভিডিও লিংক (প্রতি লাইনে একটি)</p>
+                <textarea id="bulkDataInput" class="admin-textarea" placeholder="ভিডিও ১, https://img.jpg, https://t.me/...&#10;ভিডিও ২, https://img.jpg, https://t.me/..."></textarea>
+                <select id="bulkCategory" class="admin-select" style="margin-bottom: 6px;">
+                    <option value="viral trending">🔥 Viral & Trending</option>
+                    <option value="couple">❤️ Special Collection</option>
+                    <option value="new">🆕 New Uploads</option>
+                </select>
+                <button onclick="addBulkVideosByAdmin()" style="width: 100%; background: #00bcd4; color: white; border: none; padding: 8px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 12px;">🚀 Bulk Add All Videos</button>
+            </div>
+
+            <b style="color: #ff5252; display: block; margin-bottom: 6px; text-align: left; font-size: 12px;">🗑️ ম্যানেজ / ডিলিট করুন:</b>
+            <div id="adminVideoManageList" style="text-align: left; max-height: 120px; overflow-y: auto;">
+                <!-- ডাইনামিক ডিলিট লিস্ট -->
             </div>
         </div>
     </div>
@@ -660,7 +669,7 @@
         }
         function closeAdminModal() { document.getElementById('adminPanelModal').style.display = 'none'; }
 
-        // নতুন ভিডিও অ্যাড করার লজিক
+        // একক ভিডিও অ্যাড করার লজিক
         function addNewVideoByAdmin() {
             let imgUrl = document.getElementById('adminImgUrl').value.trim();
             let title = document.getElementById('adminTitle').value.trim();
@@ -685,6 +694,47 @@
             closeAdminModal();
             loadCustomVideos();
             showToast("✅ সফলভাবে নতুন ভিডিও যোগ করা হয়েছে!");
+        }
+
+        // একসাথে অনেকগুলো লিংক অ্যাড করার লজিক (Bulk Add)
+        function addBulkVideosByAdmin() {
+            let rawData = document.getElementById('bulkDataInput').value.trim();
+            let category = document.getElementById('bulkCategory').value;
+
+            if (!rawData) {
+                showToast("⚠️ দয়া করে বক্সে লিংকগুলো পেস্ট করুন!");
+                return;
+            }
+
+            let lines = rawData.split('\n');
+            let customVideos = JSON.parse(localStorage.getItem('admin_custom_videos')) || [];
+            let addedCount = 0;
+
+            lines.forEach((line, index) => {
+                let parts = line.split(',');
+                if (parts.length >= 3) {
+                    let title = parts[0].trim();
+                    let imgUrl = parts[1].trim();
+                    let link = parts.slice(2).join(',').trim(); // যাতে লিংকের ভেতরে কমা থাকলেও সমস্যা না হয়
+
+                    if (title && imgUrl && link) {
+                        let newId = 'custom_' + Date.now() + '_' + index;
+                        let newVidObj = { id: newId, img: imgUrl, title: title, link: link, category: category, likes: 10, views: 150 };
+                        customVideos.unshift(newVidObj);
+                        addedCount++;
+                    }
+                }
+            });
+
+            if (addedCount > 0) {
+                localStorage.setItem('admin_custom_videos', JSON.stringify(customVideos));
+                document.getElementById('bulkDataInput').value = "";
+                closeAdminModal();
+                loadCustomVideos();
+                showToast(`✅ সফলভাবে ${addedCount}টি ভিডিও একসাথে যোগ করা হয়েছে!`);
+            } else {
+                showToast("❌ সঠিক ফরম্যাটে লিংক দিন (টাইটেল, ছবির লিংক, ভিডিও লিংক)");
+            }
         }
 
         // অ্যাডমিন প্যানেলে ডিলিট করার লিস্ট দেখানোর ফাংশন
@@ -737,7 +787,7 @@
             customVideos.forEach(v => {
                 let cardDiv = document.createElement('div');
                 cardDiv.className = 'card';
-                cardDiv.setAttribute('data-category', v.category + " liked"); // টপ লাইক ক্যাটাগরির জন্য সাপোর্টেড
+                cardDiv.setAttribute('data-category', v.category + " liked");
                 cardDiv.setAttribute('data-title', v.title);
                 cardDiv.setAttribute('data-id', v.id);
 
