@@ -73,7 +73,12 @@
             align-items: center;
             font-weight: bold;
         }
-        .coin-bar {
+        .dashboard-bar {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        .coin-bar, .refer-bar {
             background: var(--card-bg);
             border: 1px solid var(--border-color);
             padding: 8px 12px;
@@ -81,18 +86,20 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 12px;
-            font-size: 13px;
+            font-size: 12px;
+            flex: 1;
         }
-        .coin-bar button {
+        .coin-bar button, .refer-bar button {
             background: #ff9800;
             color: white;
             border: none;
-            padding: 5px 10px;
+            padding: 5px 8px;
             border-radius: 6px;
             cursor: pointer;
             font-weight: bold;
+            font-size: 11px;
         }
+        .refer-bar button { background: #00bcd4; }
         .search-box {
             margin-bottom: 12px;
         }
@@ -151,6 +158,21 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
+            transition: opacity 0.3s;
+        }
+        .card-img-container:hover .card-img {
+            opacity: 0.85;
+        }
+        .preview-badge {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(156, 39, 176, 0.85);
+            color: white;
+            padding: 3px 8px;
+            font-size: 11px;
+            border-radius: 6px;
+            font-weight: bold;
         }
         .duration-badge {
             position: absolute;
@@ -361,12 +383,18 @@
     </div>
 
     <div class="announcement-banner">
-        <span>🔥 নতুন আপডেট! প্রতিদিন ভিজিট করে কয়েন আর্ন করুন।</span>
+        <span>🔥 নতুন আপডেট! রেফার করুন এবং চ্যানেল জয়েন করে এক্সক্লুসিভ সুবিধা নিন।</span>
     </div>
 
-    <div class="coin-bar">
-        <span>🪙 আপনার কয়েন: <b id="userCoins" style="color: #ffeb3b;">0</b></span>
-        <button onclick="claimDailyReward()">🎁 Claim Daily</button>
+    <div class="dashboard-bar">
+        <div class="coin-bar">
+            <span>🪙 কয়েন: <b id="userCoins" style="color: #ffeb3b;">0</b></span>
+            <button onclick="claimDailyReward()">🎁 Daily</button>
+        </div>
+        <div class="refer-bar">
+            <span>👥 রেফার: <b id="referCount" style="color: #00e5ff;">0</b></span>
+            <button onclick="shareReferralLink()">🔗 Invite</button>
+        </div>
     </div>
 
     <div class="search-box">
@@ -376,6 +404,9 @@
     <div class="categories">
         <button class="cat-btn active" onclick="filterCategory('all', this)">📹 All Videos</button>
         <button class="cat-btn" onclick="filterCategory('favorites', this)">⭐ Favorites</button>
+        <button class="cat-btn" onclick="filterCategory('trending', this)">🔥 Trending</button>
+        <button class="cat-btn" onclick="filterCategory('liked', this)">👍 Top Liked</button>
+        <button class="cat-btn" onclick="filterCategory('new', this)">🆕 New Uploads</button>
         <button class="cat-btn" onclick="filterCategory('couple', this)">❤️ জামাই বউ নতুন ভিডিও</button>
         <button class="cat-btn" onclick="filterCategory('viral', this)">🔥 Viral Collection</button>
         <button class="cat-btn" onclick="filterCategory('bangla', this)">🇧🇩 নতুন কালেকশন</button>
@@ -385,9 +416,10 @@
 
     <div id="card-container">
         
-        <div class="card" data-category="couple" data-title="❤️ জামাই বউ নতুন ভিডিও - রোমান্টিক ও উপভোগ্য বিশেষ মুহূর্তের গোপন ক্লিপ!" data-id="video_5">
+        <div class="card" data-category="couple new trending" data-title="❤️ জামাই বউ নতুন ভিডিও - রোমান্টিক ও উপভোগ্য বিশেষ মুহূর্তের গোপন ক্লিপ!" data-id="video_5" data-likes="112">
             <div class="card-img-container">
-                <img src="https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2" class="card-img" alt="Thumbnail">
+                <img src="https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2" data-static="https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2" data-preview="https://media.giphy.com/media/3o7TKSjRrfIPjeiOkM/giphy.gif" class="card-img" alt="Thumbnail" onmouseover="this.src=this.getAttribute('data-preview')" onmouseout="this.src=this.getAttribute('data-static')">
+                <span class="preview-badge">✨ GIF Preview</span>
                 <div class="duration-badge">10:15</div>
                 <button class="fav-icon" onclick="toggleFavorite('video_5', this)">❤️</button>
             </div>
@@ -404,9 +436,10 @@
             </div>
         </div>
 
-        <div class="card" data-category="viral" data-title="🔥 হট ভাইরাল এক্সক্লুসিভ ভিডিও কালেকশন ২০২৬ - না দেখলে চরম মিস করবেন!" data-id="video_1">
+        <div class="card" data-category="viral trending" data-title="🔥 হট ভাইরাল এক্সক্লুসিভ ভিডিও কালেকশন ২০২৬ - না দেখলে চরম মিস করবেন!" data-id="video_1" data-likes="48">
             <div class="card-img-container">
-                <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe" class="card-img" alt="Thumbnail">
+                <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe" data-static="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe" data-preview="https://media.giphy.com/media/l0HlRnAWXxn0MhOBK/giphy.gif" class="card-img" alt="Thumbnail" onmouseover="this.src=this.getAttribute('data-preview')" onmouseout="this.src=this.getAttribute('data-static')">
+                <span class="preview-badge">✨ GIF Preview</span>
                 <div class="duration-badge">05:20</div>
                 <button class="fav-icon" onclick="toggleFavorite('video_1', this)">❤️</button>
             </div>
@@ -423,9 +456,10 @@
             </div>
         </div>
 
-        <div class="card" data-category="bangla" data-title="🇧🇩 নতুন বাংলা ভাইরাল ভিডিও প্যাক - সেরা মুহূর্তগুলো দেখে নিন এখনই।" data-id="video_2">
+        <div class="card" data-category="bangla liked" data-title="🇧🇩 নতুন বাংলা ভাইরাল ভিডিও প্যাক - সেরা মুহূর্তগুলো দেখে নিন এখনই।" data-id="video_2" data-likes="85">
             <div class="card-img-container">
-                <img src="https://images.unsplash.com/photo-1579546929518-9e396f3cc809" class="card-img" alt="Thumbnail">
+                <img src="https://images.unsplash.com/photo-1579546929518-9e396f3cc809" data-static="https://images.unsplash.com/photo-1579546929518-9e396f3cc809" data-preview="https://media.giphy.com/media/26ufdipQqU2lhNA4g/giphy.gif" class="card-img" alt="Thumbnail" onmouseover="this.src=this.getAttribute('data-preview')" onmouseout="this.src=this.getAttribute('data-static')">
+                <span class="preview-badge">✨ GIF Preview</span>
                 <div class="duration-badge">12:45</div>
                 <button class="fav-icon" onclick="toggleFavorite('video_2', this)">❤️</button>
             </div>
@@ -442,9 +476,10 @@
             </div>
         </div>
 
-        <div class="card" data-category="viral" data-title="💎 প্রিমিয়াম ফুল আনকাট ভাইরাল ভিডিও লিংক - সম্পূর্ণ নতুন ও ফ্রেশ কন্টেন্ট!" data-id="video_3">
+        <div class="card" data-category="viral" data-title="💎 প্রিমিয়াম ফুল আনকাট ভাইরাল ভিডিও লিংক - সম্পূর্ণ নতুন ও ফ্রেশ কন্টেন্ট!" data-id="video_3" data-likes="62">
             <div class="card-img-container">
-                <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2" class="card-img" alt="Thumbnail">
+                <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2" data-static="https://images.unsplash.com/photo-1544005313-94ddf0286df2" data-preview="https://media.giphy.com/media/xT5LMFZDsj0AKUDYTS/giphy.gif" class="card-img" alt="Thumbnail" onmouseover="this.src=this.getAttribute('data-preview')" onmouseout="this.src=this.getAttribute('data-static')">
+                <span class="preview-badge">✨ GIF Preview</span>
                 <div class="duration-badge">09:10</div>
                 <button class="fav-icon" onclick="toggleFavorite('video_3', this)">❤️</button>
             </div>
@@ -461,9 +496,10 @@
             </div>
         </div>
 
-        <div class="card" data-category="viral" data-title="🔥 স্পেশাল ট্রেন্ডিং ভিডিও স্পেশাল কালেকশন - দারুণ বিনোদন উপভোগ করুন!" data-id="video_4">
+        <div class="card" data-category="viral trending liked" data-title="🔥 স্পেশাল ট্রেন্ডিং ভিডিও স্পেশাল কালেকশন - দারুণ বিনোদন উপভোগ করুন!" data-id="video_4" data-likes="94">
             <div class="card-img-container">
-                <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb" class="card-img" alt="Thumbnail">
+                <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb" data-static="https://images.unsplash.com/photo-1534528741775-53994a69daeb" data-preview="https://media.giphy.com/media/3oEjI6SIIHBdRxXI40/giphy.gif" class="card-img" alt="Thumbnail" onmouseover="this.src=this.getAttribute('data-preview')" onmouseout="this.src=this.getAttribute('data-static')">
+                <span class="preview-badge">✨ GIF Preview</span>
                 <div class="duration-badge">15:30</div>
                 <button class="fav-icon" onclick="toggleFavorite('video_4', this)">❤️</button>
             </div>
@@ -487,9 +523,13 @@
     <div id="adModal" class="modal">
         <div class="modal-content">
             <span class="close-modal" onclick="closeModal()">&#10005;</span>
-            <h3 style="color: inherit; margin-top: 10px; font-size: 18px;">🔒 Watch 3 ads to unlock</h3>
-            <p id="adStatusText" style="font-size: 14px; margin: 12px 0;">Progress: <b style="color: #ffeb3b;">0/3</b></p>
-            <button id="watchAdBtn" onclick="watchNextAd()" style="width: 100%; background: var(--btn-color); color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer;">🔓 UNLOCK VIDEO</button>
+            <h3 style="color: inherit; margin-top: 10px; font-size: 18px;" id="modalMainTitle">🔒 Channel Join & Ads Verification</h3>
+            <div id="modalBodyContent">
+                <p style="font-size: 13px; margin: 10px 0; color: #b0bec5;">ভিডিও আনলক করতে প্রথমে আমাদের সাপোর্ট চ্যানেলে জয়েন করুন:</p>
+                <button onclick="verifyChannelJoin()" style="width: 100%; background: #0088cc; color: white; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-bottom: 12px;">📢 Join Channel Now</button>
+                <p id="adStatusText" style="font-size: 13px; margin: 8px 0; display:none;">অ্যাড প্রোগ্রেস: <b style="color: #ffeb3b;">0/3</b></p>
+                <button id="watchAdBtn" onclick="watchNextAd()" style="width: 100%; background: var(--btn-color); color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; display:none;">🔓 WATCH ADS (0/3)</button>
+            </div>
         </div>
     </div>
 
@@ -552,6 +592,29 @@
         let coins = parseInt(localStorage.getItem(userCoinsKey)) || 10;
         document.getElementById('userCoins').innerText = coins;
 
+        let referKey = 'refers_' + currentUserId;
+        let refers = parseInt(localStorage.getItem(referKey)) || 0;
+        document.getElementById('referCount').innerText = refers;
+
+        // চেক করা যাক ইউজার রেফার লিংক থেকে এসেছে কি না
+        try {
+            let startParam = tg.initDataUnsafe && tg.initDataUnsafe.start_param;
+            if (startParam && startParam.startsWith('ref_') && startParam !== 'ref_' + currentUserId) {
+                let refOwner = startParam.split('_')[1];
+                let claimedRefKey = 'claimed_ref_' + currentUserId;
+                if (!localStorage.getItem(claimedRefKey)) {
+                    localStorage.setItem(claimedRefKey, 'true');
+                    // মূল রেফার ওনারকে কয়েন বা রেফার কাউন্ট বাড়িয়ে দেওয়া (লোকাল স্টোরেজ সিমুলেশন)
+                    let ownerReferKey = 'refers_' + refOwner;
+                    let ownerCoinsKey = 'coins_' + refOwner;
+                    let currentRefers = parseInt(localStorage.getItem(ownerReferKey)) || 0;
+                    let currentOwnerCoins = parseInt(localStorage.getItem(ownerCoinsKey)) || 10;
+                    localStorage.setItem(ownerReferKey, currentRefers + 1);
+                    localStorage.setItem(ownerCoinsKey, currentOwnerCoins + 10);
+                }
+            }
+        } catch(e) {}
+
         function claimDailyReward() {
             let lastClaimKey = 'last_claim_' + currentUserId;
             let lastClaimDate = localStorage.getItem(lastClaimKey);
@@ -565,6 +628,19 @@
                 localStorage.setItem(lastClaimKey, today);
                 document.getElementById('userCoins').innerText = coins;
                 showToast("🎉 সফলভাবে ৫ কয়েন বোনাস পেলেন!");
+            }
+        }
+
+        function shareReferralLink() {
+            let botUsername = "SSFileStorebot"; // আপনার টেলিগ্রাম বট ইউজারনেম এখানে দিন
+            let refUrl = `https://t.me/${botUsername}?start=ref_${currentUserId}`;
+            let shareText = `🔥 ফ্রি আনলিমিটেড ভিডিও কালেকশন দেখতে এই অ্যাপটি ভিজিট করুন:\n${refUrl}`;
+            
+            if (navigator.share) {
+                navigator.share({ title: 'UNLIMITED VIDS', text: shareText, url: refUrl }).catch(() => {});
+            } else {
+                navigator.clipboard.writeText(refUrl);
+                showToast("✅ রেফারেল লিংক কপি করা হয়েছে!");
             }
         }
 
@@ -746,21 +822,46 @@
             selectedVideoUrl = url;
             selectedVideoId = id;
             adsWatched = 0;
-            resetModalContent();
+            
+            let joinedKey = 'channel_joined_' + currentUserId;
+            if (!localStorage.getItem(joinedKey)) {
+                // চ্যানেল জয়েন করতে হবে প্রথমে
+                document.getElementById('modalMainTitle').innerText = "🔒 Mandatory Channel Join";
+                document.getElementById('modalBodyContent').innerHTML = `
+                    <p style="font-size: 13px; margin: 10px 0; color: #b0bec5;">ভিডিও আনলক করতে প্রথমে আমাদের সাপোর্ট চ্যানেলে জয়েন করুন:</p>
+                    <button onclick="verifyChannelJoin()" style="width: 100%; background: #0088cc; color: white; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-bottom: 12px;">📢 Join Channel Now</button>
+                    <p id="adStatusText" style="font-size: 13px; margin: 8px 0; display:none;"></p>
+                    <button id="watchAdBtn" onclick="watchNextAd()" style="width: 100%; background: var(--btn-color); color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; display:none;"></button>
+                `;
+            } else {
+                // সরাসরি অ্যাড প্রোগ্রেসে চলে যাবে
+                setupAdProgressView();
+            }
             document.getElementById('adModal').style.display = 'flex';
+        }
+
+        function verifyChannelJoin() {
+            try {
+                tg.openTelegramLink('https://t.me/freeIinkshare56');
+            } catch(e) {
+                window.open('https://t.me/freeIinkshare56', '_blank');
+            }
+            let joinedKey = 'channel_joined_' + currentUserId;
+            localStorage.setItem(joinedKey, 'true');
+            showToast("✅ চ্যানেল জয়েন ভেরিফাই হয়েছে!");
+            setupAdProgressView();
+        }
+
+        function setupAdProgressView() {
+            document.getElementById('modalMainTitle').innerText = "🔒 Watch 3 ads to unlock";
+            document.getElementById('modalBodyContent').innerHTML = `
+                <p id="adStatusText" style="font-size: 14px; margin: 12px 0;">Progress: <b style="color: #ffeb3b;">0/3</b></p>
+                <button id="watchAdBtn" onclick="watchNextAd()" style="width: 100%; background: var(--btn-color); color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer;">🔓 UNLOCK VIDEO</button>
+            `;
         }
 
         function closeModal() {
             document.getElementById('adModal').style.display = 'none';
-        }
-
-        function resetModalContent() {
-            document.querySelector('#adModal .modal-content').innerHTML = `
-                <span class="close-modal" onclick="closeModal()">&#10005;</span>
-                <h3 style="color: inherit; margin-top: 10px; font-size: 18px;">🔒 Watch 3 ads to unlock</h3>
-                <p id="adStatusText" style="font-size: 14px; margin: 12px 0;">Progress: <b style="color: #ffeb3b;">0/3</b></p>
-                <button id="watchAdBtn" onclick="watchNextAd()" style="width: 100%; background: var(--btn-color); color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer;">🔓 UNLOCK VIDEO</button>
-            `;
         }
 
         function watchNextAd() {
@@ -812,7 +913,8 @@
             let hasVisible = false;
 
             cards.forEach(card => {
-                let category = card.getAttribute('data-category');
+                let categoryAttr = card.getAttribute('data-category');
+                let categories = categoryAttr ? categoryAttr.split(' ') : [];
                 let title = card.getAttribute('data-title').toLowerCase();
                 let cardId = card.getAttribute('data-id');
                 let favKey = 'fav_' + currentUserId + '_' + cardId;
@@ -824,7 +926,7 @@
                 } else if (currentCategory === 'favorites') {
                     matchesCategory = isFav;
                 } else {
-                    matchesCategory = (category === currentCategory);
+                    matchesCategory = categories.includes(currentCategory);
                 }
 
                 let matchesSearch = title.includes(query);
