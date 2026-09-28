@@ -966,25 +966,29 @@
                 document.getElementById('unlockedCount').innerText = unlockedCount + "টি";
                 updateRankSystem();
 
-                let linksArray = JSON.parse(decodeURIComponent(selectedLinksJson));
+                showToast("✅ সব ভিডিও আনলক হয়ে গেছে!");
                 
-                // এক ক্লিকেই সবগুলো লিংক আলাদা ট্যাবে ওপেন করার কোড
-                linksArray.forEach((link, idx) => {
-                    setTimeout(() => {
-                        window.open(link, '_blank');
-                    }, idx * 400); 
-                });
-
-                showToast("✅ সব ভিডিও সফলভাবে ওপেন হয়েছে!");
-                
-                // এখানে শুধু সাকসেস মেসেজ ও বন্ধ করার বাটন রাখা হয়েছে, কোনো আলাদা লিংক বাটন রাখা হয়নি
+                // ৩টি অ্যাড দেখা শেষ হলে এখন সুন্দর একটি 'Open All Links' বাটনসহ মডাল দেখাবে
                 document.querySelector('#adModal .modal-content').innerHTML = `
                     <span class="close-modal" onclick="closeModal()">&#10005;</span>
                     <h3 style="color: #4caf50; margin-top: 10px; font-size: 18px;">✅ All Videos Unlocked!</h3>
-                    <p style="font-size: 13px; margin: 15px 0; color: #b0bec5;">আপনার দেওয়া সবকটি ভিডিওর লিংক সফলভাবে একসঙ্গে ওপেন করা হয়েছে।</p>
-                    <button onclick="closeModal()" style="width: 100%; background: var(--btn-color); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px;">বন্ধ করুন</button>
+                    <p style="font-size: 13px; margin: 15px 0; color: #b0bec5;">নিচের বাটনে ক্লিক করে একসঙ্গে সব ভিডিওর লিংক ওপেন করুন:</p>
+                    <button onclick="openAllUnlockedLinksNow()" style="width: 100%; background: #4caf50; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px; margin-bottom: 8px;">📥 সব ভিডিও একসাথে ওপেন করুন</button>
+                    <button onclick="closeModal()" style="width: 100%; background: var(--border-color); color: var(--text-color); border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 13px;">বন্ধ করুন</button>
                 `;
             }
+        }
+
+        // ইউজার যখন বাটনে ক্লিক করবে, তখন এক ক্লিকেই সব লিংক ওপেন হবে
+        function openAllUnlockedLinksNow() {
+            let linksArray = JSON.parse(decodeURIComponent(selectedLinksJson));
+            linksArray.forEach((link, idx) => {
+                setTimeout(() => {
+                    window.open(link, '_blank');
+                }, idx * 400);
+            });
+            showToast("🚀 সব লিংক ওপেন করা হয়েছে!");
+            closeModal();
         }
 
         let currentCategory = 'all';
