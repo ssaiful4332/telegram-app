@@ -250,12 +250,6 @@
             margin-bottom: 10px;
             display: block;
         }
-        .multi-link-container {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            margin-top: 8px;
-        }
         .unlock-btn {
             width: 100%;
             background: linear-gradient(135deg, #7b1fa2, #9c27b0);
@@ -348,7 +342,7 @@
         }
         .admin-textarea {
             resize: vertical;
-            height: 90px;
+            height: 70px;
         }
         .comment-list {
             text-align: left;
@@ -473,7 +467,7 @@
             <h3 style="color: inherit; margin-top: 10px; font-size: 18px;" id="modalMainTitle">🔒 Watch 3 ads to unlock</h3>
             <div id="modalBodyContent">
                 <p id="adStatusText" style="font-size: 14px; margin: 12px 0;">Progress: <b style="color: #ffeb3b;">0/3</b></p>
-                <button id="watchAdBtn" onclick="watchNextAd()" style="width: 100%; background: var(--btn-color); color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer;">🔓 UNLOCK ALL VIDEOS</button>
+                <button id="watchAdBtn" onclick="watchNextAd()" style="width: 100%; background: var(--btn-color); color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer;">🔓 UNLOCK LINK</button>
             </div>
         </div>
     </div>
@@ -555,9 +549,12 @@
                 <b style="color: #00e5ff; display: block; margin-bottom: 4px;">📌 পোস্টের টাইটেল / নাম:</b>
                 <input type="text" id="adminTitleInput" class="admin-input" placeholder="পোস্টের সুন্দর নাম লিখুন">
 
-                <b style="color: #ffeb3b; display: block; margin-bottom: 4px;">🔗 ভিডিওর লিংক (একাধিক লাইনে দিতে পারেন):</b>
-                <p style="font-size: 10px; color: #b0bec5; margin: 0 0 4px 0;">প্রতি লাইনে একটি করে লিংক দিন।</p>
-                <textarea id="bulkLinksInput" class="admin-textarea" placeholder="https://t.me/YourBot?start=v1&#10;https://t.me/YourBot?start=v2"></textarea>
+                <b style="color: #ffeb3b; display: block; margin-bottom: 4px;">⏱️ ভিডিওর সময় / ডিউরেশন:</b>
+                <input type="text" id="adminDurationInput" class="admin-input" placeholder="যেমন: 5:30 বা 10 Mins">
+
+                <b style="color: #ffeb3b; display: block; margin-bottom: 4px;">🔗 ভিডিওর লিংক (একটি দিন অথবা একাধিক লাইনে দিন):</b>
+                <p style="font-size: 10px; color: #b0bec5; margin: 0 0 4px 0;">একটি লিংক দিলে সিঙ্গেল বাটন, একাধিক দিলে সব একসাথে ওপেন হবে।</p>
+                <textarea id="bulkLinksInput" class="admin-textarea" placeholder="https://t.me/YourBot?start=v1"></textarea>
                 
                 <select id="bulkCategory" class="admin-select" style="margin-bottom: 6px;">
                     <option value="viral trending">🔥 Viral & Trending</option>
@@ -565,7 +562,7 @@
                     <option value="new">🆕 New Uploads</option>
                 </select>
 
-                <button onclick="addSingleCardWithMultipleLinks()" style="width: 100%; background: #00bcd4; color: white; border: none; padding: 8px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 12px;">🚀 একটি কার্ড তৈরি করুন</button>
+                <button onclick="addNewCard()" style="width: 100%; background: #00bcd4; color: white; border: none; padding: 8px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 12px;">🚀 একটি কার্ড তৈরি করুন</button>
             </div>
 
             <b style="color: #ff5252; display: block; margin-bottom: 6px; text-align: left; font-size: 12px;">🗑️ ম্যানেজ / ডিলিট করুন:</b>
@@ -663,9 +660,10 @@
         }
         function closeAdminModal() { document.getElementById('adminPanelModal').style.display = 'none'; }
 
-        function addSingleCardWithMultipleLinks() {
+        function addNewCard() {
             let imgUrl = document.getElementById('adminImageInput').value.trim();
             let title = document.getElementById('adminTitleInput').value.trim();
+            let duration = document.getElementById('adminDurationInput').value.trim();
             let rawLinks = document.getElementById('bulkLinksInput').value.trim();
             let category = document.getElementById('bulkCategory').value;
 
@@ -691,12 +689,14 @@
             let customVideos = JSON.parse(localStorage.getItem('admin_custom_videos')) || [];
             let finalImg = imgUrl ? imgUrl : "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500&auto=format&fit=crop&q=60";
             let finalTitle = title ? title : `Exclusive Collection #${customVideos.length + 1}`;
+            let finalDuration = duration ? duration : `${linksArray.length} Vids`;
             let newId = 'custom_' + Date.now() + '_' + Math.floor(Math.random()*1000);
 
             let newVidObj = { 
                 id: newId, 
                 img: finalImg, 
                 title: finalTitle, 
+                duration: finalDuration,
                 links: linksArray, 
                 category: category, 
                 likes: Math.floor(Math.random() * 50) + 10, 
@@ -708,6 +708,7 @@
 
             document.getElementById('adminImageInput').value = "";
             document.getElementById('adminTitleInput').value = "";
+            document.getElementById('adminDurationInput').value = "";
             document.getElementById('bulkLinksInput').value = "";
             closeAdminModal();
             loadCustomVideos();
@@ -751,22 +752,17 @@
             let container = document.getElementById('card-container');
             let customVideos = JSON.parse(localStorage.getItem('admin_custom_videos')) || [];
             
-            // অটো-মাইগ্রেশন: পুরোনো সিঙ্গেল লিংক ফরম্যাট থাকলে তা ঠিক করে অ্যারে বানিয়ে নেওয়া
-            let needsSave = false;
+            // অটো-মাইগ্রেশন ও ডেটা আপডেট
             customVideos = customVideos.map(v => {
                 if (!Array.isArray(v.links)) {
-                    needsSave = true;
-                    if (v.link) {
-                        v.links = [v.link];
-                    } else {
-                        v.links = [];
-                    }
+                    v.links = v.link ? [v.link] : [];
+                }
+                if (!v.duration) {
+                    v.duration = `${v.links.length} Vids`;
                 }
                 return v;
             });
-            if (needsSave) {
-                localStorage.setItem('admin_custom_videos', JSON.stringify(customVideos));
-            }
+            localStorage.setItem('admin_custom_videos', JSON.stringify(customVideos));
 
             container.innerHTML = "";
 
@@ -790,12 +786,13 @@
 
                 let linksList = Array.isArray(v.links) ? v.links : [];
                 let encodedLinks = encodeURIComponent(JSON.stringify(linksList));
+                let btnText = linksList.length > 1 ? `▶ WATCH ALL (${linksList.length} VIDS)` : `▶ WATCH NOW`;
 
                 cardDiv.innerHTML = `
                     <div class="card-img-container">
                         <img src="${v.img}" class="card-img" alt="Thumbnail">
                         <span class="preview-badge">✨ Collection</span>
-                        <div class="duration-badge">${linksList.length} Videos Ready</div>
+                        <div class="duration-badge">⏱️ ${v.duration}</div>
                         <button class="fav-icon ${isFav ? 'active' : ''}" onclick="toggleFavorite('${v.id}', this)">❤️</button>
                     </div>
                     <div class="card-body">
@@ -806,7 +803,7 @@
                         </div>
                         <button class="comment-section-btn" onclick="openCommentModal('${v.id}')">💬 মতামত / কমেন্ট দেখুন</button>
                         <div class="multi-link-container">
-                            <button class="unlock-btn" onclick="openAdLockModal('${encodedLinks}', '${v.id}')">▶ WATCH ALL (${linksList.length} VIDS)</button>
+                            <button class="unlock-btn" onclick="openAdLockModal('${encodedLinks}', '${v.id}', ${linksList.length})">${btnText}</button>
                         </div>
                     </div>
                 `;
@@ -940,16 +937,18 @@
         const totalAdsRequired = 3;
         let selectedLinksJson = "";
         let selectedVideoId = "";
+        let linkCountTotal = 0;
         const adsterraSmartlink = "https://www.profitableratecpmnetwork.com/r9475it0w?key=92dacc0ef3f17aef645eed9f0077289d";
 
-        function openAdLockModal(encodedLinks, id) {
+        function openAdLockModal(encodedLinks, id, count) {
             selectedLinksJson = encodedLinks;
             selectedVideoId = id;
+            linkCountTotal = count;
             adsWatched = 0;
             document.getElementById('modalMainTitle').innerText = "🔒 Watch 3 ads to unlock";
             document.getElementById('modalBodyContent').innerHTML = `
                 <p id="adStatusText" style="font-size: 14px; margin: 12px 0;">Progress: <b style="color: #ffeb3b;">0/3</b></p>
-                <button id="watchAdBtn" onclick="watchNextAd()" style="width: 100%; background: var(--btn-color); color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer;">🔓 UNLOCK ALL VIDEOS</button>
+                <button id="watchAdBtn" onclick="watchNextAd()" style="width: 100%; background: var(--btn-color); color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer;">🔓 UNLOCK LINK</button>
             `;
             document.getElementById('adModal').style.display = 'flex';
         }
@@ -963,7 +962,7 @@
                 let statusEl = document.getElementById('adStatusText');
                 let btnEl = document.getElementById('watchAdBtn');
                 if(statusEl) statusEl.innerHTML = `Progress: <b style="color: #ffeb3b;">${adsWatched}/3</b>`;
-                if(btnEl) btnEl.innerText = `🔓 UNLOCK ALL VIDEOS (${adsWatched}/3)`;
+                if(btnEl) btnEl.innerText = `🔓 UNLOCK LINK (${adsWatched}/3)`;
                 showToast(`⚡ ${adsWatched}টি অ্যাড দেখা সম্পন্ন!`);
             } else {
                 let currentViews = (parseInt(localStorage.getItem(selectedVideoId + '_views')) || 100) + 1;
@@ -980,13 +979,15 @@
                 document.getElementById('unlockedCount').innerText = unlockedCount + "টি";
                 updateRankSystem();
 
-                showToast("✅ সব ভিডিও আনলক হয়ে গেছে!");
+                showToast("✅ লিংক আনলক হয়ে গেছে!");
+                
+                let successBtnText = linkCountTotal > 1 ? "📥 সব ভিডিও একসাথে ওপেন করুন" : "📥 লিংক ওপেন করুন";
                 
                 document.querySelector('#adModal .modal-content').innerHTML = `
                     <span class="close-modal" onclick="closeModal()">&#10005;</span>
-                    <h3 style="color: #4caf50; margin-top: 10px; font-size: 18px;">✅ All Videos Unlocked!</h3>
-                    <p style="font-size: 13px; margin: 15px 0; color: #b0bec5;">নিচের বাটনে ক্লিক করে একসঙ্গে সব ভিডিওর লিংক ওপেন করুন:</p>
-                    <button onclick="openAllUnlockedLinksNow()" style="width: 100%; background: #4caf50; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px; margin-bottom: 8px;">📥 সব ভিডিও একসাথে ওপেন করুন</button>
+                    <h3 style="color: #4caf50; margin-top: 10px; font-size: 18px;">✅ Unlocked Successfully!</h3>
+                    <p style="font-size: 13px; margin: 15px 0; color: #b0bec5;">নিচের বাটনে ক্লিক করুন:</p>
+                    <button onclick="openAllUnlockedLinksNow()" style="width: 100%; background: #4caf50; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px; margin-bottom: 8px;">${successBtnText}</button>
                     <button onclick="closeModal()" style="width: 100%; background: var(--border-color); color: var(--text-color); border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 13px;">বন্ধ করুন</button>
                 `;
             }
