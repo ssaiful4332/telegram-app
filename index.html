@@ -250,20 +250,26 @@
             margin-bottom: 10px;
             display: block;
         }
+        .multi-link-container {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-top: 8px;
+        }
         .unlock-btn {
             width: 100%;
             background: linear-gradient(135deg, #7b1fa2, #9c27b0);
             color: white;
             border: none;
-            padding: 12px;
-            border-radius: 10px;
-            font-size: 14px;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 13px;
             font-weight: bold;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
+            gap: 6px;
         }
         #no-result {
             text-align: center;
@@ -545,16 +551,16 @@
             <span class="close-modal" onclick="closeAdminModal()">&#10005;</span>
             <h3 style="color: #e91e63; margin-top: 5px; font-size: 18px; margin-bottom: 8px;">🛠️ Admin Control Panel</h3>
             
-            <!-- আলাদা করা ফর্ম: পিক, টাইটেল এবং অনেকগুলো লিংক একসঙ্গে -->
+            <!-- একটি কার্ডের ভেতরে একাধিক লিংক যুক্ত করার ফর্ম -->
             <div style="text-align: left; font-size: 12px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom: 10px;">
                 <b style="color: #00e5ff; display: block; margin-bottom: 4px;">🖼️ থাম্বনেইল ছবির লিংক:</b>
                 <input type="text" id="adminImageInput" class="admin-input" placeholder="https://example.com/image.jpg">
 
-                <b style="color: #00e5ff; display: block; margin-bottom: 4px;">📌 ভিডিওর টাইটেল / নাম:</b>
-                <input type="text" id="adminTitleInput" class="admin-input" placeholder="ভিডিওর সুন্দর নাম লিখুন">
+                <b style="color: #00e5ff; display: block; margin-bottom: 4px;">📌 পোস্টের টাইটেল / নাম:</b>
+                <input type="text" id="adminTitleInput" class="admin-input" placeholder="পোস্টের সুন্দর নাম লিখুন">
 
-                <b style="color: #ffeb3b; display: block; margin-bottom: 4px;">🔗 ভিডিওর লিংকগুলো (অনেকগুলো দিতে পারবেন):</b>
-                <p style="font-size: 10px; color: #b0bec5; margin: 0 0 4px 0;">প্রতি লাইনে একটি করে লিংক পেস্ট করুন। যতটি লিংক দেবেন, ঠিক ততগুলো কার্ড আলাদাভাবে তৈরি হবে!</p>
+                <b style="color: #ffeb3b; display: block; margin-bottom: 4px;">🔗 একাধিক ভিডিওর লিংক (একই কার্ডের ভেতরে থাকবে):</b>
+                <p style="font-size: 10px; color: #b0bec5; margin: 0 0 4px 0;">প্রতি লাইনে একটি করে লিংক দিন। সবগুলো লিংক একই কার্ডের নিচে সাজানো থাকবে!</p>
                 <textarea id="bulkLinksInput" class="admin-textarea" placeholder="https://t.me/YourBot?start=v1&#10;https://t.me/YourBot?start=v2&#10;https://t.me/YourBot?start=v3"></textarea>
                 
                 <select id="bulkCategory" class="admin-select" style="margin-bottom: 6px;">
@@ -563,7 +569,7 @@
                     <option value="new">🆕 New Uploads</option>
                 </select>
 
-                <button onclick="addMultipleLinksByAdmin()" style="width: 100%; background: #00bcd4; color: white; border: none; padding: 8px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 12px;">🚀 ভিডিওগুলো যোগ করুন</button>
+                <button onclick="addSingleCardWithMultipleLinks()" style="width: 100%; background: #00bcd4; color: white; border: none; padding: 8px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 12px;">🚀 একটি কার্ড তৈরি করুন</button>
             </div>
 
             <b style="color: #ff5252; display: block; margin-bottom: 6px; text-align: left; font-size: 12px;">🗑️ ম্যানেজ / ডিলিট করুন:</b>
@@ -662,57 +668,56 @@
         }
         function closeAdminModal() { document.getElementById('adminPanelModal').style.display = 'none'; }
 
-        // ছবি, টাইটেল এবং অনেকগুলো লিংক আলাদা নিয়ে ভিডিও যোগ করার ফাংশন
-        function addMultipleLinksByAdmin() {
+        // একটি একক কার্ডের ভেতরে একাধিক লিংক সংরক্ষণ করার ফাংশন
+        function addSingleCardWithMultipleLinks() {
             let imgUrl = document.getElementById('adminImageInput').value.trim();
-            let baseTitle = document.getElementById('adminTitleInput').value.trim();
+            let title = document.getElementById('adminTitleInput').value.trim();
             let rawLinks = document.getElementById('bulkLinksInput').value.trim();
             let category = document.getElementById('bulkCategory').value;
 
             if (!rawLinks) {
-                showToast("⚠️ দয়া করে বক্সে অন্তত একটি লিংক দিন!");
+                showToast("⚠️ দয়া করে অন্তত একটি লিংক দিন!");
                 return;
             }
 
             let lines = rawLinks.split('\n');
-            let customVideos = JSON.parse(localStorage.getItem('admin_custom_videos')) || [];
-            let addedCount = 0;
-
-            // যদি ছবি বা টাইটেল খালি রাখা হয়, তবে ডিফল্ট মান বসবে
-            let finalImg = imgUrl ? imgUrl : "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500&auto=format&fit=crop&q=60";
-
-            lines.forEach((link, index) => {
-                let cleanLink = link.trim();
-                if (cleanLink.startsWith('http')) {
-                    let newId = 'custom_' + Date.now() + '_' + index + '_' + Math.floor(Math.random()*1000);
-                    let finalTitle = baseTitle ? (lines.length > 1 ? `${baseTitle} #${addedCount + 1}` : baseTitle) : `Exclusive Video #${customVideos.length + addedCount + 1}`;
-                    
-                    let newVidObj = { 
-                        id: newId, 
-                        img: finalImg, 
-                        title: finalTitle, 
-                        link: cleanLink, 
-                        category: category, 
-                        likes: Math.floor(Math.random() * 50) + 10, 
-                        views: Math.floor(Math.random() * 200) + 100 
-                    };
-
-                    customVideos.unshift(newVidObj);
-                    addedCount++;
+            let linksArray = [];
+            lines.forEach(l => {
+                let clean = l.trim();
+                if (clean.startsWith('http')) {
+                    linksArray.push(clean);
                 }
             });
 
-            if (addedCount > 0) {
-                localStorage.setItem('admin_custom_videos', JSON.stringify(customVideos));
-                document.getElementById('adminImageInput').value = "";
-                document.getElementById('adminTitleInput').value = "";
-                document.getElementById('bulkLinksInput').value = "";
-                closeAdminModal();
-                loadCustomVideos();
-                showToast(`✅ সফলভাবে ${addedCount}টি ভিডিও যোগ করা হয়েছে!`);
-            } else {
-                showToast("❌ সঠিক ফরম্যাটে লিংক দিন (প্রতি লাইনে একটি করে http লিংক)");
+            if (linksArray.length === 0) {
+                showToast("❌ সঠিক ফরম্যাটে লিংক দিন (http দিয়ে শুরু হতে হবে)");
+                return;
             }
+
+            let customVideos = JSON.parse(localStorage.getItem('admin_custom_videos')) || [];
+            let finalImg = imgUrl ? imgUrl : "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500&auto=format&fit=crop&q=60";
+            let finalTitle = title ? title : `Exclusive Collection #${customVideos.length + 1}`;
+            let newId = 'custom_' + Date.now() + '_' + Math.floor(Math.random()*1000);
+
+            let newVidObj = { 
+                id: newId, 
+                img: finalImg, 
+                title: finalTitle, 
+                links: linksArray, // এখানে সব লিংক একটি অ্যারে হিসেবে জমা হবে
+                category: category, 
+                likes: Math.floor(Math.random() * 50) + 10, 
+                views: Math.floor(Math.random() * 200) + 100 
+            };
+
+            customVideos.unshift(newVidObj);
+            localStorage.setItem('admin_custom_videos', JSON.stringify(customVideos));
+
+            document.getElementById('adminImageInput').value = "";
+            document.getElementById('adminTitleInput').value = "";
+            document.getElementById('bulkLinksInput').value = "";
+            closeAdminModal();
+            loadCustomVideos();
+            showToast(`✅ সফলভাবে ১টি কার্ডে ${linksArray.length}টি লিংক যোগ করা হয়েছে!`);
         }
 
         function loadAdminManageList() {
@@ -721,7 +726,7 @@
             listContainer.innerHTML = "";
 
             if (customVideos.length === 0) {
-                listContainer.innerHTML = "<p style='color:#8b949e; text-align:center; font-size:11px;'>কোনো ভিডিও নেই।</p>";
+                listContainer.innerHTML = "<p style='color:#8b949e; text-align:center; font-size:11px;'>কোনো কার্ড নেই।</p>";
                 return;
             }
 
@@ -729,7 +734,7 @@
                 let div = document.createElement('div');
                 div.className = 'manage-item';
                 div.innerHTML = `
-                    <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 200px;">${v.title}</span>
+                    <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 200px;">${v.title} (${v.links ? v.links.length : 1} links)</span>
                     <button onclick="deleteCustomVideo('${v.id}')">Delete</button>
                 `;
                 listContainer.appendChild(div);
@@ -737,7 +742,7 @@
         }
 
         function deleteCustomVideo(id) {
-            if (!confirm("আপনি কি নিশ্চিতভাবে এই ভিডিওটি ডিলিট করতে চান?")) return;
+            if (!confirm("আপনি কি নিশ্চিতভাবে এই কার্ডটি ডিলিট করতে চান?")) return;
 
             let customVideos = JSON.parse(localStorage.getItem('admin_custom_videos')) || [];
             customVideos = customVideos.filter(v => v.id !== id);
@@ -745,7 +750,7 @@
 
             loadCustomVideos();
             loadAdminManageList();
-            showToast("🗑️ ভিডিও সফলভাবে ডিলিট করা হয়েছে!");
+            showToast("🗑️ কার্ড সফলভাবে ডিলিট করা হয়েছে!");
         }
 
         function loadCustomVideos() {
@@ -772,11 +777,20 @@
                 let favKey = 'fav_' + currentUserId + '_' + v.id;
                 let isFav = localStorage.getItem(favKey) === 'true';
 
+                // একাধিক লিংক থাকলে সেগুলোকে একটা একটা করে বাটনে রূপান্তর করা
+                let linksHtml = '';
+                let linksList = v.links ? v.links : [v.link]; // পুরনো একক লিংক ব্যাকআপসহ হ্যান্ডেল করার জন্য
+                
+                linksList.forEach((lnk, idx) => {
+                    let btnLabel = linksList.length > 1 ? `▶ WATCH / DOWNLOAD (Part ${idx + 1})` : `▶ WATCH / DOWNLOAD NOW`;
+                    linksHtml += `<button class="unlock-btn" onclick="openAdLockModal('${lnk}', '${v.id}')">${btnLabel}</button>`;
+                });
+
                 cardDiv.innerHTML = `
                     <div class="card-img-container">
                         <img src="${v.img}" class="card-img" alt="Thumbnail">
-                        <span class="preview-badge">✨ New Arrival</span>
-                        <div class="duration-badge">05:20</div>
+                        <span class="preview-badge">✨ Collection</span>
+                        <div class="duration-badge">${linksList.length} Files</div>
                         <button class="fav-icon ${isFav ? 'active' : ''}" onclick="toggleFavorite('${v.id}', this)">❤️</button>
                     </div>
                     <div class="card-body">
@@ -786,7 +800,9 @@
                             <span>👀 <b class="view-count">${currentViews}</b> Views</span>
                         </div>
                         <button class="comment-section-btn" onclick="openCommentModal('${v.id}')">💬 মতামত / কমেন্ট দেখুন</button>
-                        <button class="unlock-btn" onclick="openAdLockModal('${v.link}', '${v.id}')">▶ WATCH / DOWNLOAD NOW</button>
+                        <div class="multi-link-container">
+                            ${linksHtml}
+                        </div>
                     </div>
                 `;
                 container.appendChild(cardDiv);
