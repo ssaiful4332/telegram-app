@@ -344,7 +344,7 @@
         }
         .admin-textarea {
             resize: vertical;
-            height: 80px;
+            height: 90px;
         }
         .comment-list {
             text-align: left;
@@ -545,21 +545,29 @@
             <span class="close-modal" onclick="closeAdminModal()">&#10005;</span>
             <h3 style="color: #e91e63; margin-top: 5px; font-size: 18px; margin-bottom: 8px;">🛠️ Admin Control Panel</h3>
             
-            <!-- শুধু লিংক পেস্ট করার বক্স (Bulk Link Upload) -->
+            <!-- আলাদা করা ফর্ম: পিক, টাইটেল এবং অনেকগুলো লিংক একসঙ্গে -->
             <div style="text-align: left; font-size: 12px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom: 10px;">
-                <b style="color: #00e5ff; display: block; margin-bottom: 4px;">📥 একসাথে যত খুশি ভিডিওর লিংক দিন:</b>
-                <p style="font-size: 10px; color: #b0bec5; margin: 0 0 6px 0;">প্রতি লাইনে একটি করে টেলিগ্রাম ভিডিওর লিংক পেস্ট করুন। সিস্টেম অটো নাম ও ছবি সেট করে নেবে।</p>
+                <b style="color: #00e5ff; display: block; margin-bottom: 4px;">🖼️ থাম্বনেইল ছবির লিংক:</b>
+                <input type="text" id="adminImageInput" class="admin-input" placeholder="https://example.com/image.jpg">
+
+                <b style="color: #00e5ff; display: block; margin-bottom: 4px;">📌 ভিডিওর টাইটেল / নাম:</b>
+                <input type="text" id="adminTitleInput" class="admin-input" placeholder="ভিডিওর সুন্দর নাম লিখুন">
+
+                <b style="color: #ffeb3b; display: block; margin-bottom: 4px;">🔗 ভিডিওর লিংকগুলো (অনেকগুলো দিতে পারবেন):</b>
+                <p style="font-size: 10px; color: #b0bec5; margin: 0 0 4px 0;">প্রতি লাইনে একটি করে লিংক পেস্ট করুন। যতটি লিংক দেবেন, ঠিক ততগুলো কার্ড আলাদাভাবে তৈরি হবে!</p>
                 <textarea id="bulkLinksInput" class="admin-textarea" placeholder="https://t.me/YourBot?start=v1&#10;https://t.me/YourBot?start=v2&#10;https://t.me/YourBot?start=v3"></textarea>
+                
                 <select id="bulkCategory" class="admin-select" style="margin-bottom: 6px;">
                     <option value="viral trending">🔥 Viral & Trending</option>
                     <option value="couple">❤️ Special Collection</option>
                     <option value="new">🆕 New Uploads</option>
                 </select>
-                <button onclick="addMultipleLinksByAdmin()" style="width: 100%; background: #00bcd4; color: white; border: none; padding: 8px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 12px;">🚀 সব লিংক একসাথে যোগ করুন</button>
+
+                <button onclick="addMultipleLinksByAdmin()" style="width: 100%; background: #00bcd4; color: white; border: none; padding: 8px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 12px;">🚀 ভিডিওগুলো যোগ করুন</button>
             </div>
 
             <b style="color: #ff5252; display: block; margin-bottom: 6px; text-align: left; font-size: 12px;">🗑️ ম্যানেজ / ডিলিট করুন:</b>
-            <div id="adminVideoManageList" style="text-align: left; max-height: 140px; overflow-y: auto;">
+            <div id="adminVideoManageList" style="text-align: left; max-height: 120px; overflow-y: auto;">
                 <!-- ডাইনামিক ডিলিট লিস্ট -->
             </div>
         </div>
@@ -641,7 +649,6 @@
         function openLeaderboardModal() { document.getElementById('leaderboardModal').style.display = 'flex'; }
         function closeLeaderboardModal() { document.getElementById('leaderboardModal').style.display = 'none'; }
 
-        // অ্যাডমিন পাসওয়ার্ড 'Lamiya'
         const ADMIN_PASS = "Lamiya"; 
         function promptAdminPassword() {
             let pass = prompt("গোপন অ্যাডমিন পাসওয়ার্ড দিন:");
@@ -655,13 +662,15 @@
         }
         function closeAdminModal() { document.getElementById('adminPanelModal').style.display = 'none'; }
 
-        // শুধুমাত্র লিংকগুলো পেস্ট করে একসাথে ভিডিও অ্যাড করার ফাংশন
+        // ছবি, টাইটেল এবং অনেকগুলো লিংক আলাদা নিয়ে ভিডিও যোগ করার ফাংশন
         function addMultipleLinksByAdmin() {
+            let imgUrl = document.getElementById('adminImageInput').value.trim();
+            let baseTitle = document.getElementById('adminTitleInput').value.trim();
             let rawLinks = document.getElementById('bulkLinksInput').value.trim();
             let category = document.getElementById('bulkCategory').value;
 
             if (!rawLinks) {
-                showToast("⚠️ দয়া করে বক্সে অন্তত একটি লিংক পেস্ট করুন!");
+                showToast("⚠️ দয়া করে বক্সে অন্তত একটি লিংক দিন!");
                 return;
             }
 
@@ -669,26 +678,19 @@
             let customVideos = JSON.parse(localStorage.getItem('admin_custom_videos')) || [];
             let addedCount = 0;
 
-            // কিছু সুন্দর স্টক থাম্বনেইল বা কালারফুল ছবি যাতে লিংক দিলে অটো সেট হয়ে যায়
-            let defaultThumbnails = [
-                "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500&auto=format&fit=crop&q=60",
-                "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=500&auto=format&fit=crop&q=60",
-                "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?w=500&auto=format&fit=crop&q=60",
-                "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=500&auto=format&fit=crop&q=60",
-                "https://images.unsplash.com/photo-1534447677768-be436bb09401?w=500&auto=format&fit=crop&q=60"
-            ];
+            // যদি ছবি বা টাইটেল খালি রাখা হয়, তবে ডিফল্ট মান বসবে
+            let finalImg = imgUrl ? imgUrl : "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500&auto=format&fit=crop&q=60";
 
             lines.forEach((link, index) => {
                 let cleanLink = link.trim();
                 if (cleanLink.startsWith('http')) {
-                    let newId = 'custom_' + Date.now + '_' + index + '_' + Math.floor(Math.random()*1000);
-                    let randomImg = defaultThumbnails[Math.floor(Math.random() * defaultThumbnails.length)];
-                    let videoTitle = `Viral Exclusive Video #${customVideos.length + addedCount + 1}`;
+                    let newId = 'custom_' + Date.now() + '_' + index + '_' + Math.floor(Math.random()*1000);
+                    let finalTitle = baseTitle ? (lines.length > 1 ? `${baseTitle} #${addedCount + 1}` : baseTitle) : `Exclusive Video #${customVideos.length + addedCount + 1}`;
                     
                     let newVidObj = { 
                         id: newId, 
-                        img: randomImg, 
-                        title: videoTitle, 
+                        img: finalImg, 
+                        title: finalTitle, 
                         link: cleanLink, 
                         category: category, 
                         likes: Math.floor(Math.random() * 50) + 10, 
@@ -702,23 +704,24 @@
 
             if (addedCount > 0) {
                 localStorage.setItem('admin_custom_videos', JSON.stringify(customVideos));
+                document.getElementById('adminImageInput').value = "";
+                document.getElementById('adminTitleInput').value = "";
                 document.getElementById('bulkLinksInput').value = "";
                 closeAdminModal();
                 loadCustomVideos();
-                showToast(`✅ সফলভাবে ${addedCount}টি ভিডিও অ্যাপে যোগ করা হয়েছে!`);
+                showToast(`✅ সফলভাবে ${addedCount}টি ভিডিও যোগ করা হয়েছে!`);
             } else {
                 showToast("❌ সঠিক ফরম্যাটে লিংক দিন (প্রতি লাইনে একটি করে http লিংক)");
             }
         }
 
-        // অ্যাডমিন প্যানেলে ডিলিট করার লিস্ট দেখানোর ফাংশন
         function loadAdminManageList() {
             let listContainer = document.getElementById('adminVideoManageList');
             let customVideos = JSON.parse(localStorage.getItem('admin_custom_videos')) || [];
             listContainer.innerHTML = "";
 
             if (customVideos.length === 0) {
-                listContainer.innerHTML = "<p style='color:#8b949e; text-align:center; font-size:11px;'>কোনো কাস্টম ভিডিও নেই।</p>";
+                listContainer.innerHTML = "<p style='color:#8b949e; text-align:center; font-size:11px;'>কোনো ভিডিও নেই।</p>";
                 return;
             }
 
@@ -733,7 +736,6 @@
             });
         }
 
-        // নির্দিষ্ট ভিডিও ডিলিট করার ফাংশন
         function deleteCustomVideo(id) {
             if (!confirm("আপনি কি নিশ্চিতভাবে এই ভিডিওটি ডিলিট করতে চান?")) return;
 
@@ -746,7 +748,6 @@
             showToast("🗑️ ভিডিও সফলভাবে ডিলিট করা হয়েছে!");
         }
 
-        // লোকাল স্টোরেজ থেকে কাস্টম ভিডিও অ্যাপে লোড করা
         function loadCustomVideos() {
             let container = document.getElementById('card-container');
             let customVideos = JSON.parse(localStorage.getItem('admin_custom_videos')) || [];
