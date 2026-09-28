@@ -344,7 +344,7 @@
         }
         .admin-textarea {
             resize: vertical;
-            height: 70px;
+            height: 80px;
         }
         .comment-list {
             text-align: left;
@@ -545,35 +545,21 @@
             <span class="close-modal" onclick="closeAdminModal()">&#10005;</span>
             <h3 style="color: #e91e63; margin-top: 5px; font-size: 18px; margin-bottom: 8px;">🛠️ Admin Control Panel</h3>
             
-            <!-- সিঙ্গেল অ্যাড সেকশন -->
+            <!-- শুধু লিংক পেস্ট করার বক্স (Bulk Link Upload) -->
             <div style="text-align: left; font-size: 12px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom: 10px;">
-                <b style="color: #ffeb3b; display: block; margin-bottom: 6px;">➕ একক ভিডিও যোগ করুন:</b>
-                <input type="text" id="adminImgUrl" class="admin-input" placeholder="ছবির লিংক (Image URL)">
-                <input type="text" id="adminTitle" class="admin-input" placeholder="ভিডিওর শিরোনাম">
-                <input type="text" id="adminLink" class="admin-input" placeholder="ভিডিওর টেলিগ্রাম লিংক">
-                <select id="adminCategory" class="admin-select">
-                    <option value="viral trending">🔥 Viral & Trending</option>
-                    <option value="couple">❤️ Special Collection</option>
-                    <option value="new">🆕 New Uploads</option>
-                </select>
-                <button onclick="addNewVideoByAdmin()" style="width: 100%; background: #e91e63; color: white; border: none; padding: 8px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 12px;">➕ Add Single Video</button>
-            </div>
-
-            <!-- বাল্ক বা একসাথে অনেক লিংক যোগ করার সেকশন -->
-            <div style="text-align: left; font-size: 12px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom: 10px;">
-                <b style="color: #00e5ff; display: block; margin-bottom: 4px;">📥 একসাথে অনেকগুলো লিংক দিন (Bulk Add):</b>
-                <p style="font-size: 10px; color: #b0bec5; margin: 0 0 6px 0;">ফরম্যাট: টাইটেল, ছবির লিংক, ভিডিও লিংক (প্রতি লাইনে একটি)</p>
-                <textarea id="bulkDataInput" class="admin-textarea" placeholder="ভিডিও ১, https://img.jpg, https://t.me/...&#10;ভিডিও ২, https://img.jpg, https://t.me/..."></textarea>
+                <b style="color: #00e5ff; display: block; margin-bottom: 4px;">📥 একসাথে যত খুশি ভিডিওর লিংক দিন:</b>
+                <p style="font-size: 10px; color: #b0bec5; margin: 0 0 6px 0;">প্রতি লাইনে একটি করে টেলিগ্রাম ভিডিওর লিংক পেস্ট করুন। সিস্টেম অটো নাম ও ছবি সেট করে নেবে।</p>
+                <textarea id="bulkLinksInput" class="admin-textarea" placeholder="https://t.me/YourBot?start=v1&#10;https://t.me/YourBot?start=v2&#10;https://t.me/YourBot?start=v3"></textarea>
                 <select id="bulkCategory" class="admin-select" style="margin-bottom: 6px;">
                     <option value="viral trending">🔥 Viral & Trending</option>
                     <option value="couple">❤️ Special Collection</option>
                     <option value="new">🆕 New Uploads</option>
                 </select>
-                <button onclick="addBulkVideosByAdmin()" style="width: 100%; background: #00bcd4; color: white; border: none; padding: 8px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 12px;">🚀 Bulk Add All Videos</button>
+                <button onclick="addMultipleLinksByAdmin()" style="width: 100%; background: #00bcd4; color: white; border: none; padding: 8px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 12px;">🚀 সব লিংক একসাথে যোগ করুন</button>
             </div>
 
             <b style="color: #ff5252; display: block; margin-bottom: 6px; text-align: left; font-size: 12px;">🗑️ ম্যানেজ / ডিলিট করুন:</b>
-            <div id="adminVideoManageList" style="text-align: left; max-height: 120px; overflow-y: auto;">
+            <div id="adminVideoManageList" style="text-align: left; max-height: 140px; overflow-y: auto;">
                 <!-- ডাইনামিক ডিলিট লিস্ট -->
             </div>
         </div>
@@ -669,71 +655,59 @@
         }
         function closeAdminModal() { document.getElementById('adminPanelModal').style.display = 'none'; }
 
-        // একক ভিডিও অ্যাড করার লজিক
-        function addNewVideoByAdmin() {
-            let imgUrl = document.getElementById('adminImgUrl').value.trim();
-            let title = document.getElementById('adminTitle').value.trim();
-            let link = document.getElementById('adminLink').value.trim();
-            let category = document.getElementById('adminCategory').value;
-
-            if (!imgUrl || !title || !link) {
-                showToast("⚠️ দয়া করে সব বক্স পূরণ করুন!");
-                return;
-            }
-
-            let customVideos = JSON.parse(localStorage.getItem('admin_custom_videos')) || [];
-            let newId = 'custom_' + Date.now();
-            let newVidObj = { id: newId, img: imgUrl, title: title, link: link, category: category, likes: 10, views: 150 };
-
-            customVideos.unshift(newVidObj);
-            localStorage.setItem('admin_custom_videos', JSON.stringify(customVideos));
-
-            document.getElementById('adminImgUrl').value = "";
-            document.getElementById('adminTitle').value = "";
-            document.getElementById('adminLink').value = "";
-            closeAdminModal();
-            loadCustomVideos();
-            showToast("✅ সফলভাবে নতুন ভিডিও যোগ করা হয়েছে!");
-        }
-
-        // একসাথে অনেকগুলো লিংক অ্যাড করার লজিক (Bulk Add)
-        function addBulkVideosByAdmin() {
-            let rawData = document.getElementById('bulkDataInput').value.trim();
+        // শুধুমাত্র লিংকগুলো পেস্ট করে একসাথে ভিডিও অ্যাড করার ফাংশন
+        function addMultipleLinksByAdmin() {
+            let rawLinks = document.getElementById('bulkLinksInput').value.trim();
             let category = document.getElementById('bulkCategory').value;
 
-            if (!rawData) {
-                showToast("⚠️ দয়া করে বক্সে লিংকগুলো পেস্ট করুন!");
+            if (!rawLinks) {
+                showToast("⚠️ দয়া করে বক্সে অন্তত একটি লিংক পেস্ট করুন!");
                 return;
             }
 
-            let lines = rawData.split('\n');
+            let lines = rawLinks.split('\n');
             let customVideos = JSON.parse(localStorage.getItem('admin_custom_videos')) || [];
             let addedCount = 0;
 
-            lines.forEach((line, index) => {
-                let parts = line.split(',');
-                if (parts.length >= 3) {
-                    let title = parts[0].trim();
-                    let imgUrl = parts[1].trim();
-                    let link = parts.slice(2).join(',').trim(); // যাতে লিংকের ভেতরে কমা থাকলেও সমস্যা না হয়
+            // কিছু সুন্দর স্টক থাম্বনেইল বা কালারফুল ছবি যাতে লিংক দিলে অটো সেট হয়ে যায়
+            let defaultThumbnails = [
+                "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500&auto=format&fit=crop&q=60",
+                "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=500&auto=format&fit=crop&q=60",
+                "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?w=500&auto=format&fit=crop&q=60",
+                "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=500&auto=format&fit=crop&q=60",
+                "https://images.unsplash.com/photo-1534447677768-be436bb09401?w=500&auto=format&fit=crop&q=60"
+            ];
 
-                    if (title && imgUrl && link) {
-                        let newId = 'custom_' + Date.now() + '_' + index;
-                        let newVidObj = { id: newId, img: imgUrl, title: title, link: link, category: category, likes: 10, views: 150 };
-                        customVideos.unshift(newVidObj);
-                        addedCount++;
-                    }
+            lines.forEach((link, index) => {
+                let cleanLink = link.trim();
+                if (cleanLink.startsWith('http')) {
+                    let newId = 'custom_' + Date.now + '_' + index + '_' + Math.floor(Math.random()*1000);
+                    let randomImg = defaultThumbnails[Math.floor(Math.random() * defaultThumbnails.length)];
+                    let videoTitle = `Viral Exclusive Video #${customVideos.length + addedCount + 1}`;
+                    
+                    let newVidObj = { 
+                        id: newId, 
+                        img: randomImg, 
+                        title: videoTitle, 
+                        link: cleanLink, 
+                        category: category, 
+                        likes: Math.floor(Math.random() * 50) + 10, 
+                        views: Math.floor(Math.random() * 200) + 100 
+                    };
+
+                    customVideos.unshift(newVidObj);
+                    addedCount++;
                 }
             });
 
             if (addedCount > 0) {
                 localStorage.setItem('admin_custom_videos', JSON.stringify(customVideos));
-                document.getElementById('bulkDataInput').value = "";
+                document.getElementById('bulkLinksInput').value = "";
                 closeAdminModal();
                 loadCustomVideos();
-                showToast(`✅ সফলভাবে ${addedCount}টি ভিডিও একসাথে যোগ করা হয়েছে!`);
+                showToast(`✅ সফলভাবে ${addedCount}টি ভিডিও অ্যাপে যোগ করা হয়েছে!`);
             } else {
-                showToast("❌ সঠিক ফরম্যাটে লিংক দিন (টাইটেল, ছবির লিংক, ভিডিও লিংক)");
+                showToast("❌ সঠিক ফরম্যাটে লিংক দিন (প্রতি লাইনে একটি করে http লিংক)");
             }
         }
 
@@ -800,8 +774,8 @@
                 cardDiv.innerHTML = `
                     <div class="card-img-container">
                         <img src="${v.img}" class="card-img" alt="Thumbnail">
-                        <span class="preview-badge">✨ Admin Post</span>
-                        <div class="duration-badge">08:00</div>
+                        <span class="preview-badge">✨ New Arrival</span>
+                        <div class="duration-badge">05:20</div>
                         <button class="fav-icon ${isFav ? 'active' : ''}" onclick="toggleFavorite('${v.id}', this)">❤️</button>
                     </div>
                     <div class="card-body">
@@ -970,7 +944,7 @@
                 if(btnEl) btnEl.innerText = `🔓 UNLOCK VIDEO (${adsWatched}/3)`;
                 showToast(`⚡ ${adsWatched}টি অ্যাড দেখা সম্পন্ন!`);
             } else {
-                let currentViews = (parseInt(localStorage.getItem(selectedVideoId + '_views')) || 150) + 1;
+                let currentViews = (parseInt(localStorage.getItem(selectedVideoId + '_views')) || 100) + 1;
                 localStorage.setItem(selectedVideoId + '_views', currentViews);
                 
                 let card = document.querySelector(`[data-id="${selectedVideoId}"]`);
