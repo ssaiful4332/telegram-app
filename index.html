@@ -160,6 +160,7 @@
             border: 1px solid var(--border-color);
             box-shadow: 0 4px 15px rgba(0,0,0,0.4);
             padding: 15px;
+            transition: all 0.4s ease;
         }
         .card-img-container {
             position: relative;
@@ -366,7 +367,7 @@
             display: block;
             margin-bottom: 4px;
         }
-        .admin-input, .admin-select {
+        .admin-input {
             width: 100%;
             padding: 8px;
             background: var(--card-bg);
@@ -639,7 +640,6 @@
 
                 <button class="admin-btn" onclick="createNewCardWithAutoLink()" style="background: #00e5ff; color: #000;">🚀 ভিডিও পোস্ট করুন ও ইউনিক লিংক তৈরি করুন</button>
                 
-                <!-- ভিডিও পোস্ট করার পর ইউনিক লিংক নিচে দেখানোর বক্স -->
                 <div id="lastGeneratedBox" style="display:none; margin-top: 10px;">
                     <label style="color: #00e5ff;">✨ এই ভিডিওর ইউনিক মিনি অ্যাপ লিংক (কপি করে নিন):</label>
                     <div class="generated-link-box" id="latestUniqueLinkText"></div>
@@ -703,16 +703,12 @@
 
         let lastCreatedLink = "";
 
-        // অটো ইউনিক লিংক জেনারেট এবং কার্ড তৈরির ফাংশন
         function createNewCardWithAutoLink() {
             let img = document.getElementById('cardImgInput').value || "https://picsum.photos/400/200?random=" + Math.floor(Math.random()*100);
             let title = document.getElementById('cardTitleInput').value || "নতুন ভাইরাল ভিডিও";
             let duration = document.getElementById('cardDurationInput').value || "04:30";
             
-            // ইউনিক আইডি জেনারেট
             let uniqueId = "v_" + Math.random().toString(36).substring(2, 7);
-            
-            // বর্তমান বেজ লিংকের সাথে ইউনিক স্টার্ট অ্যাপ প্যারামিটার যুক্ত করা
             let currentBaseUrl = window.location.href.split('?')[0];
             lastCreatedLink = `${currentBaseUrl}?startapp=${uniqueId}`;
 
@@ -744,13 +740,11 @@
             `;
             container.prepend(card);
 
-            // অ্যাডমিন প্যানেলের ভেতরে ঠিক নিচেই লিংকটি শো করাবে
             document.getElementById('lastGeneratedBox').style.display = 'block';
             document.getElementById('latestUniqueLinkText').innerText = lastCreatedLink;
             
             showToast("ভিডিও পোস্ট হয়েছে ও ইউনিক লিংক তৈরি হয়েছে!");
             
-            // ইনপুট ফিল্ড খালি করা
             document.getElementById('cardImgInput').value = '';
             document.getElementById('cardTitleInput').value = '';
             document.getElementById('cardDurationInput').value = '';
@@ -772,8 +766,8 @@
             });
         }
 
-        // লিংকে ইউনিক আইডি থাকলে স্বয়ংক্রিয়ভাবে সেই ভিডিওতে ফোকাস করার লজিক
-        window.addEventListener('DOMContentLoaded', () => {
+        // পেজ পুরোপুরি লোড হওয়ার পর নির্দিষ্ট ভিডিওতে নিখুঁতভাবে ফোকাস ও গ্লোয়িং ইফেক্ট দেখানোর লজিক
+        window.addEventListener('load', () => {
             const urlParams = new URLSearchParams(window.location.search);
             const startAppParam = urlParams.get('startapp');
             if (startAppParam) {
@@ -782,9 +776,13 @@
                     if (targetCard) {
                         targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
                         targetCard.style.border = "2px solid #00e5ff";
-                        setTimeout(() => { targetCard.style.border = "1px solid var(--border-color)"; }, 3000);
+                        targetCard.style.boxShadow = "0 0 20px rgba(0, 229, 255, 0.5)";
+                        setTimeout(() => { 
+                            targetCard.style.border = "1px solid var(--border-color)"; 
+                            targetCard.style.boxShadow = "0 4px 15px rgba(0,0,0,0.4)";
+                        }, 3500);
                     }
-                }, 500);
+                }, 300);
             }
         });
 
