@@ -558,9 +558,9 @@
                 <b style="color: #00e5ff; display: block; margin-bottom: 4px;">📌 পোস্টের টাইটেল / নাম:</b>
                 <input type="text" id="adminTitleInput" class="admin-input" placeholder="পোস্টের সুন্দর নাম লিখুন">
 
-                <b style="color: #ffeb3b; display: block; margin-bottom: 4px;">🔗 ভিডিওর লিংক:</b>
-                <p style="font-size: 10px; color: #b0bec5; margin: 0 0 4px 0;">এখানে আপনার কাঙ্ক্ষিত লিংকটি দিন।</p>
-                <textarea id="bulkLinksInput" class="admin-textarea" placeholder="https://t.me/YourBot?start=v1"></textarea>
+                <b style="color: #ffeb3b; display: block; margin-bottom: 4px;">🔗 ভিডিওর লিংক (একাধিক লাইনে দিতে পারেন):</b>
+                <p style="font-size: 10px; color: #b0bec5; margin: 0 0 4px 0;">প্রতি লাইনে একটি করে লিংক দিন।</p>
+                <textarea id="bulkLinksInput" class="admin-textarea" placeholder="https://t.me/YourBot?start=v1&#10;https://t.me/YourBot?start=v2"></textarea>
                 
                 <select id="bulkCategory" class="admin-select" style="margin-bottom: 6px;">
                     <option value="viral trending">🔥 Viral & Trending</option>
@@ -781,7 +781,7 @@
                     <div class="card-img-container">
                         <img src="${v.img}" class="card-img" alt="Thumbnail">
                         <span class="preview-badge">✨ Collection</span>
-                        <div class="duration-badge">File Ready</div>
+                        <div class="duration-badge">${linksList.length} Videos Ready</div>
                         <button class="fav-icon ${isFav ? 'active' : ''}" onclick="toggleFavorite('${v.id}', this)">❤️</button>
                     </div>
                     <div class="card-body">
@@ -792,7 +792,7 @@
                         </div>
                         <button class="comment-section-btn" onclick="openCommentModal('${v.id}')">💬 মতামত / কমেন্ট দেখুন</button>
                         <div class="multi-link-container">
-                            <button class="unlock-btn" onclick="openAdLockModal('${encodedLinks}', '${v.id}')">▶ WATCH / DOWNLOAD NOW</button>
+                            <button class="unlock-btn" onclick="openAdLockModal('${encodedLinks}', '${v.id}')">▶ WATCH ALL (${linksList.length} VIDS)</button>
                         </div>
                     </div>
                 `;
@@ -935,7 +935,7 @@
             document.getElementById('modalMainTitle').innerText = "🔒 Watch 3 ads to unlock";
             document.getElementById('modalBodyContent').innerHTML = `
                 <p id="adStatusText" style="font-size: 14px; margin: 12px 0;">Progress: <b style="color: #ffeb3b;">0/3</b></p>
-                <button id="watchAdBtn" onclick="watchNextAd()" style="width: 100%; background: var(--btn-color); color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer;">🔓 UNLOCK VIDEO</button>
+                <button id="watchAdBtn" onclick="watchNextAd()" style="width: 100%; background: var(--btn-color); color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer;">🔓 UNLOCK ALL VIDEOS</button>
             `;
             document.getElementById('adModal').style.display = 'flex';
         }
@@ -949,7 +949,7 @@
                 let statusEl = document.getElementById('adStatusText');
                 let btnEl = document.getElementById('watchAdBtn');
                 if(statusEl) statusEl.innerHTML = `Progress: <b style="color: #ffeb3b;">${adsWatched}/3</b>`;
-                if(btnEl) btnEl.innerText = `🔓 UNLOCK VIDEO (${adsWatched}/3)`;
+                if(btnEl) btnEl.innerText = `🔓 UNLOCK ALL VIDEOS (${adsWatched}/3)`;
                 showToast(`⚡ ${adsWatched}টি অ্যাড দেখা সম্পন্ন!`);
             } else {
                 let currentViews = (parseInt(localStorage.getItem(selectedVideoId + '_views')) || 100) + 1;
@@ -967,16 +967,30 @@
                 updateRankSystem();
 
                 let linksArray = JSON.parse(decodeURIComponent(selectedLinksJson));
-                let targetLink = linksArray.length > 0 ? linksArray[0] : "#";
+                
+                // এক ক্লিকেই সবগুলো লিংক আলাদা ট্যাবে/উইন্ডোতে ওপেন করার কোড
+                linksArray.forEach((link, idx) => {
+                    setTimeout(() => {
+                        window.open(link, '_blank');
+                    }, idx * 300); // প্রতিটি লিংকের মাঝে সামান্য বিরতি যাতে ব্রাউজার পপআপ ব্লক না করে
+                });
 
-                showToast("✅ ভিডিও আনলক সফল হয়েছে!");
+                showToast("✅ সব ভিডিও সফলভাবে ওপেন হয়েছে!");
+                
+                // মডালের ভেতর সফল মেসেজ ও লিংকগুলোর লিস্ট একসাথে দেখানো
+                let linksHtml = '';
+                linksArray.forEach((l, index) => {
+                    linksHtml += `<a href="${l}" target="_blank" style="display: block; background: #4caf50; color: white; text-decoration: none; padding: 8px 10px; border-radius: 6px; font-weight: bold; font-size: 12px; margin-bottom: 6px; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">▶ Video ${index + 1}: ${l}</a>`;
+                });
+
                 document.querySelector('#adModal .modal-content').innerHTML = `
                     <span class="close-modal" onclick="closeModal()">&#10005;</span>
-                    <h3 style="color: #4caf50; margin-top: 10px; font-size: 18px;">✅ Unlocked Successfully!</h3>
-                    <p style="font-size: 13px; margin: 10px 0;">আপনার ভিডিওর লিংক নিচে দেওয়া হলো:</p>
-                    <div style="max-height: 200px; overflow-y: auto;">
-                        <a href="${targetLink}" target="_blank" style="display: block; background: #4caf50; color: white; text-decoration: none; padding: 12px; border-radius: 8px; font-weight: bold; font-size: 13px; margin-bottom: 6px;">▶ WATCH / DOWNLOAD NOW</a>
+                    <h3 style="color: #4caf50; margin-top: 10px; font-size: 16px;">✅ All Videos Unlocked!</h3>
+                    <p style="font-size: 12px; margin: 8px 0;">নিচের লিংকগুলোতে ক্লিক করে সরাসরি দেখতে পারেন:</p>
+                    <div style="max-height: 180px; overflow-y: auto; text-align: left; margin-bottom: 10px;">
+                        ${linksHtml}
                     </div>
+                    <button onclick="closeModal()" style="width: 100%; background: var(--btn-color); color: white; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 12px;">বন্ধ করুন</button>
                 `;
             }
         }
