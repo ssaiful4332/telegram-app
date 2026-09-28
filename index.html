@@ -211,9 +211,6 @@
         .fav-icon.active {
             color: #ff4444;
         }
-        .card-body {
-            padding: 5px 0;
-        }
         .card-title {
             font-size: 14px;
             font-weight: bold;
@@ -354,7 +351,6 @@
         }
         .close-modal:hover { color: #fff; }
 
-        /* অ্যাডমিন প্যানেল স্টাইল */
         .admin-section {
             background: rgba(156, 39, 176, 0.08);
             border: 1px solid var(--border-color);
@@ -402,6 +398,7 @@
             margin-top: 6px;
             color: #00e5ff;
             text-align: left;
+            user-select: all;
         }
 
         .comment-input {
@@ -510,7 +507,6 @@
         <input type="text" id="searchInput" class="search-input" placeholder="🔍 সার্চ করুন..." onkeyup="filterContent()">
     </div>
 
-    <!-- ডাইনামিক ক্যাটাগরি বার -->
     <div class="categories" id="categoryContainer">
         <button class="cat-btn active" onclick="filterCategory('all', this)">📹 All Videos</button>
         <button class="cat-btn" onclick="filterCategory('favorites', this)">⭐ Favorites</button>
@@ -521,9 +517,8 @@
 
     <div id="no-result">কোনো কনটেন্ট পাওয়া যায়নি! ❌</div>
 
-    <!-- ডাইনামিক ভিডিও কার্ড কনটেইনার -->
     <div id="card-container">
-        <!-- ডিফল্ট কার্ড উদাহরণ (ইউনিক আইডি: v1) -->
+        <!-- ডিফল্ট কার্ড (ইউনিক আইডি: v1) -->
         <div class="card" id="card-v1" data-id="v1">
             <div class="card-img-container">
                 <img src="https://picsum.photos/400/200?random=1" class="card-img" alt="Video">
@@ -541,7 +536,7 @@
                     <button class="comment-section-btn" onclick="openCommentModal()">💬 কমেন্ট</button>
                     <button class="share-link-btn" onclick="copyVideoLink('v1')">🔗 লিংক কপি</button>
                 </div>
-                <button class="unlock-btn" onclick="openAdModal('এক্সক্লুসিভ ভিডিও লিংক')">▶ WATCH NOW</button>
+                <button class="unlock-btn" onclick="openAdModal()">▶ WATCH NOW</button>
             </div>
         </div>
     </div>
@@ -552,11 +547,9 @@
     <div id="adModal" class="modal">
         <div class="modal-content">
             <span class="close-modal" onclick="closeModal()">&#10005;</span>
-            <h3 style="color: inherit; margin-top: 10px; font-size: 18px;" id="modalMainTitle">🔒 Watch ads to unlock</h3>
-            <div id="modalBodyContent">
-                <p id="adStatusText" style="font-size: 14px; margin: 12px 0;">Progress: <b style="color: #ffeb3b;">0/3</b></p>
-                <button id="watchAdBtn" onclick="watchNextAd()" style="width: 100%; background: var(--btn-color); color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer;">🔓 UNLOCK LINK</button>
-            </div>
+            <h3 style="color: inherit; margin-top: 10px; font-size: 18px;">🔒 Watch ads to unlock</h3>
+            <p style="font-size: 13px; color: #b0bec5; margin: 10px 0;">ভিডিও আনলক করতে অ্যাড সম্পন্ন করুন।</p>
+            <button onclick="closeModal(); showToast('ভিডিও আনলক সফল!');" style="width: 100%; background: var(--btn-color); color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer;">UNLOCK NOW</button>
         </div>
     </div>
 
@@ -565,9 +558,8 @@
         <div class="modal-content">
             <span class="close-modal" onclick="closeSpinModal()">&#10005;</span>
             <h3 style="color: #ff9800; margin-top: 5px; font-size: 18px;">🎡 Daily Lucky Spin</h3>
-            <p style="font-size: 13px; color: #b0bec5; margin: 10px 0;">চাকা ঘুরিয়ে প্রতিদিন ফ্রি কয়েন জিতে নিন!</p>
             <div id="spinBox" style="font-size: 26px; padding: 20px; background: var(--border-color); border-radius: 10px; margin-bottom: 12px; font-weight: bold; color: #ffeb3b;">🎁 ?</div>
-            <button id="spinActionBtn" onclick="executeSpin()" style="width: 100%; background: #ff9800; color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer;">SPIN NOW</button>
+            <button onclick="executeSpin()" style="width: 100%; background: #ff9800; color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer;">SPIN NOW</button>
         </div>
     </div>
 
@@ -575,10 +567,9 @@
     <div id="leaderboardModal" class="modal">
         <div class="modal-content">
             <span class="close-modal" onclick="closeLeaderboardModal()">&#10005;</span>
-            <h3 style="color: #00e5ff; margin-top: 5px; font-size: 18px; margin-bottom: 12px;">🏆 Top Referrer Leaderboard</h3>
-            <div id="leaderboardList" style="text-align: left; font-size: 13px; max-height: 180px; overflow-y: auto;">
+            <h3 style="color: #00e5ff; margin-top: 5px; font-size: 18px; margin-bottom: 12px;">🏆 Leaderboard</h3>
+            <div style="text-align: left; font-size: 13px;">
                 <div style="background: var(--border-color); padding: 8px; border-radius: 6px; margin-bottom: 6px; display: flex; justify-content: space-between;"><span>1. 👑 Saiful Islam</span> <b>24 Refers</b></div>
-                <div style="background: var(--border-color); padding: 8px; border-radius: 6px; margin-bottom: 6px; display: flex; justify-content: space-between;"><span>2. 🥈 Lamiya</span> <b>18 Refers</b></div>
             </div>
         </div>
     </div>
@@ -601,35 +592,21 @@
         <div class="modal-content">
             <span class="close-modal" onclick="closeSettingsModal()">&#10005;</span>
             <h3 style="color: inherit; margin-top: 5px; font-size: 18px; margin-bottom: 15px;">⚙️ Personal Settings</h3>
-            
-            <div style="font-size: 12px; background: var(--border-color); padding: 8px; border-radius: 6px; margin-bottom: 10px; text-align: left;">
-                Telegram User: <br><b>SAIFUL SIR ❤️ (@SAIFUL676)</b>
-            </div>
-
             <div class="setting-item">
                 <span>🎨 Dark / Light Mode</span>
                 <button onclick="toggleTheme()">Switch</button>
             </div>
-
             <div class="setting-item" style="flex-direction: column; align-items: flex-start; gap: 8px;">
                 <span>🎨 থিম কালার সিলেক্ট করুন:</span>
                 <div class="theme-picker-row">
                     <span class="color-bubble" style="background: #9c27b0;" onclick="setThemeAccent('#9c27b0', '#7b1fa2')"></span>
                     <span class="color-bubble" style="background: #2196f3;" onclick="setThemeAccent('#2196f3', '#1976d2')"></span>
                     <span class="color-bubble" style="background: #e91e63;" onclick="setThemeAccent('#e91e63', '#c2185b')"></span>
-                    <span class="color-bubble" style="background: #009688;" onclick="setThemeAccent('#009688', '#00796b')"></span>
-                    <span class="color-bubble" style="background: #ff9800;" onclick="setThemeAccent('#ff9800', '#f57c00')"></span>
                 </div>
             </div>
-
             <div class="setting-item">
                 <span>🛠️ Admin Panel</span>
                 <button onclick="checkAdminPassword()">Open</button>
-            </div>
-
-            <div class="setting-item">
-                <span>📢 Support Channel</span>
-                <button onclick="showToast('চ্যানেলে জয়েন করুন!')">Join</button>
             </div>
             <div class="setting-item">
                 <span>🗑️ Clear Cache</span>
@@ -638,7 +615,7 @@
         </div>
     </div>
 
-    <!-- অ্যাডমিন প্যানেল মডাল (অটো লিংক জেনারেটর সহ) -->
+    <!-- অ্যাডমিন প্যানেল মডাল -->
     <div id="adminModal" class="modal">
         <div class="modal-content" style="max-width: 380px;">
             <span class="close-modal" onclick="closeAdminModal()">&#10005;</span>
@@ -646,48 +623,27 @@
             
             <div class="admin-section">
                 <label>📢 অ্যানাউন্সমেন্ট ব্যানার আপডেট:</label>
-                <input type="text" id="adminBannerInput" class="admin-input" placeholder="নতুন নোটিশ বা ব্যানার টেক্সট লিখুন">
+                <input type="text" id="adminBannerInput" class="admin-input" placeholder="নতুন নোটিশ লিখুন">
                 <button class="admin-btn" onclick="updateBanner()">ব্যানার পরিবর্তন করুন</button>
             </div>
 
             <div class="admin-section">
-                <label>🔗 অ্যাডস্টার্ডা (Adsterra) লিংক সেটআপ:</label>
-                <input type="text" id="adminAdLinkInput" class="admin-input" placeholder="https://profitableatecpmnetwork.com/...">
-                <button class="admin-btn" onclick="updateAdLink()">অ্যাড লিংক সেভ করুন</button>
-            </div>
-
-            <div class="admin-section">
-                <label>✨ নতুন ক্যাটাগরি যোগ করুন:</label>
-                <input type="text" id="newCategoryInput" class="admin-input" placeholder="যেমন: special, 18plus">
-                <button class="admin-btn" onclick="addNewCategory()">Add</button>
-            </div>
-
-            <div class="admin-section">
                 <label>🖼️ থাম্বনেইল ছবির লিংক:</label>
-                <input type="text" id="cardImgInput" class="admin-input" placeholder="https://example.com/image.jpg">
+                <input type="text" id="cardImgInput" class="admin-input" placeholder="https://...">
 
                 <label>📌 পোস্টের টাইটেল / নাম:</label>
-                <input type="text" id="cardTitleInput" class="admin-input" placeholder="পোস্টের সুন্দর নাম লিখুন">
+                <input type="text" id="cardTitleInput" class="admin-input" placeholder="ভিডিওর নাম লিখুন">
 
                 <label>⏱️ ভিডিওর সময় / ডিউরেশন:</label>
-                <input type="text" id="cardDurationInput" class="admin-input" placeholder="যেমন: 5:30 বা 10 Mins">
-
-                <label>🔗 ভিডিওর লিংক (ডাউনলোড/ওয়াচ লিংক):</label>
-                <input type="text" id="cardLinksInput" class="admin-input" placeholder="https://t.me/YourBot?start=v1">
-
-                <label>🗂️ ক্যাটাগরি সিলেক্ট করুন:</label>
-                <select id="cardCategorySelect" class="admin-select">
-                    <option value="trending">🔥 Viral & Trending</option>
-                    <option value="favorites">⭐ Favorites</option>
-                    <option value="liked">👍 Top Liked</option>
-                    <option value="new">🆕 New Uploads</option>
-                </select>
+                <input type="text" id="cardDurationInput" class="admin-input" placeholder="যেমন: 04:30">
 
                 <button class="admin-btn" onclick="createNewCardWithAutoLink()" style="background: #00e5ff; color: #000;">🚀 ভিডিও পোস্ট করুন ও ইউনিক লিংক তৈরি করুন</button>
                 
-                <div id="lastGeneratedBox" style="display:none; margin-top: 8px;">
-                    <label style="color: #00e5ff;">✨ তৈরি হওয়া ইউনিক মিনি অ্যাপ লিংক:</label>
+                <!-- ভিডিও পোস্ট করার পর ইউনিক লিংক নিচে দেখানোর বক্স -->
+                <div id="lastGeneratedBox" style="display:none; margin-top: 10px;">
+                    <label style="color: #00e5ff;">✨ এই ভিডিওর ইউনিক মিনি অ্যাপ লিংক (কপি করে নিন):</label>
                     <div class="generated-link-box" id="latestUniqueLinkText"></div>
+                    <button class="admin-btn" onclick="copyLatestGeneratedLink()" style="margin-top: 6px; background: #4caf50;">📋 লিংক কপি করুন</button>
                 </div>
             </div>
         </div>
@@ -723,10 +679,9 @@
         function closeLeaderboardModal() { document.getElementById('leaderboardModal').style.display = 'none'; }
         function openCommentModal() { document.getElementById('commentModal').style.display = 'flex'; }
         function closeCommentModal() { document.getElementById('commentModal').style.display = 'none'; }
-        function openAdModal(title) { document.getElementById('adModal').style.display = 'flex'; }
+        function openAdModal() { document.getElementById('adModal').style.display = 'flex'; }
         function closeModal() { document.getElementById('adModal').style.display = 'none'; }
 
-        // পাসওয়ার্ড চেক
         function checkAdminPassword() {
             let pass = prompt("গোপন অ্যাডমিন পাসওয়ার্ড দিন:");
             if (pass === "Lamiya" || pass === "admin" || pass === "1234") {
@@ -746,25 +701,7 @@
             }
         }
 
-        function updateAdLink() {
-            let link = document.getElementById('adminAdLinkInput').value;
-            if(link) {
-                showToast("অ্যাড স্টার্ডা লিংক সেভ হয়েছে!");
-            }
-        }
-
-        function addNewCategory() {
-            let catName = document.getElementById('newCategoryInput').value.trim();
-            if(!catName) return;
-            let container = document.getElementById('categoryContainer');
-            let btn = document.createElement('button');
-            btn.className = 'cat-btn';
-            btn.setAttribute('onclick', `filterCategory('${catName}', this)`);
-            btn.innerText = "📁 " + catName;
-            container.appendChild(btn);
-            document.getElementById('newCategoryInput').value = '';
-            showToast("নতুন ক্যাটাগরি যোগ হয়েছে!");
-        }
+        let lastCreatedLink = "";
 
         // অটো ইউনিক লিংক জেনারেট এবং কার্ড তৈরির ফাংশন
         function createNewCardWithAutoLink() {
@@ -772,12 +709,12 @@
             let title = document.getElementById('cardTitleInput').value || "নতুন ভাইরাল ভিডিও";
             let duration = document.getElementById('cardDurationInput').value || "04:30";
             
-            // ইউনিক আইডি জেনারেট (যেমন: v_9824 বা টাইমস্ট্যাম্প ভিত্তিক)
-            let uniqueId = "v_" + Math.random().toString(36.substring(2, 7));
+            // ইউনিক আইডি জেনারেট
+            let uniqueId = "v_" + Math.random().toString(36).substring(2, 7);
             
-            // বর্তমান ওয়েব অ্যাপের বেজ লিংকের সাথে ইউনিক আইডি যুক্ত করা (Telegram StartApp প্যারামিটার স্টাইল)
+            // বর্তমান বেজ লিংকের সাথে ইউনিক স্টার্ট অ্যাপ প্যারামিটার যুক্ত করা
             let currentBaseUrl = window.location.href.split('?')[0];
-            let generatedUniqueAppLink = `${currentBaseUrl}?startapp=${uniqueId}`;
+            lastCreatedLink = `${currentBaseUrl}?startapp=${uniqueId}`;
 
             let container = document.getElementById('card-container');
             let card = document.createElement('div');
@@ -802,33 +739,40 @@
                         <button class="comment-section-btn" onclick="openCommentModal()">💬 কমেন্ট</button>
                         <button class="share-link-btn" onclick="copyVideoLink('${uniqueId}')">🔗 লিংক কপি</button>
                     </div>
-                    <button class="unlock-btn" onclick="openAdModal('ভিডিও লিংক')">▶ WATCH NOW</button>
+                    <button class="unlock-btn" onclick="openAdModal()">▶ WATCH NOW</button>
                 </div>
             `;
             container.prepend(card);
 
-            // অ্যাডমিন প্যানেলে সাকসেস মেসেজ ও লিংক প্রদর্শন
+            // অ্যাডমিন প্যানেলের ভেতরে ঠিক নিচেই লিংকটি শো করাবে
             document.getElementById('lastGeneratedBox').style.display = 'block';
-            document.getElementById('latestUniqueLinkText').innerText = generatedUniqueAppLink;
+            document.getElementById('latestUniqueLinkText').innerText = lastCreatedLink;
             
             showToast("ভিডিও পোস্ট হয়েছে ও ইউনিক লিংক তৈরি হয়েছে!");
+            
+            // ইনপুট ফিল্ড খালি করা
+            document.getElementById('cardImgInput').value = '';
+            document.getElementById('cardTitleInput').value = '';
+            document.getElementById('cardDurationInput').value = '';
         }
 
-        // নির্দিষ্ট ভিডিওর ইউনিক লিংক ক্লিপবোর্ডে কপি করার ফাংশন
-        function copyVideoLink(uid) {
-            let currentBaseUrl = window.location.href.split('?')[0];
-            let videoLink = `${currentBaseUrl}?startapp=${uid}`;
-            
-            if (navigator.clipboard) {
-                navigator.clipboard.writeText(videoLink).then(() => {
+        function copyLatestGeneratedLink() {
+            if(lastCreatedLink) {
+                navigator.clipboard.writeText(lastCreatedLink).then(() => {
                     showToast("লিংক কপি করা হয়েছে! 🔗");
                 });
-            } else {
-                prompt("নিচের লিংকটি কপি করুন:", videoLink);
             }
         }
 
-        // পেজ লোড হওয়ার সময় যদি লিংকে কোনো নির্দিষ্ট ইউনিক আইডি (startapp) থাকে, তবে সরাসরি সেই কার্ডে স্ক্রিন ফোকাস করার লজিক
+        function copyVideoLink(uid) {
+            let currentBaseUrl = window.location.href.split('?')[0];
+            let videoLink = `${currentBaseUrl}?startapp=${uid}`;
+            navigator.clipboard.writeText(videoLink).then(() => {
+                showToast("ভিডিওর লিংক কপি করা হয়েছে! 🔗");
+            });
+        }
+
+        // লিংকে ইউনিক আইডি থাকলে স্বয়ংক্রিয়ভাবে সেই ভিডিওতে ফোকাস করার লজিক
         window.addEventListener('DOMContentLoaded', () => {
             const urlParams = new URLSearchParams(window.location.search);
             const startAppParam = urlParams.get('startapp');
@@ -886,7 +830,7 @@
         }
 
         function executeSpin() {
-            document.getElementById('spinBox').innerText = "🎉 আপনি ৫০ কয়েন পেলেন!";
+            document.getElementById('spinBox').innerText = "🎉 ৫০ কয়েন পেলেন!";
             showToast("স্পিন সফল হয়েছে!");
         }
     </script>
