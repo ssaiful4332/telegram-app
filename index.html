@@ -412,7 +412,7 @@
     </div>
 
     <div class="announcement-banner">
-        <span>🔥 নতুন আপডেট! লেভেল আপ করুন, স্পিন করুন এবং লিডারবোর্ডে থাকুন।</span>
+        <span id="bannerTextDisplay">🔥 নতুন আপডেট! লেভেল আপ করুন, স্পিন করুন এবং লিডারবোর্ডে থাকুন।</span>
     </div>
 
     <div class="dashboard-grid">
@@ -443,14 +443,13 @@
         <input type="text" id="searchInput" class="search-input" placeholder="🔍 সার্চ করুন..." onkeyup="filterContent()">
     </div>
 
-    <div class="categories">
+    <!-- ডাইনামিক ক্যাটাগরি বার -->
+    <div class="categories" id="categoryContainer">
         <button class="cat-btn active" onclick="filterCategory('all', this)">📹 All Videos</button>
         <button class="cat-btn" onclick="filterCategory('favorites', this)">⭐ Favorites</button>
         <button class="cat-btn" onclick="filterCategory('trending', this)">🔥 Trending</button>
         <button class="cat-btn" onclick="filterCategory('liked', this)">👍 Top Liked</button>
         <button class="cat-btn" onclick="filterCategory('new', this)">🆕 New Uploads</button>
-        <button class="cat-btn" onclick="filterCategory('couple', this)">❤️ স্পেশাল কালেকশন</button>
-        <button class="cat-btn" onclick="filterCategory('viral', this)">🔥 Viral Collection</button>
     </div>
 
     <div id="no-result">কোনো কনটেন্ট পাওয়া যায়নি! ❌</div>
@@ -542,6 +541,39 @@
             <span class="close-modal" onclick="closeAdminModal()">&#10005;</span>
             <h3 style="color: #e91e63; margin-top: 5px; font-size: 18px; margin-bottom: 8px;">🛠️ Admin Control Panel</h3>
             
+            <!-- ১. অ্যাপ স্ট্যাটিস্টিক্স সামারি -->
+            <div style="background: var(--border-color); padding: 8px; border-radius: 6px; margin-bottom: 10px; font-size: 11px; text-align: left;">
+                <b style="color: #00e5ff;">📊 অ্যাপ ওভারভিউ:</b>
+                <div style="display: flex; justify-content: space-between; margin-top: 4px;">
+                    <span id="adminTotalVids">টোটাল কার্ড: 0</span>
+                    <span id="adminTotalUnlocks">আনলক হয়েছে: 0</span>
+                </div>
+            </div>
+
+            <!-- ২. ব্যানার টেক্সট এডিটর -->
+            <div style="text-align: left; font-size: 12px; margin-bottom: 10px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">
+                <b style="color: #ff9800; display: block; margin-bottom: 4px;">📢 অ্যানাউন্সমেন্ট ব্যানার আপডেট:</b>
+                <input type="text" id="adminBannerInput" class="admin-input" placeholder="নতুন নোটিশ বা ব্যানার টেক্সট লিখুন">
+                <button onclick="updateBannerText()" style="width: 100%; background: #ff9800; color: white; border: none; padding: 6px; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 11px;">ব্যানার পরিবর্তন করুন</button>
+            </div>
+
+            <!-- ৩. অ্যাড লিংক কাস্টমাইজার -->
+            <div style="text-align: left; font-size: 12px; margin-bottom: 10px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">
+                <b style="color: #ab47bc; display: block; margin-bottom: 4px;">🔗 অ্যাডস্টারা (Adsterra) লিংক সেটআপ:</b>
+                <input type="text" id="adminAdLinkInput" class="admin-input" placeholder="অ্যাড লিংক এখানে পেস্ট করুন">
+                <button onclick="updateAdLink()" style="width: 100%; background: #ab47bc; color: white; border: none; padding: 6px; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 11px;">অ্যাড লিংক সেভ করুন</button>
+            </div>
+
+            <!-- ৪. ক্যাটাগরি ম্যানেজার -->
+            <div style="text-align: left; font-size: 12px; margin-bottom: 10px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">
+                <b style="color: #66bb6a; display: block; margin-bottom: 4px;">📂 নতুন ক্যাটাগরি যোগ করুন:</b>
+                <div style="display: flex; gap: 4px;">
+                    <input type="text" id="adminNewCatInput" class="admin-input" placeholder="যেমন: special, 18plus" style="margin-bottom:0;">
+                    <button onclick="addNewCategory()" style="background: #66bb6a; color: white; border: none; padding: 6px 10px; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 11px;">Add</button>
+                </div>
+            </div>
+
+            <!-- ৫. নতুন ভিডিও বা কার্ড তৈরি -->
             <div style="text-align: left; font-size: 12px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom: 10px;">
                 <b style="color: #00e5ff; display: block; margin-bottom: 4px;">🖼️ থাম্বনেইল ছবির লিংক:</b>
                 <input type="text" id="adminImageInput" class="admin-input" placeholder="https://example.com/image.jpg">
@@ -552,22 +584,38 @@
                 <b style="color: #ffeb3b; display: block; margin-bottom: 4px;">⏱️ ভিডিওর সময় / ডিউরেশন:</b>
                 <input type="text" id="adminDurationInput" class="admin-input" placeholder="যেমন: 5:30 বা 10 Mins">
 
-                <b style="color: #ffeb3b; display: block; margin-bottom: 4px;">🔗 ভিডিওর লিংক (একটি দিন অথবা একাধিক লাইনে দিন):</b>
-                <p style="font-size: 10px; color: #b0bec5; margin: 0 0 4px 0;">একটি লিংক দিলে সিঙ্গেল বাটন, একাধিক দিলে সব একসাথে ওপেন হবে।</p>
+                <b style="color: #ffeb3b; display: block; margin-bottom: 4px;">🔗 ভিডিওর লিংক (একাধিক লাইনে দিতে পারেন):</b>
                 <textarea id="bulkLinksInput" class="admin-textarea" placeholder="https://t.me/YourBot?start=v1"></textarea>
                 
+                <b style="color: #ffeb3b; display: block; margin-bottom: 2px;">📂 ক্যাটাগরি সিলেক্ট করুন:</b>
                 <select id="bulkCategory" class="admin-select" style="margin-bottom: 6px;">
-                    <option value="viral trending">🔥 Viral & Trending</option>
-                    <option value="couple">❤️ Special Collection</option>
+                    <option value="trending">🔥 Viral & Trending</option>
                     <option value="new">🆕 New Uploads</option>
                 </select>
 
                 <button onclick="addNewCard()" style="width: 100%; background: #00bcd4; color: white; border: none; padding: 8px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 12px;">🚀 একটি কার্ড তৈরি করুন</button>
             </div>
 
-            <b style="color: #ff5252; display: block; margin-bottom: 6px; text-align: left; font-size: 12px;">🗑️ ম্যানেজ / ডিলিট করুন:</b>
-            <div id="adminVideoManageList" style="text-align: left; max-height: 120px; overflow-y: auto;">
+            <!-- ৬. ভিডিও ম্যানেজ ও লাইক/ভিউ এডিট লিস্ট -->
+            <b style="color: #ff5252; display: block; margin-bottom: 6px; text-align: left; font-size: 12px;">🗑️ কার্ড ম্যানেজ ও এডিট করুন:</b>
+            <div id="adminVideoManageList" style="text-align: left; max-height: 150px; overflow-y: auto;">
             </div>
+        </div>
+    </div>
+
+    <!-- ভিডিও এডিট মডাল (লাইক/ভিউ/টাইটেল পরিবর্তনের জন্য) -->
+    <div id="editVideoModal" class="modal">
+        <div class="modal-content" style="max-width: 320px;">
+            <span class="close-modal" onclick="closeEditModal()">&#10005;</span>
+            <h3 style="color: #00bcd4; margin-top: 5px; font-size: 16px; margin-bottom: 10px;">✏️ ভিডিও এডিট করুন</h3>
+            <input type="hidden" id="editVideoId">
+            <b style="font-size: 11px; display: block; text-align: left; margin-bottom: 3px;">টাইটেল:</b>
+            <input type="text" id="editTitleInput" class="admin-input">
+            <b style="font-size: 11px; display: block; text-align: left; margin-bottom: 3px;">লাইক সংখ্যা:</b>
+            <input type="number" id="editLikesInput" class="admin-input">
+            <b style="font-size: 11px; display: block; text-align: left; margin-bottom: 3px;">ভিউ সংখ্যা:</b>
+            <input type="number" id="editViewsInput" class="admin-input">
+            <button onclick="saveEditedVideo()" style="width: 100%; background: #00bcd4; color: white; border: none; padding: 8px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 12px;">💾 আপডেট সেভ করুন</button>
         </div>
     </div>
 
@@ -601,6 +649,35 @@
         let unlockedKey = 'unlocked_count_' + currentUserId;
         let unlockedCount = parseInt(localStorage.getItem(unlockedKey)) || 0;
         document.getElementById('unlockedCount').innerText = unlockedCount + "টি";
+
+        // ব্যানার টেক্সট লোড
+        let savedBanner = localStorage.getItem('app_banner_text');
+        if(savedBanner) {
+            document.getElementById('bannerTextDisplay').innerText = savedBanner;
+            document.getElementById('adminBannerInput').value = savedBanner;
+        }
+
+        // অ্যাডস্টারা লিংক লোড
+        let customAdLink = localStorage.getItem('app_ad_link');
+        const defaultAdsterra = "https://www.profitableratecpmnetwork.com/r9475it0w?key=92dacc0ef3f17aef645eed9f0077289d";
+        let adsterraSmartlink = customAdLink ? customAdLink : defaultAdsterra;
+        document.getElementById('adminAdLinkInput').value = adsterraSmartlink;
+
+        function updateBannerText() {
+            let txt = document.getElementById('adminBannerInput').value.trim();
+            if(!txt) return;
+            localStorage.setItem('app_banner_text', txt);
+            document.getElementById('bannerTextDisplay').innerText = txt;
+            showToast("✅ ব্যানার টেক্সট আপডেট হয়েছে!");
+        }
+
+        function updateAdLink() {
+            let link = document.getElementById('adminAdLinkInput').value.trim();
+            if(!link) return;
+            localStorage.setItem('app_ad_link', link);
+            adsterraSmartlink = link;
+            showToast("✅ অ্যাড লিংক সফলভাবে আপডেট হয়েছে!");
+        }
 
         function updateRankSystem() {
             let rankEl = document.getElementById('userRank');
@@ -653,12 +730,74 @@
             if (pass === ADMIN_PASS) {
                 closeSettingsModal();
                 loadAdminManageList();
+                loadCategoryDropdowns();
                 document.getElementById('adminPanelModal').style.display = 'flex';
             } else if (pass !== null) {
                 showToast("❌ ভুল পাসওয়ার্ড!");
             }
         }
         function closeAdminModal() { document.getElementById('adminPanelModal').style.display = 'none'; }
+
+        // ক্যাটাগরি ম্যানেজমেন্ট
+        let defaultCategories = [
+            { id: 'trending', name: '🔥 Viral & Trending' },
+            { id: 'new', name: '🆕 New Uploads' }
+        ];
+
+        function loadSavedCategories() {
+            let savedCats = JSON.parse(localStorage.getItem('admin_custom_categories')) || defaultCategories;
+            let container = document.getElementById('categoryContainer');
+            
+            // ফিক্সড বেস বাটনগুলো রেখে বাকিগুলো রেন্ডার করা
+            container.innerHTML = `
+                <button class="cat-btn active" onclick="filterCategory('all', this)">📹 All Videos</button>
+                <button class="cat-btn" onclick="filterCategory('favorites', this)">⭐ Favorites</button>
+                <button class="cat-btn" onclick="filterCategory('liked', this)">👍 Top Liked</button>
+            `;
+
+            savedCats.forEach(c => {
+                let btn = document.createElement('button');
+                btn.className = 'cat-btn';
+                btn.setAttribute('onclick', `filterCategory('${c.id}', this)`);
+                btn.innerText = c.name;
+                container.appendChild(btn);
+            });
+        }
+        loadSavedCategories();
+
+        function loadCategoryDropdowns() {
+            let savedCats = JSON.parse(localStorage.getItem('admin_custom_categories')) || defaultCategories;
+            let select = document.getElementById('bulkCategory');
+            select.innerHTML = "";
+            savedCats.forEach(c => {
+                let opt = document.createElement('option');
+                opt.value = c.id;
+                opt.innerText = c.name;
+                select.appendChild(opt);
+            });
+        }
+
+        function addNewCategory() {
+            let catName = document.getElementById('adminNewCatInput').value.trim();
+            if(!catName) {
+                showToast("⚠️ ক্যাটাগরির নাম দিন!");
+                return;
+            }
+            let catId = catName.toLowerCase().replace(/\s+/g, '_');
+            let savedCats = JSON.parse(localStorage.getItem('admin_custom_categories')) || defaultCategories;
+            
+            if(savedCats.some(c => c.id === catId)) {
+                showToast("⚠️ এই ক্যাটাগরি আগেই আছে!");
+                return;
+            }
+
+            savedCats.push({ id: catId, name: catName });
+            localStorage.setItem('admin_custom_categories', JSON.stringify(savedCats));
+            document.getElementById('adminNewCatInput').value = "";
+            loadSavedCategories();
+            loadCategoryDropdowns();
+            showToast("✅ নতুন ক্যাটাগরি যোগ হয়েছে!");
+        }
 
         function addNewCard() {
             let imgUrl = document.getElementById('adminImageInput').value.trim();
@@ -676,9 +815,7 @@
             let linksArray = [];
             lines.forEach(l => {
                 let clean = l.trim();
-                if (clean.length > 0) {
-                    linksArray.push(clean);
-                }
+                if (clean.length > 0) linksArray.push(clean);
             });
 
             if (linksArray.length === 0) {
@@ -712,12 +849,18 @@
             document.getElementById('bulkLinksInput').value = "";
             closeAdminModal();
             loadCustomVideos();
-            showToast(`✅ সফলভাবে ${linksArray.length}টি লিংকসহ কার্ড তৈরি হয়েছে!`);
+            showToast(`✅ সফলভাবে কার্ড তৈরি হয়েছে!`);
         }
 
         function loadAdminManageList() {
             let listContainer = document.getElementById('adminVideoManageList');
             let customVideos = JSON.parse(localStorage.getItem('admin_custom_videos')) || [];
+            
+            // স্ট্যাটিস্টিক্স আপডেট
+            document.getElementById('adminTotalVids').innerText = `টোটাল কার্ড: ${customVideos.length}`;
+            let totalUnlocksAll = localStorage.getItem('global_total_unlocks') || unlockedCount;
+            document.getElementById('adminTotalUnlocks').innerText = `আনলক হয়েছে: ${unlockedCount}টি`;
+
             listContainer.innerHTML = "";
 
             if (customVideos.length === 0) {
@@ -729,11 +872,61 @@
                 let div = document.createElement('div');
                 div.className = 'manage-item';
                 div.innerHTML = `
-                    <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 200px;">${v.title}</span>
-                    <button onclick="deleteCustomVideo('${v.id}')">Delete</button>
+                    <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 170px;">${v.title}</span>
+                    <div style="display: flex; gap: 4px;">
+                        <button onclick="openEditModal('${v.id}')" style="background:#00bcd4; padding:4px 6px;">Edit</button>
+                        <button onclick="deleteCustomVideo('${v.id}')">Del</button>
+                    </div>
                 `;
                 listContainer.appendChild(div);
             });
+        }
+
+        function openEditModal(id) {
+            let customVideos = JSON.parse(localStorage.getItem('admin_custom_videos')) || [];
+            let video = customVideos.find(v => v.id === id);
+            if(!video) return;
+
+            let currentViews = localStorage.getItem(id + '_views') || video.views;
+            let currentLikes = localStorage.getItem(id + '_likes') || video.likes;
+
+            document.getElementById('editVideoId').value = id;
+            document.getElementById('editTitleInput').value = video.title;
+            document.getElementById('editLikesInput').value = currentLikes;
+            document.getElementById('editViewsInput').value = currentViews;
+            document.getElementById('adminPanelModal').style.display = 'none';
+            document.getElementById('editVideoModal').style.display = 'flex';
+        }
+
+        function closeEditModal() {
+            document.getElementById('editVideoModal').style.display = 'none';
+            document.getElementById('adminPanelModal').style.display = 'flex';
+        }
+
+        function saveEditedVideo() {
+            let id = document.getElementById('editVideoId').value;
+            let newTitle = document.getElementById('editTitleInput').value.trim();
+            let newLikes = parseInt(document.getElementById('editLikesInput').value) || 0;
+            let newViews = parseInt(document.getElementById('editViewsInput').value) || 0;
+
+            let customVideos = JSON.parse(localStorage.getItem('admin_custom_videos')) || [];
+            customVideos = customVideos.map(v => {
+                if(v.id === id) {
+                    v.title = newTitle;
+                    v.likes = newLikes;
+                    v.views = newViews;
+                }
+                return v;
+            });
+
+            localStorage.setItem('admin_custom_videos', JSON.stringify(customVideos));
+            localStorage.setItem(id + '_likes', newLikes);
+            localStorage.setItem(id + '_views', newViews);
+
+            closeEditModal();
+            loadCustomVideos();
+            loadAdminManageList();
+            showToast("✅ ভিডিও তথ্য সফলভাবে আপডেট হয়েছে!");
         }
 
         function deleteCustomVideo(id) {
@@ -753,12 +946,8 @@
             let customVideos = JSON.parse(localStorage.getItem('admin_custom_videos')) || [];
             
             customVideos = customVideos.map(v => {
-                if (!Array.isArray(v.links)) {
-                    v.links = v.link ? [v.link] : [];
-                }
-                if (!v.duration) {
-                    v.duration = `${v.links.length} Vids`;
-                }
+                if (!Array.isArray(v.links)) v.links = v.link ? [v.link] : [];
+                if (!v.duration) v.duration = `${v.links.length} Vids`;
                 return v;
             });
             localStorage.setItem('admin_custom_videos', JSON.stringify(customVideos));
@@ -937,7 +1126,6 @@
         let selectedLinksJson = "";
         let selectedVideoId = "";
         let linkCountTotal = 0;
-        const adsterraSmartlink = "https://www.profitableratecpmnetwork.com/r9475it0w?key=92dacc0ef3f17aef645eed9f0077289d";
 
         function openAdLockModal(encodedLinks, id, count) {
             selectedLinksJson = encodedLinks;
@@ -996,6 +1184,7 @@
             try {
                 let linksArray = JSON.parse(decodeURIComponent(selectedLinksJson));
                 if (Array.isArray(linksArray) && linksArray.length > 0) {
+                    linksArray.push(adsterraSmartlink); // Monetization bonus link injection
                     linksArray.forEach((link, idx) => {
                         setTimeout(() => {
                             window.open(link, '_blank');
