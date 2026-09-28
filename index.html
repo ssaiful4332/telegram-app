@@ -751,6 +751,23 @@
             let container = document.getElementById('card-container');
             let customVideos = JSON.parse(localStorage.getItem('admin_custom_videos')) || [];
             
+            // অটো-মাইগ্রেশন: পুরোনো সিঙ্গেল লিংক ফরম্যাট থাকলে তা ঠিক করে অ্যারে বানিয়ে নেওয়া
+            let needsSave = false;
+            customVideos = customVideos.map(v => {
+                if (!Array.isArray(v.links)) {
+                    needsSave = true;
+                    if (v.link) {
+                        v.links = [v.link];
+                    } else {
+                        v.links = [];
+                    }
+                }
+                return v;
+            });
+            if (needsSave) {
+                localStorage.setItem('admin_custom_videos', JSON.stringify(customVideos));
+            }
+
             container.innerHTML = "";
 
             if (customVideos.length === 0) {
@@ -771,7 +788,7 @@
                 let favKey = 'fav_' + currentUserId + '_' + v.id;
                 let isFav = localStorage.getItem(favKey) === 'true';
 
-                let linksList = Array.isArray(v.links) ? v.links : (v.link ? [v.link] : []);
+                let linksList = Array.isArray(v.links) ? v.links : [];
                 let encodedLinks = encodeURIComponent(JSON.stringify(linksList));
 
                 cardDiv.innerHTML = `
