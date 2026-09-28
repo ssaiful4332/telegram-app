@@ -558,9 +558,9 @@
                 <b style="color: #00e5ff; display: block; margin-bottom: 4px;">📌 পোস্টের টাইটেল / নাম:</b>
                 <input type="text" id="adminTitleInput" class="admin-input" placeholder="পোস্টের সুন্দর নাম লিখুন">
 
-                <b style="color: #ffeb3b; display: block; margin-bottom: 4px;">🔗 একাধিক ভিডিওর লিংক (একটি মাত্র বাটনে থাকবে):</b>
-                <p style="font-size: 10px; color: #b0bec5; margin: 0 0 4px 0;">প্রতি লাইনে একটি করে লিংক দিন। আনলক করার পর সবগুলো লিংক একসঙ্গে দেখা যাবে!</p>
-                <textarea id="bulkLinksInput" class="admin-textarea" placeholder="https://t.me/YourBot?start=v1&#10;https://t.me/YourBot?start=v2&#10;https://t.me/YourBot?start=v3"></textarea>
+                <b style="color: #ffeb3b; display: block; margin-bottom: 4px;">🔗 ভিডিওর লিংক:</b>
+                <p style="font-size: 10px; color: #b0bec5; margin: 0 0 4px 0;">এখানে একটিমাত্র লিংক দিন। আনলক করার পর সরাসরি এই লিংকটি শো করবে!</p>
+                <textarea id="bulkLinksInput" class="admin-textarea" placeholder="https://t.me/YourBot?start=v1"></textarea>
                 
                 <select id="bulkCategory" class="admin-select" style="margin-bottom: 6px;">
                     <option value="viral trending">🔥 Viral & Trending</option>
@@ -714,7 +714,7 @@
             document.getElementById('bulkLinksInput').value = "";
             closeAdminModal();
             loadCustomVideos();
-            showToast(`✅ সফলভাবে ১টি কার্ডে ${linksArray.length}টি লিংক যোগ করা হয়েছে!`);
+            showToast("✅ সফলভাবে কার্ড তৈরি করা হয়েছে!");
         }
 
         function loadAdminManageList() {
@@ -731,7 +731,7 @@
                 let div = document.createElement('div');
                 div.className = 'manage-item';
                 div.innerHTML = `
-                    <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 200px;">${v.title} (${v.links ? v.links.length : 1} links)</span>
+                    <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 200px;">${v.title}</span>
                     <button onclick="deleteCustomVideo('${v.id}')">Delete</button>
                 `;
                 listContainer.appendChild(div);
@@ -781,7 +781,7 @@
                     <div class="card-img-container">
                         <img src="${v.img}" class="card-img" alt="Thumbnail">
                         <span class="preview-badge">✨ Collection</span>
-                        <div class="duration-badge">${linksList.length} Files</div>
+                        <div class="duration-badge">File Ready</div>
                         <button class="fav-icon ${isFav ? 'active' : ''}" onclick="toggleFavorite('${v.id}', this)">❤️</button>
                     </div>
                     <div class="card-body">
@@ -968,16 +968,18 @@
 
                 let linksArray = JSON.parse(decodeURIComponent(selectedLinksJson));
                 let unlockedLinksHtml = '';
+                
+                // এখানে চেক করা হয়েছে যদি একটি লিংক থাকে তবে একটি বাটন দেখাবে, একাধিক থাকলে একটি সুন্দর লিস্ট বা একটি কমন বাটন দেখাবে
                 linksArray.forEach((lnk, idx) => {
-                    let label = linksArray.length > 1 ? `▶ WATCH / DOWNLOAD (Part ${idx + 1})` : `▶ WATCH / DOWNLOAD NOW`;
-                    unlockedLinksHtml += `<a href="${lnk}" target="_blank" style="display: block; background: #4caf50; color: white; text-decoration: none; padding: 10px; border-radius: 8px; font-weight: bold; font-size: 13px; margin-bottom: 6px;">${label}</a>`;
+                    let label = `▶ WATCH / DOWNLOAD NOW`;
+                    unlockedLinksHtml += `<a href="${lnk}" target="_blank" style="display: block; background: #4caf50; color: white; text-decoration: none; padding: 12px; border-radius: 8px; font-weight: bold; font-size: 13px; margin-bottom: 6px;">${label}</a>`;
                 });
 
                 showToast("✅ ভিডিও আনলক সফল হয়েছে!");
                 document.querySelector('#adModal .modal-content').innerHTML = `
                     <span class="close-modal" onclick="closeModal()">&#10005;</span>
                     <h3 style="color: #4caf50; margin-top: 10px; font-size: 18px;">✅ Unlocked Successfully!</h3>
-                    <p style="font-size: 13px; margin: 10px 0;">আপনার ভিডিওর লিংকগুলো নিচে দেওয়া হলো:</p>
+                    <p style="font-size: 13px; margin: 10px 0;">আপনার ভিডিওর লিংক নিচে দেওয়া হলো:</p>
                     <div style="max-height: 200px; overflow-y: auto;">
                         ${unlockedLinksHtml}
                     </div>
