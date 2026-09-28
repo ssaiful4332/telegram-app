@@ -476,7 +476,7 @@
             <h3 style="color: inherit; margin-top: 10px; font-size: 18px;" id="modalMainTitle">🔒 Watch 3 ads to unlock</h3>
             <div id="modalBodyContent">
                 <p id="adStatusText" style="font-size: 14px; margin: 12px 0;">Progress: <b style="color: #ffeb3b;">0/3</b></p>
-                <button id="watchAdBtn" onclick="watchNextAd()" style="width: 100%; background: var(--btn-color); color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer;">🔓 UNLOCK VIDEO</button>
+                <button id="watchAdBtn" onclick="watchNextAd()" style="width: 100%; background: var(--btn-color); color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer;">🔓 UNLOCK ALL VIDEOS</button>
             </div>
         </div>
     </div>
@@ -968,29 +968,21 @@
 
                 let linksArray = JSON.parse(decodeURIComponent(selectedLinksJson));
                 
-                // এক ক্লিকেই সবগুলো লিংক আলাদা ট্যাবে/উইন্ডোতে ওপেন করার কোড
+                // এক ক্লিকেই সবগুলো লিংক আলাদা ট্যাবে ওপেন করার কোড
                 linksArray.forEach((link, idx) => {
                     setTimeout(() => {
                         window.open(link, '_blank');
-                    }, idx * 300); // প্রতিটি লিংকের মাঝে সামান্য বিরতি যাতে ব্রাউজার পপআপ ব্লক না করে
+                    }, idx * 400); 
                 });
 
                 showToast("✅ সব ভিডিও সফলভাবে ওপেন হয়েছে!");
                 
-                // মডালের ভেতর সফল মেসেজ ও লিংকগুলোর লিস্ট একসাথে দেখানো
-                let linksHtml = '';
-                linksArray.forEach((l, index) => {
-                    linksHtml += `<a href="${l}" target="_blank" style="display: block; background: #4caf50; color: white; text-decoration: none; padding: 8px 10px; border-radius: 6px; font-weight: bold; font-size: 12px; margin-bottom: 6px; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">▶ Video ${index + 1}: ${l}</a>`;
-                });
-
+                // এখানে শুধু সাকসেস মেসেজ ও বন্ধ করার বাটন রাখা হয়েছে, কোনো আলাদা লিংক বাটন রাখা হয়নি
                 document.querySelector('#adModal .modal-content').innerHTML = `
                     <span class="close-modal" onclick="closeModal()">&#10005;</span>
-                    <h3 style="color: #4caf50; margin-top: 10px; font-size: 16px;">✅ All Videos Unlocked!</h3>
-                    <p style="font-size: 12px; margin: 8px 0;">নিচের লিংকগুলোতে ক্লিক করে সরাসরি দেখতে পারেন:</p>
-                    <div style="max-height: 180px; overflow-y: auto; text-align: left; margin-bottom: 10px;">
-                        ${linksHtml}
-                    </div>
-                    <button onclick="closeModal()" style="width: 100%; background: var(--btn-color); color: white; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 12px;">বন্ধ করুন</button>
+                    <h3 style="color: #4caf50; margin-top: 10px; font-size: 18px;">✅ All Videos Unlocked!</h3>
+                    <p style="font-size: 13px; margin: 15px 0; color: #b0bec5;">আপনার দেওয়া সবকটি ভিডিওর লিংক সফলভাবে একসঙ্গে ওপেন করা হয়েছে।</p>
+                    <button onclick="closeModal()" style="width: 100%; background: var(--btn-color); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px;">বন্ধ করুন</button>
                 `;
             }
         }
