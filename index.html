@@ -381,6 +381,26 @@
             cursor: pointer;
             font-weight: bold;
         }
+        .manage-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--border-color);
+            padding: 8px 10px;
+            border-radius: 6px;
+            margin-bottom: 6px;
+            font-size: 12px;
+            text-align: left;
+        }
+        .manage-item button {
+            background: #d32f2f;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -438,7 +458,7 @@
 
     <div id="no-result">কোনো কনটেন্ট পাওয়া যায়নি! ❌</div>
 
-    <!-- ডায়নামিক ও ডিফল্ট কার্ড কন্টেইনার -->
+    <!-- কার্ড কন্টেইনার -->
     <div id="card-container">
         
         <!-- নতুন যোগ করা জামাই বউ ভিডিও -->
@@ -585,15 +605,16 @@
         </div>
     </div>
 
-    <!-- গোপন অ্যাডমিন প্যানেল মডাল -->
+    <!-- অ্যাডমিন কন্ট্রোল প্যানেল মডাল (অ্যাড ও ডিলিট অপশনসহ) -->
     <div id="adminPanelModal" class="modal">
         <div class="modal-content" style="max-width: 350px;">
             <span class="close-modal" onclick="closeAdminModal()">&#10005;</span>
             <h3 style="color: #e91e63; margin-top: 5px; font-size: 18px; margin-bottom: 10px;">🛠️ Admin Control Panel</h3>
-            <p style="font-size: 11px; color: #b0bec5; margin-bottom: 12px;">অ্যাপের ভেতরে নতুন পোস্ট বা ভিডিও যুক্ত করুন</p>
+            <p style="font-size: 11px; color: #b0bec5; margin-bottom: 12px;">নতুন পোস্ট যোগ বা আগের পোস্ট ডিলিট করুন</p>
             
-            <div style="text-align: left; font-size: 12px;">
-                <label style="color: #b0bec5;">ছবির লিংক (Image / GIF URL):</label>
+            <div style="text-align: left; font-size: 12px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; margin-bottom: 12px;">
+                <b style="color: #ffeb3b; display: block; margin-bottom: 8px;">➕ নতুন ভিডিও যোগ করুন:</b>
+                <label style="color: #b0bec5;">ছবির লিংক (Image URL):</label>
                 <input type="text" id="adminImgUrl" class="admin-input" placeholder="https://image-link.jpg">
 
                 <label style="color: #b0bec5;">ভিডিওর টাইটেল / নাম:</label>
@@ -609,9 +630,14 @@
                     <option value="couple new">❤️ Couple Special</option>
                     <option value="new">🆕 New Uploads</option>
                 </select>
+
+                <button onclick="addNewVideoByAdmin()" style="width: 100%; background: #e91e63; color: white; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 13px; margin-top: 5px;">➕ Add Video to App</button>
             </div>
 
-            <button onclick="addNewVideoByAdmin()" style="width: 100%; background: #e91e63; color: white; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 13px; margin-top: 5px;">➕ Add Video to App</button>
+            <b style="color: #ff5252; display: block; margin-bottom: 8px; text-align: left;">🗑️ আপনার যোগ করা পোস্ট ম্যানেজ/ডিলিট করুন:</b>
+            <div id="adminVideoManageList" style="text-align: left; max-height: 150px; overflow-y: auto;">
+                <!-- ডাইনামিক ডিলিট লিস্ট এখানে দেখাবে -->
+            </div>
         </div>
     </div>
 
@@ -697,6 +723,7 @@
             let pass = prompt("গোপন অ্যাডমিন পাসওয়ার্ড দিন:");
             if (pass === ADMIN_PASS) {
                 closeSettingsModal();
+                loadAdminManageList();
                 document.getElementById('adminPanelModal').style.display = 'flex';
             } else if (pass !== null) {
                 showToast("❌ ভুল পাসওয়ার্ড!");
@@ -731,12 +758,46 @@
             showToast("✅ সফলভাবে নতুন ভিডিও যোগ করা হয়েছে!");
         }
 
-        // লোকাল স্টোরেজ থেকে কাস্টম ভিডিও লোড করা
+        // অ্যাডমিন প্যানেলে ডিলিট করার লিস্ট দেখানোর ফাংশন
+        function loadAdminManageList() {
+            let listContainer = document.getElementById('adminVideoManageList');
+            let customVideos = JSON.parse(localStorage.getItem('admin_custom_videos')) || [];
+            listContainer.innerHTML = "";
+
+            if (customVideos.length === 0) {
+                listContainer.innerHTML = "<p style='color:#8b949e; text-align:center; font-size:11px;'>কোনো কাস্টম ভিডিও নেই।</p>";
+                return;
+            }
+
+            customVideos.forEach(v => {
+                let div = document.createElement('div');
+                div.className = 'manage-item';
+                div.innerHTML = `
+                    <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 200px;">${v.title}</span>
+                    <button onclick="deleteCustomVideo('${v.id}')">Delete</button>
+                `;
+                listContainer.appendChild(div);
+            });
+        }
+
+        // নির্দিষ্ট ভিডিও ডিলিট করার ফাংশন
+        function deleteCustomVideo(id) {
+            if (!confirm("আপনি কি নিশ্চিতভাবে এই ভিডিওটি ডিলিট করতে চান?")) return;
+
+            let customVideos = JSON.parse(localStorage.getItem('admin_custom_videos')) || [];
+            customVideos = customVideos.filter(v => v.id !== id);
+            localStorage.setItem('admin_custom_videos', JSON.stringify(customVideos));
+
+            loadCustomVideos();
+            loadAdminManageList();
+            showToast("🗑️ ভিডিও সফলভাবে ডিলিট করা হয়েছে!");
+        }
+
+        // লোকাল স্টোরেজ থেকে কাস্টম ভিডিও অ্যাপে লোড করা
         function loadCustomVideos() {
             let container = document.getElementById('card-container');
             let customVideos = JSON.parse(localStorage.getItem('admin_custom_videos')) || [];
             
-            // রিমুভ প্রিভিয়াস কাস্টম কার্ডস যাতে ডুপ্লিকেট না হয়
             document.querySelectorAll('.custom-card').forEach(el => el.remove());
 
             customVideos.forEach(v => {
