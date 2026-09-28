@@ -282,7 +282,7 @@
             margin-top: 8px;
         }
 
-        /* কার্ডের নিচে ইউনিক লিংক প্রদর্শনের বক্স */
+        /* কার্ডের নিচের ইউনিক লিংক বক্স */
         .card-unique-link-box {
             background: rgba(0, 229, 255, 0.05);
             border: 1px dashed #00e5ff;
@@ -535,7 +535,6 @@
 </head>
 <body>
 
-    <!-- ইউনিক লিংকের জন্য ফোকাস পপআপ -->
     <div id="singleVideoFocusModal">
         <div class="focus-box">
             <button class="close-focus-btn" onclick="closeFocusModal()">✕</button>
@@ -594,7 +593,6 @@
     <div id="no-result">কোনো কনটেন্ট পাওয়া যায়নি! ❌</div>
 
     <div id="card-container">
-        <!-- ডিফল্ট কার্ড v1 -->
         <div class="card" id="card-v1" data-id="v1" data-video-url="https://t.me/example_video_link">
             <div class="card-img-container">
                 <img src="https://picsum.photos/400/200?random=1" class="card-img" alt="Video">
@@ -614,7 +612,6 @@
                 </div>
                 <button class="unlock-btn" onclick="openVideoLink('https://t.me/example_video_link')">▶ WATCH / DOWNLOAD NOW</button>
                 
-                <!-- কার্ডের নিচে ইউনিক লিংক বক্স -->
                 <div class="card-unique-link-box">
                     <span>🔗 Unique Link: ...?startapp=v1</span>
                     <button onclick="copyVideoLink('v1')">Copy</button>
@@ -625,7 +622,6 @@
 
     <div id="toast">বিজ্ঞপ্তি</div>
 
-    <!-- মডালসমূহ -->
     <div id="spinModal" class="modal">
         <div class="modal-content">
             <span class="close-modal" onclick="closeSpinModal()">&#10005;</span>
@@ -684,7 +680,6 @@
         </div>
     </div>
 
-    <!-- অ্যাডমিন প্যানেল -->
     <div id="adminModal" class="modal">
         <div class="modal-content" style="max-width: 380px;">
             <span class="close-modal" onclick="closeAdminModal()">&#10005;</span>
@@ -825,7 +820,6 @@
                     </div>
                     <button class="unlock-btn" onclick="openVideoLink('${videoUrl}')">▶ WATCH / DOWNLOAD NOW</button>
                     
-                    <!-- থাম্বনেইল ও কার্ডের নিচে ইউনিক লিংক বক্স -->
                     <div class="card-unique-link-box">
                         <span>🔗 Unique Link: ...?startapp=${uniqueId}</span>
                         <button onclick="copyVideoLink('${uniqueId}')">Copy</button>
@@ -861,7 +855,7 @@
             });
         }
 
-        // ইউনিক লিংকে ঢুকলে পপআপ ফোকাস ওপেন এবং বাটন লিংক ফিক্স করার লজিক
+        // ইউনিক লিংকে ঢুকলে পপআপ ফোকাস ওপেন এবং বাটন লিংক ফিক্স করার লজিক (অন্য কার্ড হাইড না করে)
         window.addEventListener('load', () => {
             const urlParams = new URLSearchParams(window.location.search);
             let startAppParam = urlParams.get('startapp');
