@@ -531,6 +531,17 @@
             border: 2px solid white;
             display: inline-block;
         }
+        .admin-delete-card-btn {
+            background: #d32f2f;
+            color: white;
+            border: none;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 6px;
+        }
     </style>
 </head>
 <body>
@@ -551,7 +562,7 @@
     </div>
 
     <div class="announcement-banner">
-        <span id="bannerTextDisplay">🔥 নতুন আপডেট! প্রতিটি ভিডিওর আলাদা ইউনিক লিংক সিস্টেম চালু হয়েছে।</span>
+        <span id="bannerTextDisplay">🔥 নতুন আপডেট! প্রতিটি ভিডিওর আলাদা ইউনিক লিংক ও পার্মানেন্ট সেভ সিস্টেম চালু হয়েছে।</span>
     </div>
 
     <div class="dashboard-grid">
@@ -592,33 +603,7 @@
 
     <div id="no-result">কোনো কনটেন্ট পাওয়া যায়নি! ❌</div>
 
-    <div id="card-container">
-        <div class="card" id="card-v1" data-id="v1" data-video-url="https://t.me/example_video_link">
-            <div class="card-img-container">
-                <img src="https://picsum.photos/400/200?random=1" class="card-img" alt="Video">
-                <span class="preview-badge">VIP PREVIEW</span>
-                <span class="duration-badge">03:38</span>
-                <button class="fav-icon" onclick="toggleFavorite(this)">⭐</button>
-            </div>
-            <div class="card-body">
-                <div class="card-title">জামাই বউ | নতুন ভাইরাল ভিডিও ২০২৬ 🎬</div>
-                <div class="card-footer-info">
-                    <span>👁️ 257 Views</span>
-                    <button class="like-btn" onclick="toggleLike(this)">👍 <span>58</span></button>
-                </div>
-                <div class="card-actions-row">
-                    <button class="comment-section-btn" onclick="openCommentModal()">💬 কমেন্ট</button>
-                    <button class="share-link-btn" onclick="copyVideoLink('v1')">🔗 লিংক কপি</button>
-                </div>
-                <button class="unlock-btn" onclick="openVideoLink('https://t.me/example_video_link')">▶ WATCH / DOWNLOAD NOW</button>
-                
-                <div class="card-unique-link-box">
-                    <span>🔗 Unique Link: ...?startapp=v1</span>
-                    <button onclick="copyVideoLink('v1')">Copy</button>
-                </div>
-            </div>
-        </div>
-    </div>
+    <div id="card-container"></div>
 
     <div id="toast">বিজ্ঞপ্তি</div>
 
@@ -777,6 +762,70 @@
             }
         }
 
+        // লোকাল স্টোরেজ থেকে ভিডিও ডাটা লোড ও সেভ করার সিস্টেম
+        function getSavedVideos() {
+            let videos = localStorage.getItem('unlimited_vids_list');
+            if (!videos) {
+                // ডিফল্ট প্রথম কার্ড
+                let defaultVideos = [
+                    {
+                        id: 'v1',
+                        img: 'https://picsum.photos/400/200?random=1',
+                        videoUrl: 'https://t.me/example_video_link',
+                        title: 'জামাই বউ | নতুন ভাইরাল ভিডিও ২০২৬ 🎬',
+                        duration: '03:38',
+                        views: '257 Views',
+                        likes: 58
+                    }
+                ];
+                localStorage.setItem('unlimited_vids_list', JSON.stringify(defaultVideos));
+                return defaultVideos;
+            }
+            return JSON.parse(videos);
+        }
+
+        function renderCards() {
+            let container = document.getElementById('card-container');
+            container.innerHTML = '';
+            let videos = getSavedVideos();
+
+            videos.forEach(v => {
+                let card = document.createElement('div');
+                card.className = 'card';
+                card.id = `card-${v.id}`;
+                card.setAttribute('data-id', v.id);
+                card.setAttribute('data-video-url', v.videoUrl);
+
+                card.innerHTML = `
+                    <div class="card-img-container">
+                        <img src="${v.img}" class="card-img" alt="Video">
+                        <span class="preview-badge">VIP PREVIEW</span>
+                        <span class="duration-badge">${v.duration}</span>
+                        <button class="fav-icon" onclick="toggleFavorite(this)">⭐</button>
+                    </div>
+                    <div class="card-body">
+                        <div class="card-title">${v.title}</div>
+                        <div class="card-footer-info">
+                            <span>👁️ ${v.views}</span>
+                            <button class="like-btn" onclick="toggleLike(this, '${v.id}')">👍 <span>${v.likes}</span></button>
+                        </div>
+                        <div class="card-actions-row">
+                            <button class="comment-section-btn" onclick="openCommentModal()">💬 কমেন্ট</button>
+                            <button class="share-link-btn" onclick="copyVideoLink('${v.id}')">🔗 লিংক কপি</button>
+                        </div>
+                        <button class="unlock-btn" onclick="openVideoLink('${v.videoUrl}')">▶ WATCH / DOWNLOAD NOW</button>
+                        
+                        <div class="card-unique-link-box">
+                            <span>🔗 Unique Link: ...?startapp=${v.id}</span>
+                            <button onclick="copyVideoLink('${v.id}')">Copy</button>
+                        </div>
+                        <button class="admin-delete-card-btn" onclick="deleteVideoCard('${v.id}')">🗑️ ডিলিট কার্ড</button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
         let lastCreatedLink = "";
 
         function createNewCardWithAutoLink() {
@@ -794,49 +843,44 @@
             let currentBaseUrl = window.location.href.split('?')[0];
             lastCreatedLink = `${currentBaseUrl}?startapp=${uniqueId}`;
 
-            let container = document.getElementById('card-container');
-            let card = document.createElement('div');
-            card.className = 'card';
-            card.id = `card-${uniqueId}`;
-            card.setAttribute('data-id', uniqueId);
-            card.setAttribute('data-video-url', videoUrl);
-            
-            card.innerHTML = `
-                <div class="card-img-container">
-                    <img src="${img}" class="card-img" alt="Video">
-                    <span class="preview-badge">VIP PREVIEW</span>
-                    <span class="duration-badge">${duration}</span>
-                    <button class="fav-icon" onclick="toggleFavorite(this)">⭐</button>
-                </div>
-                <div class="card-body">
-                    <div class="card-title">${title}</div>
-                    <div class="card-footer-info">
-                        <span>👁️ 15 Views</span>
-                        <button class="like-btn" onclick="toggleLike(this)">👍 <span>0</span></button>
-                    </div>
-                    <div class="card-actions-row">
-                        <button class="comment-section-btn" onclick="openCommentModal()">💬 কমেন্ট</button>
-                        <button class="share-link-btn" onclick="copyVideoLink('${uniqueId}')">🔗 লিংক কপি</button>
-                    </div>
-                    <button class="unlock-btn" onclick="openVideoLink('${videoUrl}')">▶ WATCH / DOWNLOAD NOW</button>
-                    
-                    <div class="card-unique-link-box">
-                        <span>🔗 Unique Link: ...?startapp=${uniqueId}</span>
-                        <button onclick="copyVideoLink('${uniqueId}')">Copy</button>
-                    </div>
-                </div>
-            `;
-            container.prepend(card);
+            let newVideo = {
+                id: uniqueId,
+                img: img,
+                videoUrl: videoUrl,
+                title: title,
+                duration: duration,
+                views: '15 Views',
+                likes: 0
+            };
+
+            let videos = getSavedVideos();
+            videos.unshift(newVideo); // নতুন ভিডিও সবার উপরে যুক্ত হবে
+            localStorage.setItem('unlimited_vids_list', JSON.stringify(videos));
+
+            renderCards();
 
             document.getElementById('lastGeneratedBox').style.display = 'block';
             document.getElementById('latestUniqueLinkText').innerText = lastCreatedLink;
             
-            showToast("ভিডিও পোস্ট হয়েছে ও ইউনিক লিংক তৈরি হয়েছে!");
+            showToast("ভিডিও পার্মানেন্টলি পোস্ট হয়েছে ও ইউনিক লিংক তৈরি হয়েছে!");
             
             document.getElementById('cardImgInput').value = '';
             document.getElementById('cardVideoUrlInput').value = '';
             document.getElementById('cardTitleInput').value = '';
             document.getElementById('cardDurationInput').value = '';
+        }
+
+        function deleteVideoCard(id) {
+            let pass = prompt("ভিডিওটি ডিলিট করতে অ্যাডমিন পাসওয়ার্ড দিন:");
+            if (pass === "Lamiya" || pass === "admin" || pass === "1234") {
+                let videos = getSavedVideos();
+                videos = videos.filter(v => v.id !== id);
+                localStorage.setItem('unlimited_vids_list', JSON.stringify(videos));
+                renderCards();
+                showToast("কার্ড সফলভাবে ডিলিট করা হয়েছে!");
+            } else if (pass !== null) {
+                showToast("ভুল পাসওয়ার্ড!");
+            }
         }
 
         function copyLatestGeneratedLink() {
@@ -855,8 +899,10 @@
             });
         }
 
-        // ইউনিক লিংকে ঢুকলে পপআপ ফোকাস ওপেন এবং বাটন লিংক ফিক্স করার লজিক (অন্য কার্ড হাইড না করে)
+        // পেজ লোড হলে সেভ করা কার্ডগুলো রেন্ডার করা এবং ইউনিক লিংক থাকলে ফোকাস করা
         window.addEventListener('load', () => {
+            renderCards();
+
             const urlParams = new URLSearchParams(window.location.search);
             let startAppParam = urlParams.get('startapp');
             
@@ -880,7 +926,7 @@
                         document.getElementById('focusCardContainer').appendChild(cloneCard);
                         document.getElementById('singleVideoFocusModal').style.display = 'flex';
                     }
-                }, 100);
+                }, 150);
             }
         });
 
@@ -889,7 +935,7 @@
         }
 
         function toggleFavorite(btn) { btn.classList.toggle('active'); }
-        function toggleLike(btn) {
+        function toggleLike(btn, id) {
             btn.classList.toggle('liked');
             let span = btn.querySelector('span');
             let count = parseInt(span.innerText);
