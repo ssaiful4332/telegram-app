@@ -569,7 +569,7 @@
     <div id="no-result">কোনো কনটেন্ট পাওয়া যায়নি! ❌</div>
 
     <div id="card-container">
-        <div class="card" id="card-v1" data-id="v1">
+        <div class="card" id="card-v1" data-id="v1" data-video-url="https://www.example.com/video1.mp4">
             <div class="card-img-container">
                 <img src="https://picsum.photos/400/200?random=1" class="card-img" alt="Video">
                 <span class="preview-badge">VIP PREVIEW</span>
@@ -586,21 +586,12 @@
                     <button class="comment-section-btn" onclick="openCommentModal()">💬 কমেন্ট</button>
                     <button class="share-link-btn" onclick="copyVideoLink('v1')">🔗 লিংক কপি</button>
                 </div>
-                <button class="unlock-btn" onclick="openAdModal()">▶ WATCH / DOWNLOAD NOW</button>
+                <button class="unlock-btn" onclick="openVideoLink('https://www.example.com/video1.mp4')">▶ WATCH / DOWNLOAD NOW</button>
             </div>
         </div>
     </div>
 
     <div id="toast">বিজ্ঞপ্তি</div>
-
-    <div id="adModal" class="modal">
-        <div class="modal-content">
-            <span class="close-modal" onclick="closeModal()">&#10005;</span>
-            <h3 style="color: inherit; margin-top: 10px; font-size: 18px;">🔒 Watch ads to unlock</h3>
-            <p style="font-size: 13px; color: #b0bec5; margin: 10px 0;">ভিডিও আনলক করতে অ্যাড সম্পন্ন করুন।</p>
-            <button onclick="closeModal(); showToast('ভিডিও আনলক সফল!');" style="width: 100%; background: var(--btn-color); color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer;">UNLOCK NOW</button>
-        </div>
-    </div>
 
     <div id="spinModal" class="modal">
         <div class="modal-content">
@@ -675,6 +666,9 @@
                 <label>🖼️ থাম্বনেইল ছবির লিংক:</label>
                 <input type="text" id="cardImgInput" class="admin-input" placeholder="https://...">
 
+                <label>🎬 ভিডিও ফাইল / স্ট্রিম লিংক (যেখানে ইউজার যাবে):</label>
+                <input type="text" id="cardVideoUrlInput" class="admin-input" placeholder="https://t.me/... বা ভিডিওর সরাসরি লিংক">
+
                 <label>📌 পোস্টের টাইটেল / নাম:</label>
                 <input type="text" id="cardTitleInput" class="admin-input" placeholder="ভিডিওর নাম লিখুন">
 
@@ -722,8 +716,19 @@
         function closeLeaderboardModal() { document.getElementById('leaderboardModal').style.display = 'none'; }
         function openCommentModal() { document.getElementById('commentModal').style.display = 'flex'; }
         function closeCommentModal() { document.getElementById('commentModal').style.display = 'none'; }
-        function openAdModal() { document.getElementById('adModal').style.display = 'flex'; }
-        function closeModal() { document.getElementById('adModal').style.display = 'none'; }
+
+        function openVideoLink(url) {
+            if (url && url !== "") {
+                // টেলিগ্রামে থাকলে সরাসরি এক্সটার্নাল লিংকে ওপেন করবে, অথবা নতুন ট্যাবে
+                if (tg && tg.openLink) {
+                    tg.openLink(url);
+                } else {
+                    window.open(url, '_blank');
+                }
+            } else {
+                showToast("দুঃখিত, এই ভিডিওর কোনো লিংক দেওয়া নেই!");
+            }
+        }
 
         function checkAdminPassword() {
             let pass = prompt("গোপন অ্যাডমিন পাসওয়ার্ড দিন:");
@@ -748,6 +753,7 @@
 
         function createNewCardWithAutoLink() {
             let img = document.getElementById('cardImgInput').value || "https://picsum.photos/400/200?random=" + Math.floor(Math.random()*100);
+            let videoUrl = document.getElementById('cardVideoUrlInput').value || "#";
             let title = document.getElementById('cardTitleInput').value || "নতুন ভাইরাল ভিডিও";
             let duration = document.getElementById('cardDurationInput').value || "04:30";
             
@@ -760,6 +766,7 @@
             card.className = 'card';
             card.id = `card-${uniqueId}`;
             card.setAttribute('data-id', uniqueId);
+            card.setAttribute('data-video-url', videoUrl);
             
             card.innerHTML = `
                 <div class="card-img-container">
@@ -778,7 +785,7 @@
                         <button class="comment-section-btn" onclick="openCommentModal()">💬 কমেন্ট</button>
                         <button class="share-link-btn" onclick="copyVideoLink('${uniqueId}')">🔗 লিংক কপি</button>
                     </div>
-                    <button class="unlock-btn" onclick="openAdModal()">▶ WATCH / DOWNLOAD NOW</button>
+                    <button class="unlock-btn" onclick="openVideoLink('${videoUrl}')">▶ WATCH / DOWNLOAD NOW</button>
                 </div>
             `;
             container.prepend(card);
@@ -789,6 +796,7 @@
             showToast("ভিডিও পোস্ট হয়েছে ও ইউনিক লিংক তৈরি হয়েছে!");
             
             document.getElementById('cardImgInput').value = '';
+            document.getElementById('cardVideoUrlInput').value = '';
             document.getElementById('cardTitleInput').value = '';
             document.getElementById('cardDurationInput').value = '';
         }
@@ -809,25 +817,20 @@
             });
         }
 
-        // ইউনিক লিংকে ঢুকলে পপআপ ফোকাস ওপেন করার অপ্টিমাইজড লজিক
+        // ইউনিক লিংকে ঢুকলে পপআপ ফোকাস ওপেন করার লজিক
         window.addEventListener('load', () => {
             const urlParams = new URLSearchParams(window.location.search);
             let startAppParam = urlParams.get('startapp');
             
-            // টেলিগ্রামের start_param হ্যান্ডেল করার জন্য অতিরিক্ত সেফটি চেক
             if (!startAppParam && tg && tg.initDataUnsafe && tg.initDataUnsafe.start_param) {
                 startAppParam = tg.initDataUnsafe.start_param;
             }
 
             if (startAppParam) {
-                // একটু দ্রুত রেসপন্স পাওয়ার জন্য টাইমআউট কমিয়ে দেওয়া হয়েছে
                 setTimeout(() => {
                     let targetCard = document.getElementById(`card-${startAppParam}`);
                     if (targetCard) {
                         let cloneCard = targetCard.cloneNode(true);
-                        let unlockBtn = cloneCard.querySelector('.unlock-btn');
-                        if(unlockBtn) unlockBtn.innerText = "▶ WATCH / DOWNLOAD NOW";
-                        
                         document.getElementById('focusCardContainer').innerHTML = '';
                         document.getElementById('focusCardContainer').appendChild(cloneCard);
                         document.getElementById('singleVideoFocusModal').style.display = 'flex';
