@@ -674,17 +674,17 @@
                 return;
             }
 
-            let lines = rawLinks.split('\n');
+            let lines = rawLinks.split(/\r?\n/);
             let linksArray = [];
             lines.forEach(l => {
                 let clean = l.trim();
-                if (clean.startsWith('http')) {
+                if (clean.length > 0) {
                     linksArray.push(clean);
                 }
             });
 
             if (linksArray.length === 0) {
-                showToast("❌ সঠিক ফরম্যাটে লিংক দিন (http দিয়ে শুরু হতে হবে)");
+                showToast("❌ সঠিক ফরম্যাটে লিংক দিন");
                 return;
             }
 
@@ -711,7 +711,7 @@
             document.getElementById('bulkLinksInput').value = "";
             closeAdminModal();
             loadCustomVideos();
-            showToast("✅ সফলভাবে কার্ড তৈরি করা হয়েছে!");
+            showToast(`✅ সফলভাবে ${linksArray.length}টি লিংকসহ কার্ড তৈরি হয়েছে!`);
         }
 
         function loadAdminManageList() {
@@ -771,7 +771,6 @@
                 let favKey = 'fav_' + currentUserId + '_' + v.id;
                 let isFav = localStorage.getItem(favKey) === 'true';
 
-                // এখানে লিংকগুলো নিশ্চিত করা হচ্ছে যে এটি অ্যারে আকারে সেভ হয়েছে
                 let linksList = Array.isArray(v.links) ? v.links : (v.link ? [v.link] : []);
                 let encodedLinks = encodeURIComponent(JSON.stringify(linksList));
 
@@ -976,7 +975,6 @@
             }
         }
 
-        // একসাথে সব লিংক সঠিকভাবে ওপেন করার লজিক (Delay সহ যাতে ব্রাউজার পপ-আপ ব্লক না করে)
         function openAllUnlockedLinksNow() {
             try {
                 let linksArray = JSON.parse(decodeURIComponent(selectedLinksJson));
@@ -984,7 +982,7 @@
                     linksArray.forEach((link, idx) => {
                         setTimeout(() => {
                             window.open(link, '_blank');
-                        }, idx * 600); // প্রতিটি লিংকের মাঝে সামান্য বিরতি রাখা হয়েছে
+                        }, idx * 600);
                     });
                     showToast(`🚀 মোট ${linksArray.length}টি লিংক ওপেন করা হয়েছে!`);
                 } else {
