@@ -569,7 +569,7 @@
     <div id="no-result">কোনো কনটেন্ট পাওয়া যায়নি! ❌</div>
 
     <div id="card-container">
-        <div class="card" id="card-v1" data-id="v1" data-video-url="https://www.example.com/video1.mp4">
+        <div class="card" id="card-v1" data-id="v1" data-video-url="https://t.me/example_video_link">
             <div class="card-img-container">
                 <img src="https://picsum.photos/400/200?random=1" class="card-img" alt="Video">
                 <span class="preview-badge">VIP PREVIEW</span>
@@ -586,7 +586,7 @@
                     <button class="comment-section-btn" onclick="openCommentModal()">💬 কমেন্ট</button>
                     <button class="share-link-btn" onclick="copyVideoLink('v1')">🔗 লিংক কপি</button>
                 </div>
-                <button class="unlock-btn" onclick="openVideoLink('https://www.example.com/video1.mp4')">▶ WATCH / DOWNLOAD NOW</button>
+                <button class="unlock-btn" onclick="openVideoLink('https://t.me/example_video_link')">▶ WATCH / DOWNLOAD NOW</button>
             </div>
         </div>
     </div>
@@ -666,8 +666,8 @@
                 <label>🖼️ থাম্বনেইল ছবির লিংক:</label>
                 <input type="text" id="cardImgInput" class="admin-input" placeholder="https://...">
 
-                <label>🎬 ভিডিও ফাইল / স্ট্রিম লিংক (যেখানে ইউজার যাবে):</label>
-                <input type="text" id="cardVideoUrlInput" class="admin-input" placeholder="https://t.me/... বা ভিডিওর সরাসরি লিংক">
+                <label>🎬 ভিডিওর আসল লিংক (Watch/Download লিংকের জন্য):</label>
+                <input type="text" id="cardVideoUrlInput" class="admin-input" placeholder="https://t.me/... বা ভিডিওর লিংক">
 
                 <label>📌 পোস্টের টাইটেল / নাম:</label>
                 <input type="text" id="cardTitleInput" class="admin-input" placeholder="ভিডিওর নাম লিখুন">
@@ -717,9 +717,9 @@
         function openCommentModal() { document.getElementById('commentModal').style.display = 'flex'; }
         function closeCommentModal() { document.getElementById('commentModal').style.display = 'none'; }
 
+        // ফিক্সড ভিডিও লিংক ওপেনার ফাংশন
         function openVideoLink(url) {
-            if (url && url !== "") {
-                // টেলিগ্রামে থাকলে সরাসরি এক্সটার্নাল লিংকে ওপেন করবে, অথবা নতুন ট্যাবে
+            if (url && url !== "" && url !== "#") {
                 if (tg && tg.openLink) {
                     tg.openLink(url);
                 } else {
@@ -753,10 +753,15 @@
 
         function createNewCardWithAutoLink() {
             let img = document.getElementById('cardImgInput').value || "https://picsum.photos/400/200?random=" + Math.floor(Math.random()*100);
-            let videoUrl = document.getElementById('cardVideoUrlInput').value || "#";
+            let videoUrl = document.getElementById('cardVideoUrlInput').value.trim();
             let title = document.getElementById('cardTitleInput').value || "নতুন ভাইরাল ভিডিও";
             let duration = document.getElementById('cardDurationInput').value || "04:30";
             
+            if(!videoUrl) {
+                showToast("দয়া করে ভিডিওর লিংক দিন!");
+                return;
+            }
+
             let uniqueId = "v_" + Math.random().toString(36).substring(2, 7);
             let currentBaseUrl = window.location.href.split('?')[0];
             lastCreatedLink = `${currentBaseUrl}?startapp=${uniqueId}`;
@@ -817,7 +822,7 @@
             });
         }
 
-        // ইউনিক লিংকে ঢুকলে পপআপ ফোকাস ওপেন করার লজিক
+        // ইউনিক লিংকে ঢুকলে পপআপ ফোকাস ওপেন এবং বাটন লিংক ফিক্স করার লজিক
         window.addEventListener('load', () => {
             const urlParams = new URLSearchParams(window.location.search);
             let startAppParam = urlParams.get('startapp');
@@ -831,6 +836,14 @@
                     let targetCard = document.getElementById(`card-${startAppParam}`);
                     if (targetCard) {
                         let cloneCard = targetCard.cloneNode(true);
+                        
+                        // পপআপের ভেতরের বাটনে যেন সঠিক লিংক থাকে তা নিশ্চিত করা
+                        let vUrl = targetCard.getAttribute('data-video-url');
+                        let cloneBtn = cloneCard.querySelector('.unlock-btn');
+                        if(cloneBtn && vUrl) {
+                            cloneBtn.setAttribute('onclick', `openVideoLink('${vUrl}')`);
+                        }
+
                         document.getElementById('focusCardContainer').innerHTML = '';
                         document.getElementById('focusCardContainer').appendChild(cloneCard);
                         document.getElementById('singleVideoFocusModal').style.display = 'flex';
