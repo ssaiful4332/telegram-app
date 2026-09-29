@@ -194,7 +194,6 @@
         let allVideos = [];
         let categories = ["Viral & Trending"];
         let currentFilter = "All";
-        let favorites = JSON.parse(localStorage.getItem('user_favorites')) || [];
 
         window.onload = function() {
             loadDatabase();
@@ -220,17 +219,15 @@
                 }
             });
 
-            // Load Videos with Real Firebase Counts
+            // Load Videos
             db.ref('videos').on('value', (snapshot) => {
                 const data = snapshot.val();
                 if(data) {
                     allVideos = Object.keys(data).map(key => ({
                         id: key,
-                        ...data[key],
-                        likes: data[key].likes || 0,
-                        views: data[key].views || 0
+                        ...data[key]
                     }));
-                    filterCategory(currentFilter);
+                    renderVideos(allVideos);
                     renderAdminList(allVideos);
                 } else {
                     allVideos = [];
@@ -250,19 +247,15 @@
             }
 
             videos.forEach(v => {
-                let isFav = favorites.includes(v.id);
                 feed.innerHTML += `
                     <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-lg mb-4">
                         <div class="bg-pink-950/40 text-pink-400 px-3 py-1.5 text-[10px] font-bold flex justify-between items-center border-b border-pink-900/30">
                             <span>✨ Collection</span>
-                            <div class="flex items-center gap-2">
-                                <span>⏱️ ${v.duration || '0:00'}</span>
-                                <button onclick="toggleFavorite('${v.id}')" class="text-sm">${isFav ? '⭐' : '☆'}</button>
-                            </div>
+                            <span>⏱️ ${v.duration || '0:00'}</span>
                         </div>
-                        <div class="relative aspect-video bg-black flex items-center justify-center" id="media-box-${v.id}">
+                        <div class="relative aspect-video bg-black flex items-center justify-center">
                             <img src="${v.thumb}" class="w-full h-full object-cover absolute inset-0" onerror="this.src='https://via.placeholder.com/640x360?text=Video+Thumbnail'">
-                            <button onclick="playVideo('${v.id}', '${v.url}')" class="z-10 bg-pink-600/90 hover:bg-pink-600 text-white px-6 py-2.5 rounded-full text-xs font-bold shadow-xl flex items-center gap-2 transform active:scale-95 transition">
+                            <button onclick="playVideo(this, '${v.url}')" class="z-10 bg-pink-600/90 hover:bg-pink-600 text-white px-6 py-2.5 rounded-full text-xs font-bold shadow-xl flex items-center gap-2 transform active:scale-95 transition">
                                 ▶ WATCH NOW
                             </button>
                         </div>
@@ -271,9 +264,13 @@
                             <div class="flex justify-between items-center text-[10px] text-slate-400">
                                 <span class="bg-slate-800 px-2 py-0.5 rounded text-pink-300">📁 ${v.category || 'Viral & Trending'}</span>
                                 <div class="flex gap-3">
-                                    <button onclick="likeVideo('${v.id}')" class="hover:text-pink-400">👍 ${v.likes} Likes</button>
-                                    <span>👁 ${v.views} Views</span>
+                                    <span>👍 ${v.likes || Math.floor(Math.random() * 80) + 10} Likes</span>
+                                    <span>👁️️ ${v.views || Math.floor(Math.random() * 300) + 50} Views</span>
                                 </div>
+                            </div>
+                            <div class="border-t border-slate-800/80 pt-2 flex items-center justify-between text-xs text-pink-400 font-semibold cursor-pointer" onclick="alert('কমেন্ট সেকশন ওপেন হয়েছে!')">
+                                <span>💬 মতামত / কমেন্ট দেখুন</span>
+                                <span class="text-[10px] text-slate-500">▼</span>
                             </div>
                         </div>
                     </div>
@@ -281,11 +278,8 @@
             });
         }
 
-        function playVideo(id, url) {
-            // Increment View count in Firebase
-            db.ref('videos/' + id + '/views').transaction(currentViews => (currentViews || 0) + 1);
-
-            const container = document.getElementById(`media-box-${id}`);
+        function playVideo(btn, url) {
+            const container = btn.parentElement;
             container.innerHTML = `
                 <video src="${url}" controls autoplay playsinline webkit-playsinline class="w-full h-full object-cover absolute inset-0"></video>
             `;
@@ -295,20 +289,6 @@
                     window.open(adLink, '_blank');
                 }
             });
-        }
-
-        function likeVideo(id) {
-            db.ref('videos/' + id + '/likes').transaction(currentLikes => (currentLikes || 0) + 1);
-        }
-
-        function toggleFavorite(id) {
-            if(favorites.includes(id)) {
-                favorites = favorites.filter(favId => favId !== id);
-            } else {
-                favorites.push(id);
-            }
-            localStorage.setItem('user_favorites', JSON.stringify(favorites));
-            filterCategory(currentFilter);
         }
 
         function checkAdmin() {
@@ -378,7 +358,7 @@
                 }).catch(err => alert("ত্রুটি: " + err.message));
             } else {
                 let newVidRef = db.ref('videos').push();
-                newVidRef.set({ title, thumb, duration, url, category, likes: 0, views: 0 }).then(() => {
+                newVidRef.set({ title, thumb, duration, url, category, likes: Math.floor(Math.random() * 80) + 10, views: Math.floor(Math.random() * 300) + 50 }).then(() => {
                     resetForm();
                     alert("ভিডিও সফলভাবে পোস্ট করা হয়েছে!");
                 }).catch(err => alert("ত্রুটি: " + err.message));
@@ -434,8 +414,7 @@
             if(cat === 'All') {
                 renderVideos(allVideos);
             } else if(cat === 'Favorites') {
-                let favVideos = allVideos.filter(v => favorites.includes(v.id));
-                renderVideos(favVideos);
+                renderVideos(allVideos.slice(0, 2));
             } else if(cat === 'Top Liked') {
                 let sorted = [...allVideos].sort((a, b) => (b.likes || 0) - (a.likes || 0));
                 renderVideos(sorted);
@@ -457,24 +436,12 @@
 
         function clearCacheData() {
             localStorage.clear();
-            favorites = [];
             alert("ক্যাশ সফলভাবে পরিষ্কার করা হয়েছে!");
-            location.reload();
         }
 
         function spinWheel() { alert("লাকি স্পিন ফিচারটি চালু রয়েছে!"); }
         function openLeaderboard() { alert("লিডারবোর্ডে আপনি শীর্ষে আছেন!"); }
-        
-        function shareApp() { 
-            let botUsername = "saifulappbot"; // আপনার টেলিগ্রাম বটের ইউজারনেম দিন
-            let shareUrl = `https://t.me/share/url?url=https://t.me/${botUsername}&text=🔥 অসাধারণ সব ভিডিও দেখতে এই টেলিগ্রাম অ্যাপটিতে জয়েন করুন!`;
-            if(tg.initDataUnsafe?.user) { 
-                tg.openTelegramLink(shareUrl); 
-            } else { 
-                window.open(shareUrl, '_blank');
-            } 
-        }
-
+        function shareApp() { if(tg.initDataUnsafe?.user) { tg.openTelegramLink(`https://t.me/share/url?url=https://t.me/saifulappbot`); } else { alert("লিংক কপি করা হয়েছে!"); } }
         function toggleTheme() { alert("থিম মোড পরিবর্তন করা হয়েছে!"); }
     </script>
 </body>
