@@ -112,7 +112,6 @@
             font-size: 12px;
         }
         .spin-btn { background: #ff9800 !important; }
-        .checkin-btn { background: #4caf50 !important; }
         .leaderboard-btn { background: #00bcd4 !important; }
 
         .search-box {
@@ -424,7 +423,6 @@
         </div>
     </div>
 
-    <!-- অ্যানাউন্সমেন্ট ব্যানার -->
     <div class="announcement-banner">
         <span id="bannerTextDisplay">🔥 নতুন আপডেট! ৩টি অ্যাড ভিজিট করে ভিডিও আনলক করুন।</span>
     </div>
@@ -449,38 +447,24 @@
     </div>
 
     <div class="action-row">
-        <button class="checkin-btn" onclick="claimDailyCheckin()">🎁 Check-in</button>
-        <button class="spin-btn" onclick="openSpinModal()">🎡 Spin</button>
-        <button class="leaderboard-btn" onclick="openLeaderboardModal()">🏆 Top</button>
+        <button class="spin-btn" onclick="openSpinModal()">🎡 Lucky Spin</button>
+        <button class="leaderboard-btn" onclick="openLeaderboardModal()">🏆 Leaderboard</button>
     </div>
 
     <div class="search-box">
         <input type="text" id="searchInput" class="search-input" placeholder="🔍 সার্চ করুন..." onkeyup="filterContent()">
     </div>
 
-    <!-- ক্যাটাগরি ফিল্টার -->
     <div class="categories" id="categoryContainer">
-        <button class="cat-btn active" onclick="filterCategory('all', this)">📹 All</button>
-        <button class="cat-btn" onclick="filterCategory('favorites', this)">⭐ Favs</button>
-        <button class="cat-btn" onclick="filterCategory('Trending', this)">🔥 Trending</button>
-        <button class="cat-btn" onclick="filterCategory('Exclusive', this)">✨ Exclusive</button>
-        <button class="cat-btn" onclick="filterCategory('Comedy', this)">😂 Comedy</button>
-        <button class="cat-btn" onclick="filterCategory('Action', this)">🎬 Action</button>
+        <button class="cat-btn active" onclick="filterCategory('all', this)">📹 All Videos</button>
+        <button class="cat-btn" onclick="filterCategory('favorites', this)">⭐ Favorites</button>
+        <button class="cat-btn" onclick="filterCategory('trending', this)">🔥 Trending</button>
+        <button class="cat-btn" onclick="filterCategory('liked', this)">👍 Top Liked</button>
     </div>
 
     <div id="no-result">কোনো কনটেন্ট পাওয়া যায়নি! ❌</div>
     <div id="card-container"></div>
     <div id="toast">বিজ্ঞপ্তি</div>
-
-    <!-- ফোর্স সাবস্ক্রিপশন মডাল -->
-    <div id="subModal" class="modal">
-        <div class="modal-content">
-            <h3 style="color: #ff9800; margin-top: 5px; font-size: 18px;">📢 চ্যানেল সাবস্ক্রাইব করুন</h3>
-            <p style="font-size: 13px; color: #b0bec5; margin: 10px 0;">অ্যাপটি ব্যবহার করতে আমাদের টেলিগ্রাম চ্যানেলে জয়েন করা বাধ্যতামূলক!</p>
-            <button onclick="joinTelegramChannel()" style="width: 100%; background: #0088cc; color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; margin-bottom: 8px;">📢 JOIN TELEGRAM CHANNEL</button>
-            <button onclick="checkSubscription()" style="width: 100%; background: #4caf50; color: white; border: none; padding: 10px; border-radius: 10px; font-weight: bold; cursor: pointer;">✅ আমি জয়েন করেছি (Verify)</button>
-        </div>
-    </div>
 
     <!-- স্মার্টলিংক অ্যাড লক মডাল -->
     <div id="adModal" class="modal">
@@ -565,18 +549,14 @@
         <div class="modal-content">
             <span class="close-modal" onclick="closeAdminModal()">&#10005;</span>
             <h3 style="color: #e91e63; margin-top: 5px; font-size: 18px; margin-bottom: 12px;">🔐 Admin Panel</h3>
-            
-            <input type="text" id="adminBannerInput" class="admin-input" placeholder="ব্যানার অ্যানাউন্সমেন্ট টেক্সট">
-            <button onclick="updateBannerText()" style="width: 100%; background: #00bcd4; color: white; border: none; padding: 8px; border-radius: 6px; font-weight: bold; cursor: pointer; margin-bottom: 10px; font-size: 12px;">📢 ব্যানার আপডেট করুন</button>
-            
             <input type="text" id="adminVidTitle" class="admin-input" placeholder="ভিডিও টাইটেল">
             <input type="text" id="adminVidImage" class="admin-input" placeholder="থাম্বনেইল ইমেজ URL">
             <input type="text" id="adminVidLink" class="admin-input" placeholder="মূল ভিডিও লিঙ্ক (Unlock Link)">
             <select id="adminVidCategory" class="admin-select">
-                <option value="Trending">Trending</option>
-                <option value="Exclusive">Exclusive</option>
-                <option value="Comedy">Comedy</option>
-                <option value="Action">Action</option>
+                <option value="trending">Trending</option>
+                <option value="exclusive">Exclusive</option>
+                <option value="comedy">Comedy</option>
+                <option value="action">Action</option>
             </select>
             <input type="text" id="adminSmartlinkInput" class="admin-input" placeholder="Adsterra Smartlink (অ্যাড লিংক)">
             
@@ -609,7 +589,6 @@
         let activeVideoLink = '';
         let currentAdStep = 0;
         let smartlinkUrl = "https://www.profitablecpmrate.com/example";
-        let channelUsername = "@your_channel_username";
 
         document.getElementById('tgUserName').innerText = `${currentUser.first_name} (@${currentUser.username || 'user'})`;
         document.getElementById('userCoins').innerText = userCoins;
@@ -617,37 +596,13 @@
 
         window.onload = function() {
             fetchDatabaseData();
-            checkSubscriptionOnStart();
         };
-
-        function checkSubscriptionOnStart() {
-            let isJoined = localStorage.getItem('channel_joined_' + currentUser.id);
-            if(!isJoined) {
-                document.getElementById('subModal').style.display = 'flex';
-            }
-        }
-        function joinTelegramChannel() {
-            window.open(`https://t.me/${channelUsername.replace('@','')}`, '_blank');
-        }
-        function checkSubscription() {
-            localStorage.setItem('channel_joined_' + currentUser.id, 'true');
-            document.getElementById('subModal').style.display = 'none';
-            showToast("চ্যানেল সাবস্ক্রিপশন সফলভাবে ভেরিফাই হয়েছে!");
-        }
 
         function fetchDatabaseData() {
             db.ref('smartlink').on('value', snapshot => {
                 if(snapshot.val()) {
                     smartlinkUrl = snapshot.val();
                     document.getElementById('adminSmartlinkInput').value = smartlinkUrl;
-                }
-            });
-
-            db.ref('bannerText').on('value', snapshot => {
-                if(snapshot.val()) {
-                    let bText = snapshot.val();
-                    document.getElementById('bannerTextDisplay').innerText = bText;
-                    document.getElementById('adminBannerInput').value = bText;
                 }
             });
 
@@ -680,6 +635,7 @@
                 let matchSearch = v.title && v.title.toLowerCase().includes(searchText);
                 if(!matchSearch) return false;
                 if(currentFilter === 'favorites') return favorites.includes(v.id);
+                if(currentFilter === 'liked') return (v.likes || 0) > 0;
                 if(currentFilter !== 'all') return v.category === currentFilter;
                 return true;
             });
@@ -808,26 +764,12 @@
             }
         }
 
-        function claimDailyCheckin() {
-            let lastCheckin = localStorage.getItem('last_checkin_date');
-            let today = new Date().toDateString();
-            if(lastCheckin === today) {
-                showToast("আজকের চেক-ইন বোনাস ইতিমধ্যে নেওয়া হয়েছে! আগামীকাল আবার চেষ্টা করুন।");
-            } else {
-                localStorage.setItem('last_checkin_date', today);
-                userCoins += 20;
-                localStorage.setItem('user_coins', userCoins);
-                document.getElementById('userCoins').innerText = userCoins;
-                showToast("অভিনন্দন! আপনি দৈনিক চেক-ইন বোনাস হিসেবে ২০ কয়েন পেলেন।");
-            }
-        }
-
         function openSpinModal() { document.getElementById('spinModal').style.display = 'flex'; }
         function closeSpinModal() { document.getElementById('spinModal').style.display = 'none'; }
         function executeSpin() {
             let rewards = [10, 20, 50, 100, 5, 25];
             let won = rewards[Math.floor(Math.random() * rewards.length)];
-            document.getElementById('spinBox',).innerText = `🎉 +${won} Coins!`;
+            document.getElementById('spinBox').innerText = `🎉 +${won} Coins!`;
             userCoins += won;
             localStorage.setItem('user_coins', userCoins);
             document.getElementById('userCoins').innerText = userCoins;
@@ -901,15 +843,7 @@
         }
         function closeAdminModal() { document.getElementById('adminModal').style.display = 'none'; }
 
-        function updateBannerText() {
-            let bText = document.getElementById('adminBannerInput').value;
-            if(bText) {
-                db.ref('bannerText').set(bText);
-                showToast("ব্যানার টেক্সট আপডেট হয়েছে!");
-            }
-        }
-
-        // ঠিক করা ভিডিও আপলোড ফাংশন
+        // সঠিক ও সম্পূর্ণ ভিডিও আপলোড ফাংশন
         function addNewVideo() {
             let title = document.getElementById('adminVidTitle').value.trim();
             let image = document.getElementById('adminVidImage').value.trim();
@@ -922,7 +856,6 @@
             }
 
             if(title && image && link) {
-                // ডাটা সঠিকভাবে পুশ করার জন্য অবজেক্ট তৈরি
                 let newVideoData = {
                     title: title,
                     image: image,
