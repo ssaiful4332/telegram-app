@@ -422,7 +422,7 @@
     </div>
 
     <div class="announcement-banner">
-        <span id="bannerTextDisplay">🔥 নতুন আপডেট! লেভেল আপ করুন, স্পিন করুন এবং লিডারবোর্ডে থাকুন।</span>
+        <span id="bannerTextDisplay">🔥 নতুন আপডেট! ৩টি অ্যাড ভিজিট করে ভিডিও আনলক করুন।</span>
     </div>
 
     <div class="dashboard-grid">
@@ -464,14 +464,15 @@
     <div id="card-container"></div>
     <div id="toast">বিজ্ঞপ্তি</div>
 
-    <!-- অ্যাড লক মডাল (Watch 3 ads) -->
+    <!-- স্মার্টলিংক অ্যাড লক মডাল (Watch 3 Ads via Smartlink) -->
     <div id="adModal" class="modal">
         <div class="modal-content">
             <span class="close-modal" onclick="closeModal()">&#10005;</span>
-            <h3 style="color: inherit; margin-top: 10px; font-size: 18px;">🔒 Watch 3 ads to unlock</h3>
+            <h3 style="color: inherit; margin-top: 10px; font-size: 18px;">🔒 Watch 3 Ads to Unlock</h3>
+            <p style="font-size: 12px; color: #b0bec5; margin: 5px 0 12px 0;">নিচের বাটনে ক্লিক করে ৩টি অ্যাড ভিজিট করুন!</p>
             <div id="modalBodyContent">
-                <p id="adStatusText" style="font-size: 14px; margin: 12px 0;">Progress: <b style="color: #ffeb3b;">0/3</b></p>
-                <button id="watchAdBtn" onclick="watchNextAd()" style="width: 100%; background: var(--btn-color); color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer;">🔓 WATCH AD 1/3</button>
+                <p id="adStatusText" style="font-size: 14px; margin: 10px 0;">Progress: <b style="color: #ffeb3b;">0/3</b></p>
+                <button id="watchAdBtn" onclick="openAdSmartlink()" style="width: 100%; background: var(--btn-color); color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer;">🌐 VISIT AD LINK 1/3</button>
             </div>
         </div>
     </div>
@@ -549,6 +550,7 @@
             <input type="text" id="adminVidTitle" class="admin-input" placeholder="ভিডিও টাইটেল">
             <input type="text" id="adminVidImage" class="admin-input" placeholder="থাম্বনেইল ইমেজ URL">
             <input type="text" id="adminVidLink" class="admin-input" placeholder="মূল ভিডিও লিঙ্ক (Unlock Link)">
+            <input type="text" id="adminSmartlinkInput" class="admin-input" placeholder="Adsterra Smartlink (অ্যাড লিংক)">
             <button onclick="addNewVideo()" style="width: 100%; background: #e91e63; color: white; border: none; padding: 10px; border-radius: 6px; font-weight: bold; cursor: pointer; margin-bottom: 15px;">নতুন ভিডিও যোগ করুন</button>
             <div id="adminVideoManageList" style="max-height: 120px; overflow-y: auto;"></div>
         </div>
@@ -582,6 +584,7 @@
         let videosList = [];
         let activeVideoId = null;
         let activeUnlockLink = '';
+        let activeSmartlink = '';
         let adWatchCount = 0;
 
         function showToast(text) {
@@ -655,7 +658,7 @@
                             <span>👁 1.2K Views</span>
                         </div>
                         <button class="comment-section-btn" onclick="openCommentModal('${vid.id}')">💬 কমেন্ট দেখুন ও লিখুন</button>
-                        <button class="unlock-btn" onclick="handleUnlock('${vid.id}', '${vid.link}')">
+                        <button class="unlock-btn" onclick="handleUnlock('${vid.id}', '${vid.link}', '${vid.smartlink || ''}')">
                             ${isUnlocked ? '🎬 WATCH FULL VIDEO' : '🔒 UNLOCK FULL VIDEO'}
                         </button>
                     </div>
@@ -705,7 +708,7 @@
             });
         }
 
-        function handleUnlock(vidId, link) {
+        function handleUnlock(vidId, link, smartlink) {
             if(userData.unlocked.includes(vidId)) {
                 if(window.Telegram && window.Telegram.WebApp) {
                     window.Telegram.WebApp.openLink(link);
@@ -715,24 +718,35 @@
             } else {
                 activeVideoId = vidId;
                 activeUnlockLink = link;
+                activeSmartlink = smartlink;
                 adWatchCount = 0;
                 document.getElementById('adStatusText').innerHTML = 'Progress: <b style="color: #ffeb3b;">0/3</b>';
-                document.getElementById('watchAdBtn').innerText = "🔓 WATCH AD 1/3";
+                document.getElementById('watchAdBtn').innerText = "🌐 VISIT AD LINK 1/3";
                 document.getElementById('adModal').style.display = 'flex';
             }
         }
 
-        function watchNextAd() {
+        function openAdSmartlink() {
+            if (activeSmartlink) {
+                if (window.Telegram && window.Telegram.WebApp) {
+                    window.Telegram.WebApp.openLink(activeSmartlink);
+                } else {
+                    window.open(activeSmartlink, '_blank');
+                }
+            } else {
+                showToast("অ্যাড লিংক পাওয়া যায়নি, ডিফল্ট ভিজিট হচ্ছে।");
+            }
+
             adWatchCount++;
             if(adWatchCount < 3) {
                 document.getElementById('adStatusText').innerHTML = `Progress: <b style="color: #ffeb3b;">${adWatchCount}/3</b>`;
-                document.getElementById('watchAdBtn').innerText = `🔓 WATCH AD ${adWatchCount + 1}/3`;
-                showToast(`বিজ্ঞপ্তি ${adWatchCount}/3 দেখা শেষ!`);
+                document.getElementById('watchAdBtn').innerText = `🌐 VISIT AD LINK ${adWatchCount + 1}/3`;
+                showToast(`ভিজিট ${adWatchCount}/3 সম্পন্ন! আবার ক্লিক করুন।`);
             } else {
                 userData.unlocked.push(activeVideoId);
                 document.getElementById('unlockedCount').innerText = userData.unlocked.length + 'টি';
                 document.getElementById('adModal').style.display = 'none';
-                showToast("ভিডিও সফলভাবে আনলক হয়েছে! 🎉");
+                showToast("ভিডিও সফলভাবে আনলک হয়েছে! 🎉");
                 renderVideos();
                 if(window.Telegram && window.Telegram.WebApp) {
                     window.Telegram.WebApp.openLink(activeUnlockLink);
@@ -803,7 +817,7 @@
 
         function promptAdminPassword() {
             let pass = prompt("অ্যাডমিন পাসওয়ার্ড দিন:");
-            if(pass === "Lamiya") {  /* পাসওয়ার্ড Lamiya সেট করা হলো */
+            if(pass === "Lamiya") { 
                 closeSettingsModal();
                 document.getElementById('adminModal').style.display = 'flex';
                 loadAdminVideoList();
@@ -816,19 +830,22 @@
             let title = document.getElementById('adminVidTitle').value;
             let image = document.getElementById('adminVidImage').value;
             let link = document.getElementById('adminVidLink').value;
+            let smartlink = document.getElementById('adminSmartlinkInput').value;
             if(!title || !link) {
-                showToast("টাইটেল এবং লিঙ্ক আবশ্যক!");
+                showToast("টাইটেল এবং ভিডিও লিঙ্ক আবশ্যক!");
                 return;
             }
             db.ref('videos').push({
                 title: title,
                 image: image || 'https://via.placeholder.com/300',
                 link: link,
+                smartlink: smartlink,
                 likes: 0
             });
             document.getElementById('adminVidTitle').value = '';
             document.getElementById('adminVidImage').value = '';
             document.getElementById('adminVidLink').value = '';
+            document.getElementById('adminSmartlinkInput').value = '';
             showToast("নতুন ভিডিও যোগ করা হয়েছে! ✅");
         }
 
