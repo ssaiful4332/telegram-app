@@ -343,10 +343,6 @@
             box-sizing: border-box;
             outline: none;
         }
-        .admin-textarea {
-            resize: vertical;
-            height: 70px;
-        }
         .comment-list {
             text-align: left;
             max-height: 120px;
@@ -478,7 +474,7 @@
     <div id="adModal" class="modal">
         <div class="modal-content">
             <span class="close-modal" onclick="closeModal()">&#10005;</span>
-            <h3 style="color: inherit; margin-top: 10px; font-size: 18px;" id="modalMainTitle">🔒 Watch 3 ads to unlock</h3>
+            <h3 style="color: inherit; margin-top: 10px; font-size: 18px;">🔒 Watch 3 ads to unlock</h3>
             <div id="modalBodyContent">
                 <p id="adStatusText" style="font-size: 14px; margin: 12px 0;">Progress: <b style="color: #ffeb3b;">0/3</b></p>
                 <button id="watchAdBtn" onclick="watchNextAd()" style="width: 100%; background: var(--btn-color); color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer;">🔓 WATCH AD</button>
@@ -643,7 +639,6 @@
             }
         }
 
-        // ডাটা রেন্ডার ও ফিল্টার ফাংশন
         function renderVideos() {
             const container = document.getElementById('card-container');
             container.innerHTML = '';
@@ -683,7 +678,7 @@
                             <button class="like-btn ${isLiked ? 'liked' : ''}" onclick="toggleLike('${vid.id}')">
                                 👍 <span id="like-count-${vid.id}">${vid.likes || 0}</span>
                             </button>
-                            <span>👁️️ 1.2K Views</span>
+                            <span>👁 1.2K Views</span>
                         </div>
                         <button class="comment-section-btn" onclick="openCommentModal('${vid.id}')">💬 কমেন্ট দেখুন ও লিখুন</button>
                         <button class="unlock-btn" onclick="handleUnlock('${vid.id}', '${vid.link}')">
@@ -761,7 +756,6 @@
                 showToast(`বিজ্ঞপ্তি ${adWatchCount}/3 দেখা শেষ!`);
             } else {
                 userData.unlocked.push(activeVideoId);
-                document.getElementById('unlockedCount.innerText = userData.unlocked.length;` // Fix syntax below
                 document.getElementById('unlockedCount').innerText = userData.unlocked.length + 'টি';
                 document.getElementById('adModal').style.display = 'none';
                 showToast("ভিডিও সফলভাবে আনলক হয়েছে! 🎉");
@@ -774,7 +768,6 @@
             }
         }
 
-        // স্পিন হুইল লজিক
         function executeSpin() {
             const btn = document.getElementById('spinActionBtn');
             btn.disabled = true;
@@ -795,7 +788,6 @@
             }, 100);
         }
 
-        // কমেন্ট সিস্টেম
         function openCommentModal(vidId) {
             activeVideoId = vidId;
             document.getElementById('commentModal').style.display = 'flex';
@@ -835,7 +827,6 @@
             showToast("কমেন্ট পোস্ট করা হয়েছে! 💬");
         }
 
-        // অ্যাডমিন প্যানেল
         function promptAdminPassword() {
             let pass = prompt("অ্যাডমিন পাসওয়ার্ড দিন:");
             if(pass === "1234") {
@@ -892,9 +883,7 @@
             }
         }
 
-        // অ্যাপ ইনিশিয়ালাইজেশন
         window.onload = function() {
-            // টেলিগ্রাম ইউজার লোড
             if (window.Telegram && window.Telegram.WebApp) {
                 const tg = window.Telegram.WebApp;
                 tg.expand();
@@ -907,7 +896,6 @@
                 document.getElementById('tgUserName').innerText = "Web Browser";
             }
 
-            // ফায়ারবেস থেকে ভিডিও লোড
             db.ref('videos').on('value', snapshot => {
                 videosList = [];
                 if(snapshot.exists()) {
@@ -921,7 +909,6 @@
                 renderVideos();
             });
 
-            // অ্যানাউন্সমেন্ট লোড
             db.ref('settings/announcement').on('value', snapshot => {
                 if(snapshot.exists()) {
                     document.getElementById('bannerTextDisplay').innerText = snapshot.val();
