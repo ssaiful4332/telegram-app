@@ -112,6 +112,7 @@
             font-size: 12px;
         }
         .spin-btn { background: #ff9800 !important; }
+        .checkin-btn { background: #4caf50 !important; }
         .leaderboard-btn { background: #00bcd4 !important; }
 
         .search-box {
@@ -330,7 +331,7 @@
             color: #8b949e;
         }
         .close-modal:hover { color: #fff; }
-        .comment-input, .admin-input {
+        .comment-input, .admin-input, .admin-select {
             width: 100%;
             padding: 9px;
             background: var(--border-color);
@@ -423,6 +424,7 @@
         </div>
     </div>
 
+    <!-- অ্যাডমিন প্যানেল থেকে নিয়ন্ত্রিত অ্যানাউন্সমেন্ট ব্যানার -->
     <div class="announcement-banner">
         <span id="bannerTextDisplay">🔥 নতুন আপডেট! ৩টি অ্যাড ভিজিট করে ভিডিও আনলক করুন।</span>
     </div>
@@ -447,24 +449,38 @@
     </div>
 
     <div class="action-row">
-        <button class="spin-btn" onclick="openSpinModal()">🎡 Lucky Spin</button>
-        <button class="leaderboard-btn" onclick="openLeaderboardModal()">🏆 Leaderboard</button>
+        <button class="checkin-btn" onclick="claimDailyCheckin()">🎁 Check-in</button>
+        <button class="spin-btn" onclick="openSpinModal()">🎡 Spin</button>
+        <button class="leaderboard-btn" onclick="openLeaderboardModal()">🏆 Top</button>
     </div>
 
     <div class="search-box">
         <input type="text" id="searchInput" class="search-input" placeholder="🔍 সার্চ করুন..." onkeyup="filterContent()">
     </div>
 
+    <!-- ক্যাটাগরি ফিল্টার ট্যাগসমূহ -->
     <div class="categories" id="categoryContainer">
-        <button class="cat-btn active" onclick="filterCategory('all', this)">📹 All Videos</button>
-        <button class="cat-btn" onclick="filterCategory('favorites', this)">⭐ Favorites</button>
-        <button class="cat-btn" onclick="filterCategory('trending', this)">🔥 Trending</button>
-        <button class="cat-btn" onclick="filterCategory('liked', this)">👍 Top Liked</button>
+        <button class="cat-btn active" onclick="filterCategory('all', this)">📹 All</button>
+        <button class="cat-btn" onclick="filterCategory('favorites', this)">⭐ Favs</button>
+        <button class="cat-btn" onclick="filterCategory('Trending', this)">🔥 Trending</button>
+        <button class="cat-btn" onclick="filterCategory('Exclusive', this)">✨ Exclusive</button>
+        <button class="cat-btn" onclick="filterCategory('Comedy', this)">😂 Comedy</button>
+        <button class="cat-btn" onclick="filterCategory('Action', this)">🎬 Action</button>
     </div>
 
     <div id="no-result">কোনো কনটেন্ট পাওয়া যায়নি! ❌</div>
     <div id="card-container"></div>
     <div id="toast">বিজ্ঞপ্তি</div>
+
+    <!-- ফোর্স সাবস্ক্রিপশন মডাল (চ্যানেলে জয়েন করা বাধ্যতামূলক) -->
+    <div id="subModal" class="modal">
+        <div class="modal-content">
+            <h3 style="color: #ff9800; margin-top: 5px; font-size: 18px;">📢 চ্যানেল সাবস্ক্রাইব করুন</h3>
+            <p style="font-size: 13px; color: #b0bec5; margin: 10px 0;">অ্যাপটি ব্যবহার করতে আমাদের টেলিগ্রাম চ্যানেলে জয়েন করা বাধ্যতামূলক!</p>
+            <button onclick="joinTelegramChannel()" style="width: 100%; background: #0088cc; color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; margin-bottom: 8px;">📢 JOIN TELEGRAM CHANNEL</button>
+            <button onclick="checkSubscription()" style="width: 100%; background: #4caf50; color: white; border: none; padding: 10px; border-radius: 10px; font-weight: bold; cursor: pointer;">✅ আমি জয়েন করেছি (Verify)</button>
+        </div>
+    </div>
 
     <!-- স্মার্টলিংক অ্যাড লক মডাল -->
     <div id="adModal" class="modal">
@@ -549,10 +565,21 @@
         <div class="modal-content">
             <span class="close-modal" onclick="closeAdminModal()">&#10005;</span>
             <h3 style="color: #e91e63; margin-top: 5px; font-size: 18px; margin-bottom: 12px;">🔐 Admin Panel</h3>
+            
+            <input type="text" id="adminBannerInput" class="admin-input" placeholder="ব্যানার অ্যানাউন্সমেন্ট টেক্সট">
+            <button onclick="updateBannerText()" style="width: 100%; background: #00bcd4; color: white; border: none; padding: 8px; border-radius: 6px; font-weight: bold; cursor: pointer; margin-bottom: 10px; font-size: 12px;">📢 ব্যানার আপডেট করুন</button>
+            
             <input type="text" id="adminVidTitle" class="admin-input" placeholder="ভিডিও টাইটেল">
             <input type="text" id="adminVidImage" class="admin-input" placeholder="থাম্বনেইল ইমেজ URL">
             <input type="text" id="adminVidLink" class="admin-input" placeholder="মূল ভিডিও লিঙ্ক (Unlock Link)">
+            <select id="adminVidCategory" class="admin-select">
+                <option value="Trending">Trending</option>
+                <option value="Exclusive">Exclusive</option>
+                <option value="Comedy">Comedy</option>
+                <option value="Action">Action</option>
+            </select>
             <input type="text" id="adminSmartlinkInput" class="admin-input" placeholder="Adsterra Smartlink (অ্যাড লিংক)">
+            
             <button onclick="addNewVideo()" style="width: 100%; background: #e91e63; color: white; border: none; padding: 10px; border-radius: 6px; font-weight: bold; cursor: pointer; margin-bottom: 12px;">➕ নতুন ভিডিও যোগ করুন</button>
             <div id="adminVideoManageList" style="max-height: 150px; overflow-y: auto;"></div>
         </div>
@@ -582,6 +609,7 @@
         let activeVideoLink = '';
         let currentAdStep = 0;
         let smartlinkUrl = "https://www.profitablecpmrate.com/example";
+        let channelUsername = "@your_channel_username"; // আপনার টেলিগ্রাম চ্যানেল ইউজারনেম এখানে দিন
 
         document.getElementById('tgUserName').innerText = `${currentUser.first_name} (@${currentUser.username || 'user'})`;
         document.getElementById('userCoins').innerText = userCoins;
@@ -589,13 +617,39 @@
 
         window.onload = function() {
             fetchDatabaseData();
+            checkSubscriptionOnStart();
         };
+
+        // ফোর্স সাবস্ক্রিপশন চেক
+        function checkSubscriptionOnStart() {
+            let isJoined = localStorage.getItem('channel_joined_' + currentUser.id);
+            if(!isJoined) {
+                document.getElementById('subModal').style.display = 'flex';
+            }
+        }
+        function joinTelegramChannel() {
+            window.open(`https://t.me/${channelUsername.replace('@','')}`, '_blank');
+        }
+        function checkSubscription() {
+            // সিম্পল ভেরিফিকেশন চেক
+            localStorage.setItem('channel_joined_' + currentUser.id, 'true');
+            document.getElementById('subModal').style.display = 'none';
+            showToast("চ্যানেল সাবস্ক্রিপশন সফলভাবে ভেরিফাই হয়েছে!");
+        }
 
         function fetchDatabaseData() {
             db.ref('smartlink').on('value', snapshot => {
                 if(snapshot.val()) {
                     smartlinkUrl = snapshot.val();
                     document.getElementById('adminSmartlinkInput').value = smartlinkUrl;
+                }
+            });
+
+            db.ref('bannerText').on('value', snapshot => {
+                if(snapshot.val()) {
+                    let bText = snapshot.val();
+                    document.getElementById('bannerTextDisplay').innerText = bText;
+                    document.getElementById('adminBannerInput').value = bText;
                 }
             });
 
@@ -628,8 +682,7 @@
                 let matchSearch = v.title.toLowerCase().includes(searchText);
                 if(!matchSearch) return false;
                 if(currentFilter === 'favorites') return favorites.includes(v.id);
-                if(currentFilter === 'trending') return v.trending;
-                if(currentFilter === 'liked') return (v.likes || 0) > 5;
+                if(currentFilter !== 'all') return v.category === currentFilter;
                 return true;
             });
 
@@ -650,7 +703,7 @@
                     <div class="card">
                         <div class="card-img-container">
                             <img class="card-img" src="${v.image}" alt="thumb">
-                            <div class="preview-badge">✨ Exclusive</div>
+                            <div class="preview-badge">✨ ${v.category || 'Exclusive'}</div>
                             <div class="duration-badge">⏱️ 05:20</div>
                             <button class="fav-icon ${isFav ? 'active' : ''}" onclick="toggleFavorite('${v.id}')">&#9733;</button>
                         </div>
@@ -757,6 +810,21 @@
             }
         }
 
+        // ডেইলি চেক-ইন বোনাস ফিচার
+        function claimDailyCheckin() {
+            let lastCheckin = localStorage.getItem('last_checkin_date');
+            let today = new Date().toDateString();
+            if(lastCheckin === today) {
+                showToast("আজকের চেক-ইন বোনাস ইতিমধ্যে নেওয়া হয়েছে! আগামীকাল আবার চেষ্টা করুন।");
+            } else {
+                localStorage.setItem('last_checkin_date', today);
+                userCoins += 20;
+                localStorage.setItem('user_coins', userCoins);
+                document.getElementById('userCoins').innerText = userCoins;
+                showToast("অভিনন্দন! আপনি দৈনিক চেক-ইন বোনাস হিসেবে ২০ কয়েন পেলেন।");
+            }
+        }
+
         // স্পিন হুইল লজিক
         function openSpinModal() { document.getElementById('spinModal').style.display = 'flex'; }
         function closeSpinModal() { document.getElementById('spinModal').style.display = 'none'; }
@@ -840,10 +908,19 @@
         }
         function closeAdminModal() { document.getElementById('adminModal').style.display = 'none'; }
 
+        function updateBannerText() {
+            let bText = document.getElementById('adminBannerInput').value;
+            if(bText) {
+                db.ref('bannerText').set(bText);
+                showToast("ব্যানার টেক্সট আপডেট হয়েছে!");
+            }
+        }
+
         function addNewVideo() {
             let title = document.getElementById('adminVidTitle').value;
             let image = document.getElementById('adminVidImage').value;
             let link = document.getElementById('adminVidLink').value;
+            let category = document.getElementById('adminVidCategory').value;
             let smartlink = document.getElementById('adminSmartlinkInput').value;
 
             if(smartlink) {
@@ -855,13 +932,14 @@
                     title: title,
                     image: image,
                     link: link,
+                    category: category,
                     views: 10,
                     likes: 1
                 });
                 document.getElementById('adminVidTitle').value = '';
                 document.getElementById('adminVidImage').value = '';
                 document.getElementById('adminVidLink').value = '';
-                showToast("সফলভাবে ভিডিও যোগ করা হয়েছে!");
+                showToast("সফলভাবে নতুন ক্যাটাগরি সহ ভিডিও যোগ করা হয়েছে!");
             } else {
                 showToast("সব ফিল্ড পূরণ করুন!");
             }
