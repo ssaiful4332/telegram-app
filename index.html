@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>UNLIMITED VIDS</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <!-- Firebase App & Realtime Database SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
     <style>
@@ -273,7 +272,6 @@
             padding: 20px;
             display: none;
         }
-
         #toast {
             visibility: hidden;
             min-width: 200px;
@@ -330,8 +328,7 @@
             color: #8b949e;
         }
         .close-modal:hover { color: #fff; }
-
-        .comment-input, .admin-input, .admin-select, .admin-textarea {
+        .comment-input, .admin-input {
             width: 100%;
             padding: 9px;
             background: var(--border-color);
@@ -431,7 +428,7 @@
     <div class="dashboard-grid">
         <div class="dash-card">
             <span>🪙 কয়েন</span>
-            <b id="userCoins" style="color: #ffeb3b;">0</b>
+            <b id="userCoins" style="color: #ffeb3b;">50</b>
         </div>
         <div class="dash-card">
             <span>🎖️ ইউজার র‍‍্যাংক</span>
@@ -461,23 +458,20 @@
         <button class="cat-btn" onclick="filterCategory('favorites', this)">⭐ Favorites</button>
         <button class="cat-btn" onclick="filterCategory('trending', this)">🔥 Trending</button>
         <button class="cat-btn" onclick="filterCategory('liked', this)">👍 Top Liked</button>
-        <button class="cat-btn" onclick="filterCategory('new', this)">🆕 New Uploads</button>
     </div>
 
     <div id="no-result">কোনো কনটেন্ট পাওয়া যায়নি! ❌</div>
-
     <div id="card-container"></div>
-
     <div id="toast">বিজ্ঞপ্তি</div>
 
-    <!-- অ্যাড লক মডাল -->
+    <!-- অ্যাড লক মডাল (Watch 3 ads) -->
     <div id="adModal" class="modal">
         <div class="modal-content">
             <span class="close-modal" onclick="closeModal()">&#10005;</span>
             <h3 style="color: inherit; margin-top: 10px; font-size: 18px;">🔒 Watch 3 ads to unlock</h3>
             <div id="modalBodyContent">
                 <p id="adStatusText" style="font-size: 14px; margin: 12px 0;">Progress: <b style="color: #ffeb3b;">0/3</b></p>
-                <button id="watchAdBtn" onclick="watchNextAd()" style="width: 100%; background: var(--btn-color); color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer;">🔓 WATCH AD</button>
+                <button id="watchAdBtn" onclick="watchNextAd()" style="width: 100%; background: var(--btn-color); color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer;">🔓 WATCH AD 1/3</button>
             </div>
         </div>
     </div>
@@ -537,18 +531,12 @@
                     <span class="color-bubble" style="background: #9c27b0;" onclick="setThemeAccent('#9c27b0', '#7b1fa2')"></span>
                     <span class="color-bubble" style="background: #2196f3;" onclick="setThemeAccent('#2196f3', '#1976d2')"></span>
                     <span class="color-bubble" style="background: #e91e63;" onclick="setThemeAccent('#e91e63', '#c2185b')"></span>
-                    <span class="color-bubble" style="background: #009688;" onclick="setThemeAccent('#009688', '#00796b')"></span>
-                    <span class="color-bubble" style="background: #ff9800;" onclick="setThemeAccent('#ff9800', '#f57c00')"></span>
                 </div>
             </div>
 
             <div class="setting-item">
                 <span>🔐 Admin Panel</span>
                 <button onclick="promptAdminPassword()" style="background: #e91e63;">Open</button>
-            </div>
-            <div class="setting-item">
-                <span>📢 Support Channel</span>
-                <button onclick="openSupportChannel()">Join</button>
             </div>
         </div>
     </div>
@@ -574,8 +562,7 @@
           projectId: "unlimited-vids-8d309",
           storageBucket: "unlimited-vids-8d309.firebasestorage.app",
           messagingSenderId: "866862984118",
-          appId: "1:866862984118:web:caf3d61c60fdd487ef6f17",
-          measurementId: "G-YKNY6RPTYN"
+          appId: "1:866862984118:web:caf3d61c60fdd487ef6f17"
         };
 
         firebase.initializeApp(firebaseConfig);
@@ -614,10 +601,7 @@
         function closeModal() { document.getElementById('adModal').style.display = 'none'; }
         function closeAdminModal() { document.getElementById('adminModal').style.display = 'none'; }
 
-        function toggleTheme() {
-            document.body.classList.toggle('light-theme');
-        }
-
+        function toggleTheme() { document.body.classList.toggle('light-theme'); }
         function setThemeAccent(primary, secondary) {
             document.documentElement.style.setProperty('--accent-color', primary);
             document.documentElement.style.setProperty('--btn-color', secondary);
@@ -626,16 +610,10 @@
 
         function shareApp() {
             if (window.Telegram && window.Telegram.WebApp) {
-                const shareUrl = "https://t.me/share/url?url=" + encodeURIComponent("https://t.me/your_bot_username/app") + "&text=" + encodeURIComponent("সেরা ভিডিও অ্যাপটি এখনই ট্রাই করুন!");
+                const shareUrl = "https://t.me/share/url?url=" + encodeURIComponent("https://t.me/your_bot_username/app");
                 window.Telegram.WebApp.openTelegramLink(shareUrl);
             } else {
                 showToast("লিংক কপি করা হয়েছে!");
-            }
-        }
-
-        function openSupportChannel() {
-            if (window.Telegram && window.Telegram.WebApp) {
-                window.Telegram.WebApp.openTelegramLink("https://t.me/your_channel");
             }
         }
 
@@ -652,11 +630,7 @@
                 return matchCat && matchSearch;
             });
 
-            if(filtered.length === 0) {
-                document.getElementById('no-result').style.display = 'block';
-            } else {
-                document.getElementById('no-result').style.display = 'none';
-            }
+            document.getElementById('no-result').style.display = filtered.length === 0 ? 'block' : 'none';
 
             filtered.forEach(vid => {
                 const isFav = userData.favorites.includes(vid.id);
@@ -829,7 +803,7 @@
 
         function promptAdminPassword() {
             let pass = prompt("অ্যাডমিন পাসওয়ার্ড দিন:");
-            if(pass === "1234") {
+            if(pass === "Lamiya") {  /* পাসওয়ার্ড Lamiya সেট করা হলো */
                 closeSettingsModal();
                 document.getElementById('adminModal').style.display = 'flex';
                 loadAdminVideoList();
@@ -892,8 +866,6 @@
                 } else {
                     document.getElementById('tgUserName').innerText = "Web User";
                 }
-            } else {
-                document.getElementById('tgUserName').innerText = "Web Browser";
             }
 
             db.ref('videos').on('value', snapshot => {
@@ -908,14 +880,6 @@
                 }
                 renderVideos();
             });
-
-            db.ref('settings/announcement').on('value', snapshot => {
-                if(snapshot.exists()) {
-                    document.getElementById('bannerTextDisplay').innerText = snapshot.val();
-                }
-            });
-
-            document.getElementById('userCoins').innerText = userData.coins;
         };
     </script>
 </body>
