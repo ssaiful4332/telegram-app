@@ -22,7 +22,7 @@
     <div class="sticky top-0 z-50 bg-slate-900/90 backdrop-blur border-b border-slate-800 px-4 py-3 flex justify-between items-center">
         <h1 class="font-bold text-lg tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-500">UNLIMITED VIDS</h1>
         <div class="flex gap-2">
-            <button onclick="openSettings()" class="bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1">⚙️ Settings</button>
+            <button onclick="openSettings()" class="bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1">⚙️️ Settings</button>
             <button onclick="shareApp()" class="bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1">🔗 Share</button>
         </div>
     </div>
@@ -30,21 +30,21 @@
     <!-- Header Stats & Actions -->
     <div class="p-4 space-y-3">
         <div class="bg-gradient-to-r from-pink-900/40 to-purple-900/40 border border-pink-500/30 rounded-xl p-3 text-xs text-pink-200 text-center animate-pulse">
-            🔔 নতুন আপডেটটি লেবেল আপ করুন, ক্লিক করুন এবং লিডারবোর্ডে থাকুন[span_1](start_span)[span_1](end_span)!
+            🔔 নতুন আপডেটটি লেবেল আপ করুন, ক্লিক করুন এবং লিডারবোর্ডে থাকুন!
         </div>
 
         <div class="grid grid-cols-2 gap-3">
             <div class="bg-slate-900 border border-slate-800 rounded-xl p-3 flex items-center justify-between">
                 <div>
                     <p class="text-xs text-slate-400">কয়েন</p>
-                    <h3 id="userCoins" class="text-xl font-bold text-yellow-400">15</h3>[span_2](start_span)[span_2](end_span)
+                    <h3 id="userCoins" class="text-xl font-bold text-yellow-400">15</h3>
                 </div>
                 <span class="text-2xl">🪙</span>
             </div>
             <div class="bg-slate-900 border border-slate-800 rounded-xl p-3 flex items-center justify-between">
                 <div>
                     <p class="text-xs text-slate-400">স্টার্জ হারকে</p>
-                    <h3 class="text-xl font-bold text-cyan-400">Diamond</h3>[span_3](start_span)[span_3](end_span)
+                    <h3 class="text-xl font-bold text-cyan-400">Diamond</h3>
                 </div>
                 <span class="text-2xl">💎</span>
             </div>
@@ -54,22 +54,22 @@
             <div class="bg-slate-900 border border-slate-800 rounded-xl p-3 flex items-center justify-between">
                 <div>
                     <p class="text-xs text-slate-400">নোট রেরার্ড</p>
-                    <h3 class="text-xl font-bold text-emerald-400">0 ঘুন</h3>[span_4](start_span)[span_4](end_span)
+                    <h3 class="text-xl font-bold text-emerald-400">0 ঘুন</h3>
                 </div>
                 <span class="text-2xl">🎁</span>
             </div>
             <div class="bg-slate-900 border border-slate-800 rounded-xl p-3 flex items-center justify-between">
                 <div>
                     <p class="text-xs text-slate-400">আনলকড ভিডিও</p>
-                    <h3 id="unlockedCount" class="text-xl font-bold text-pink-400">10টি</h3>[span_5](start_span)[span_5](end_span)
+                    <h3 id="unlockedCount" class="text-xl font-bold text-pink-400">10টি</h3>
                 </div>
                 <span class="text-2xl">🔓</span>
             </div>
         </div>
 
         <div class="grid grid-cols-2 gap-3">
-            <button onclick="spinWheel()" class="bg-gradient-to-r from-amber-600 to-orange-600 font-bold py-2.5 rounded-xl text-xs flex items-center justify-center gap-2 shadow-lg">🍀 Lucky Spin</button>[span_6](start_span)[span_6](end_span)
-            <button onclick="openLeaderboard()" class="bg-gradient-to-r from-blue-600 to-indigo-600 font-bold py-2.5 rounded-xl text-xs flex items-center justify-center gap-2 shadow-lg">🏆 Leaderboard</button>[span_7](start_span)[span_7](end_span)
+            <button onclick="spinWheel()" class="bg-gradient-to-r from-amber-600 to-orange-600 font-bold py-2.5 rounded-xl text-xs flex items-center justify-center gap-2 shadow-lg">🍀 Lucky Spin</button>
+            <button onclick="openLeaderboard()" class="bg-gradient-to-r from-blue-600 to-indigo-600 font-bold py-2.5 rounded-xl text-xs flex items-center justify-center gap-2 shadow-lg">🏆 Leaderboard</button>
         </div>
 
         <!-- Search Bar -->
@@ -79,9 +79,9 @@
 
         <!-- Category Tabs -->
         <div id="categoryTabs" class="flex gap-2 overflow-x-auto pb-2 scrollbar-none">
-            <button onclick="filterCategory('All')" class="cat-btn bg-pink-600 text-white px-4 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap">🔥 All Videos</button>[span_8](start_span)[span_8](end_span)
-            <button onclick="filterCategory('Favorites')" class="cat-btn bg-slate-900 border border-slate-800 text-slate-300 px-4 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap">⭐ Favorites</button>[span_9](start_span)[span_9](end_span)
-            <button onclick="filterCategory('Top Liked')" class="cat-btn bg-slate-900 border border-slate-800 text-slate-300 px-4 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap">🔥 Top Liked</button>[span_10](start_span)[span_10](end_span)
+            <button onclick="filterCategory('All')" class="cat-btn bg-pink-600 text-white px-4 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap">🔥 All Videos</button>
+            <button onclick="filterCategory('Favorites')" class="cat-btn bg-slate-900 border border-slate-800 text-slate-300 px-4 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap">⭐ Favorites</button>
+            <button onclick="filterCategory('Top Liked')" class="cat-btn bg-slate-900 border border-slate-800 text-slate-300 px-4 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap">🔥 Top Liked</button>
         </div>
     </div>
 
@@ -90,7 +90,7 @@
         <!-- Videos will load dynamically -->
     </div>
 
-    <!-- Settings Modal (Exact Match) -->
+    <!-- Settings Modal -->
     <div id="settingsModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-slate-900 border border-slate-800 w-full max-w-sm rounded-2xl p-5 space-y-4">
             <div class="flex justify-between items-center border-b border-slate-800 pb-3">
@@ -100,14 +100,14 @@
             <div class="space-y-3 text-xs">
                 <div class="bg-slate-950 p-3 rounded-xl border border-slate-800">
                     <p class="text-slate-400">Telegram User:</p>
-                    <p id="tgUsername" class="font-bold text-pink-400">SAIFUL SIR (@SAIFUL676)</p>[span_11](start_span)[span_11](end_span)
+                    <p id="tgUsername" class="font-bold text-pink-400">SAIFUL SIR (@SAIFUL676)</p>
                 </div>
                 <div class="flex justify-between items-center bg-slate-950 p-3 rounded-xl border border-slate-800">
                     <span>Dark / Light Mode</span>
-                    <button onclick="toggleTheme()" class="bg-pink-600 px-3 py-1 rounded-lg">Switch</button>[span_12](start_span)[span_12](end_span)
+                    <button onclick="toggleTheme()" class="bg-pink-600 px-3 py-1 rounded-lg">Switch</button>
                 </div>
                 <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-2">
-                    <span>থিম কালার সিলেকট করুন:</span>[span_13](start_span)[span_13](end_span)
+                    <span>থিম কালার সিলেকট করুন:</span>
                     <div class="flex gap-2">
                         <button onclick="changeThemeColor('purple')" class="w-6 h-6 rounded-full bg-purple-600 border-2 border-white"></button>
                         <button onclick="changeThemeColor('pink')" class="w-6 h-6 rounded-full bg-pink-600"></button>
@@ -118,62 +118,62 @@
                 </div>
                 <div class="flex justify-between items-center bg-slate-950 p-3 rounded-xl border border-slate-800">
                     <span>Admin Panel</span>
-                    <button onclick="checkAdmin()" class="bg-pink-600 hover:bg-pink-700 px-3 py-1 rounded-lg">Open</button>[span_14](start_span)[span_14](end_span)
+                    <button onclick="checkAdmin()" class="bg-pink-600 hover:bg-pink-700 px-3 py-1 rounded-lg">Open</button>
                 </div>
                 <div class="flex justify-between items-center bg-slate-950 p-3 rounded-xl border border-slate-800">
                     <span>Support Channel</span>
-                    <button onclick="window.open('https://t.me/saifulappbot', '_blank')" class="bg-indigo-600 hover:bg-indigo-700 px-3 py-1 rounded-lg">Join</button>[span_15](start_span)[span_15](end_span)
+                    <button onclick="window.open('https://t.me/saifulappbot', '_blank')" class="bg-indigo-600 hover:bg-indigo-700 px-3 py-1 rounded-lg">Join</button>
                 </div>
                 <div class="flex justify-between items-center bg-slate-950 p-3 rounded-xl border border-slate-800">
                     <span>Clear Cache</span>
-                    <button onclick="clearCacheData()" class="bg-red-600 hover:bg-red-700 px-3 py-1 rounded-lg">Clear</button>[span_16](start_span)[span_16](end_span)
+                    <button onclick="clearCacheData()" class="bg-red-600 hover:bg-red-700 px-3 py-1 rounded-lg">Clear</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Admin Panel Modal (With Edit/Delete & Adsterra setup) -->
+    <!-- Admin Panel Modal -->
     <div id="adminModal" class="fixed inset-0 bg-black/90 backdrop-blur-md z-50 hidden overflow-y-auto p-4">
         <div class="bg-slate-900 border border-slate-800 max-w-lg mx-auto rounded-2xl p-5 space-y-4 my-6">
             <div class="flex justify-between items-center border-b border-slate-800 pb-3">
-                <h3 class="font-bold text-sm text-pink-400">👑 Admin Control Panel</h3>[span_17](start_span)[span_17](end_span)
+                <h3 class="font-bold text-sm text-pink-400">👑 Admin Control Panel</h3>
                 <button onclick="closeAdmin()" class="text-slate-400 hover:text-white">✕</button>
             </div>
             
             <div class="space-y-4 text-xs">
                 <!-- Adsterra Setup -->
                 <div>
-                    <label class="block text-slate-400 mb-1">📢 অ্যাডভার্টাইজিং (Adsterra) লিংক সেটআপ:</label>[span_18](start_span)[span_18](end_span)
+                    <label class="block text-slate-400 mb-1">📢 অ্যাডভার্টাইজিং (Adsterra) লিংক সেটআপ:</label>
                     <input type="text" id="adminAdLink" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-xs text-yellow-400">
-                    <button onclick="saveAdLink()" class="mt-2 w-full bg-emerald-600 font-bold py-2 rounded-lg">সংরক্ষণ পরিবর্তন করুন</button>[span_19](start_span)[span_19](end_span)
+                    <button onclick="saveAdLink()" class="mt-2 w-full bg-emerald-600 font-bold py-2 rounded-lg">সংরক্ষণ পরিবর্তন করুন</button>
                 </div>
 
                 <!-- Add Category -->
                 <div>
-                    <label class="block text-slate-400 mb-1">📁 নতুন ক্যাটাগরি যোগ করুন:</label>[span_20](start_span)[span_20](end_span)
+                    <label class="block text-slate-400 mb-1">📁 নতুন ক্যাটাগরি যোগ করুন:</label>
                     <div class="flex gap-2">
-                        <input type="text" id="newCatName" placeholder="যেমন: Special, 18plus" class="flex-1 bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-xs">[span_21](start_span)[span_21](end_span)
-                        <button onclick="addCategory()" class="bg-pink-600 px-4 py-2.5 font-bold rounded-lg">Add</button>[span_22](start_span)[span_22](end_span)
+                        <input type="text" id="newCatName" placeholder="যেমন: Special, 18plus" class="flex-1 bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-xs">
+                        <button onclick="addCategory()" class="bg-pink-600 px-4 py-2.5 font-bold rounded-lg">Add</button>
                     </div>
                 </div>
 
                 <!-- Add / Edit Video Form -->
                 <div class="space-y-2 border-t border-slate-800 pt-3">
-                    <p id="formHeading" class="font-bold text-pink-400">🎬 নতুন ভিডিও যোগ করুন:</p>[span_23](start_span)[span_23](end_span)
+                    <p id="formHeading" class="font-bold text-pink-400">🎬 নতুন ভিডিও যোগ করুন:</p>
                     <input type="hidden" id="editVideoId" value="">
-                    <input type="text" id="vidTitle" placeholder="পোস্টের টাইটেল / নাম" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5">[span_24](start_span)[span_24](end_span)
-                    <input type="text" id="vidThumb" placeholder="থাম্বনেইল ছবির লিংক (image.jpg)" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5">[span_25](start_span)[span_25](end_span)
-                    <input type="text" id="vidDuration" placeholder="ভিডিওর সময় / ডিউরেশন (যেমন: ৫:৩০ মি)" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5">[span_26](start_span)[span_26](end_span)
-                    <input type="text" id="vidUrl" placeholder="ভিডিও লিংক (Direct MP4 বা Embed URL)" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5">[span_27](start_span)[span_27](end_span)
+                    <input type="text" id="vidTitle" placeholder="পোস্টের টাইটেল / নাম" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5">
+                    <input type="text" id="vidThumb" placeholder="থাম্বনেইল ছবির লিংক (image.jpg)" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5">
+                    <input type="text" id="vidDuration" placeholder="ভিডিওর সময় / ডিউরেশন (যেমন: ৫:৩০ মি)" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5">
+                    <input type="text" id="vidUrl" placeholder="ভিডিও লিংক (Direct MP4 বা Embed URL)" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5">
                     <select id="vidCategory" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-xs">
                         <option value="Viral & Trending">Viral & Trending</option>
                     </select>
-                    <button onclick="saveOrUpdateVideo()" id="saveBtnText" class="w-full bg-gradient-to-r from-pink-600 to-purple-600 font-bold py-2.5 rounded-lg">🚀 একটি কার্ড তৈরি করুন</button>[span_28](start_span)[span_28](end_span)
+                    <button onclick="saveOrUpdateVideo()" id="saveBtnText" class="w-full bg-gradient-to-r from-pink-600 to-purple-600 font-bold py-2.5 rounded-lg">🚀 একটি কার্ড তৈরি করুন</button>
                 </div>
 
                 <!-- Manage Existing Categories & Videos -->
                 <div class="border-t border-slate-800 pt-3">
-                    <p class="font-bold text-slate-400 mb-2">📋 ক্যাটাগরি ও ভিডিও লিস্ট:</p>[span_29](start_span)[span_29](end_span)
+                    <p class="font-bold text-slate-400 mb-2">📋 ক্যাটাগরি ও ভিডিও লিস্ট:</p>
                     <div id="adminVideoList" class="space-y-2 max-h-40 overflow-y-auto"></div>
                 </div>
             </div>
@@ -345,13 +345,11 @@
             }
 
             if(editId) {
-                // Update existing video
                 db.ref('app_data/videos/' + editId).update({ title, thumb, duration, url, category }).then(() => {
                     resetForm();
                     alert("ভিডিও সফলভাবে আপডেট করা হয়েছে!");
                 });
             } else {
-                // Add new video
                 let newVidRef = db.ref('app_data/videos').push();
                 newVidRef.set({ title, thumb, duration, url, category, likes: Math.floor(Math.random() * 80) + 10, views: Math.floor(Math.random() * 300) + 50 }).then(() => {
                     resetForm();
@@ -409,7 +407,7 @@
             if(cat === 'All') {
                 renderVideos(allVideos);
             } else if(cat === 'Favorites') {
-                renderVideos(allVideos.slice(0, 2)); // Example filter for favorites
+                renderVideos(allVideos.slice(0, 2));
             } else if(cat === 'Top Liked') {
                 let sorted = [...allVideos].sort((a, b) => (b.likes || 0) - (a.likes || 0));
                 renderVideos(sorted);
