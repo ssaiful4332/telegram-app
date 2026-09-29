@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>UNLIMITED VIDS</title>
+    <!-- Telegram Web App SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
     <style>
@@ -464,7 +466,7 @@
     <div id="card-container"></div>
     <div id="toast">বিজ্ঞপ্তি</div>
 
-    <!-- স্মার্টলিংক অ্যাড লক মডাল (Watch 3 Ads via Smartlink) -->
+    <!-- স্মার্টলিংক অ্যাড লক মডাল -->
     <div id="adModal" class="modal">
         <div class="modal-content">
             <span class="close-modal" onclick="closeModal()">&#10005;</span>
@@ -551,4 +553,339 @@
             <input type="text" id="adminVidImage" class="admin-input" placeholder="থাম্বনেইল ইমেজ URL">
             <input type="text" id="adminVidLink" class="admin-input" placeholder="মূল ভিডিও লিঙ্ক (Unlock Link)">
             <input type="text" id="adminSmartlinkInput" class="admin-input" placeholder="Adsterra Smartlink (অ্যাড লিংক)">
-            <button onclick="addNewVideo()" style="width: 100%; background: #e91e
+            <button onclick="addNewVideo()" style="width: 100%; background: #e91e63; color: white; border: none; padding: 10px; border-radius: 6px; font-weight: bold; cursor: pointer; margin-bottom: 12px;">➕ নতুন ভিডিও যোগ করুন</button>
+            <div id="adminVideoManageList" style="max-height: 150px; overflow-y: auto;"></div>
+        </div>
+    </div>
+
+    <!-- স্ক্রিপ্ট লজিক -->
+    <script>
+        const firebaseConfig = {
+            databaseURL: "https://saifulappbot-default-rtdb.firebaseio.com/"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        let tg = window.Telegram.WebApp;
+        tg.expand();
+
+        let currentUser = tg.initDataUnsafe?.user || { id: 12345, first_name: "Saiful Islam", username: "SAIFUL676" };
+        let userId = "user_" + currentUser.id;
+
+        let videosData = [];
+        let unlockedVideos = JSON.parse(localStorage.getItem('unlocked_videos') || '[]');
+        let favorites = JSON.parse(localStorage.getItem('fav_videos') || '[]');
+        let userCoins = parseInt(localStorage.getItem('user_coins') || '50');
+        
+        let currentFilter = 'all';
+        let activeVideoId = null;
+        let activeVideoLink = '';
+        let currentAdStep = 0;
+        let smartlinkUrl = "https://www.profitablecpmrate.com/example";
+
+        document.getElementById('tgUserName').innerText = `${currentUser.first_name} (@${currentUser.username || 'user'})`;
+        document.getElementById('userCoins').innerText = userCoins;
+        document.getElementById('unlockedCount').innerText = unlockedVideos.length;
+
+        window.onload = function() {
+            fetchDatabaseData();
+        };
+
+        function fetchDatabaseData() {
+            db.ref('smartlink').on('value', snapshot => {
+                if(snapshot.val()) {
+                    smartlinkUrl = snapshot.val();
+                    document.getElementById('adminSmartlinkInput').value = smartlinkUrl;
+                }
+            });
+
+            db.ref('videos').on('value', snapshot => {
+                const data = snapshot.val();
+                videosData = [];
+                if(data) {
+                    Object.keys(data).forEach(key => {
+                        videosData.push({ id: key, ...data[key] });
+                    });
+                }
+                renderVideos();
+                renderAdminManageList();
+            });
+        }
+
+        function showToast(text) {
+            let t = document.getElementById("toast");
+            t.innerText = text;
+            t.className = "show";
+            setTimeout(() => { t.className = t.className.replace("show", ""); }, 2300);
+        }
+
+        function renderVideos() {
+            let container = document.getElementById('card-container');
+            container.innerHTML = '';
+            let searchText = document.getElementById('searchInput').value.toLowerCase();
+            
+            let filtered = videosData.filter(v => {
+                let matchSearch = v.title.toLowerCase().includes(searchText);
+                if(!matchSearch) return false;
+                if(currentFilter === 'favorites') return favorites.includes(v.id);
+                if(currentFilter === 'trending') return v.trending;
+                if(currentFilter === 'liked') return (v.likes || 0) > 5;
+                return true;
+            });
+
+            if(filtered.length === 0) {
+                document.getElementById('no-result').style.display = 'block';
+                return;
+            } else {
+                document.getElementById('no-result').style.display = 'none';
+            }
+
+            filtered.forEach(v => {
+                let isUnlocked = unlockedVideos.includes(v.id);
+                let isFav = favorites.includes(v.id);
+                let likesCount = v.likes || 0;
+                let isLiked = v.likedUsers && v.likedUsers[currentUser.id];
+
+                let html = `
+                    <div class="card">
+                        <div class="card-img-container">
+                            <img class="card-img" src="${v.image}" alt="thumb">
+                            <div class="preview-badge">✨ Exclusive</div>
+                            <div class="duration-badge">⏱️ 05:20</div>
+                            <button class="fav-icon ${isFav ? 'active' : ''}" onclick="toggleFavorite('${v.id}')">&#9733;</button>
+                        </div>
+                        <div class="card-body">
+                            <div class="card-title">${v.title}</div>
+                            <div class="card-footer-info">
+                                <button class="like-btn ${isLiked ? 'liked' : ''}" onclick="handleLike('${v.id}')">👍 <span>${likesCount}</span> Likes</button>
+                                <span>👁️ ${v.views || 120} Views</span>
+                            </div>
+                            <button class="comment-section-btn" onclick="openCommentModal('${v.id}')">💬 কমেন্ট দেখুন ও লিখুন</button>
+                            <button class="unlock-btn" onclick="handleVideoAccess('${v.id}', '${v.link}')">
+                                ${isUnlocked ? '▶ WATCH NOW (UNLOCKED)' : '🔒 WATCH 3 ADS TO UNLOCK'}
+                            </button>
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += html;
+            });
+        }
+
+        function filterCategory(cat, btn) {
+            currentFilter = cat;
+            document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderVideos();
+        }
+
+        function filterContent() {
+            renderVideos();
+        }
+
+        function toggleFavorite(id) {
+            if(favorites.includes(id)) {
+                favorites = favorites.filter(item => item !== id);
+                showToast("ফেভারিট থেকে সরানো হয়েছে!");
+            } else {
+                favorites.push(id);
+                showToast("ফেভারিটে যোগ করা হয়েছে!");
+            }
+            localStorage.setItem('fav_videos', JSON.stringify(favorites));
+            renderVideos();
+        }
+
+        function handleLike(id) {
+            let vidRef = db.ref('videos/' + id);
+            vidRef.once('value', snapshot => {
+                let val = snapshot.val();
+                let likedUsers = val.likedUsers || {};
+                let likes = val.likes || 0;
+
+                if(likedUsers[currentUser.id]) {
+                    likes = Math.max(0, likes - 1);
+                    delete likedUsers[currentUser.id];
+                    showToast("লাইক তুলে নেওয়া হয়েছে!");
+                } else {
+                    likes += 1;
+                    likedUsers[currentUser.id] = true;
+                    showToast("লাইক দেওয়া হয়েছে!");
+                }
+                vidRef.update({ likes: likes, likedUsers: likedUsers });
+            });
+        }
+
+        function handleVideoAccess(id, link) {
+            activeVideoId = id;
+            activeVideoLink = link;
+            if(unlockedVideos.includes(id)) {
+                window.open(link, '_blank');
+                db.ref('videos/' + id + '/views').transaction(v => (v || 0) + 1);
+            } else {
+                currentAdStep = 0;
+                updateAdModalUI();
+                document.getElementById('adModal').style.display = 'flex';
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('adModal').style.display = 'none';
+        }
+
+        function updateAdModalUI() {
+            document.getElementById('adStatusText').innerHTML = `Progress: <b style="color: #ffeb3b;">${currentAdStep}/3</b>`;
+            if(currentAdStep < 3) {
+                document.getElementById('watchAdBtn').innerText = `🌐 VISIT AD LINK ${currentAdStep + 1}/3`;
+            } else {
+                document.getElementById('watchAdBtn').innerText = `🎉 UNLOCK NOW!`;
+            }
+        }
+
+        function openAdSmartlink() {
+            window.open(smartlinkUrl, '_blank');
+            currentAdStep++;
+            if(currentAdStep < 3) {
+                updateAdModalUI();
+                showToast(`অ্যাড ${currentAdStep} দেখা সম্পন্ন হয়েছে!`);
+            } else {
+                unlockedVideos.push(activeVideoId);
+                localStorage.setItem('unlocked_videos', JSON.stringify(unlockedVideos));
+                document.getElementById('unlockedCount').innerText = unlockedVideos.length;
+                closeModal();
+                showToast("ভিডিও সফলভাবে আনলক হয়েছে!");
+                renderVideos();
+                window.open(activeVideoLink, '_blank');
+            }
+        }
+
+        // স্পিন হুইল লজিক
+        function openSpinModal() { document.getElementById('spinModal').style.display = 'flex'; }
+        function closeSpinModal() { document.getElementById('spinModal').style.display = 'none'; }
+        function executeSpin() {
+            let rewards = [10, 20, 50, 100, 5, 25];
+            let won = rewards[Math.floor(Math.random() * rewards.length)];
+            document.getElementById('spinBox').innerText = `🎉 +${won} Coins!`;
+            userCoins += won;
+            localStorage.setItem('user_coins', userCoins);
+            document.getElementById('userCoins').innerText = userCoins;
+            showToast(`অভিনন্দন! আপনি ${won} কয়েন জিতেছেন।`);
+        }
+
+        // লিডারবোর্ড ও সেটিংস
+        function openLeaderboardModal() { document.getElementById('leaderboardModal').style.display = 'flex'; }
+        function closeLeaderboardModal() { document.getElementById('leaderboardModal').style.display = 'none'; }
+        
+        function openSettingsModal() { document.getElementById('settingsModal').style.display = 'flex'; }
+        function closeSettingsModal() { document.getElementById('settingsModal').style.display = 'none'; }
+        
+        function toggleTheme() {
+            document.body.classList.toggle('light-theme');
+        }
+
+        function setThemeAccent(primary, btnDark) {
+            document.documentElement.style.setProperty('--accent-color', primary);
+            document.documentElement.style.setProperty('--btn-color', btnDark);
+            showToast("থিম পরিবর্তন করা হয়েছে!");
+        }
+
+        function shareApp() {
+            let shareText = encodeURIComponent("🔥 অসাধারণ সব ভিডিও দেখতে এই টেলিগ্রাম অ্যাপটিতে জয়েন করুন!");
+            let shareUrl = `https://t.me/share/url?url=https://t.me/${currentUser.username || 'saifulappbot'}&text=${shareText}`;
+            window.open(shareUrl, '_blank');
+        }
+
+        // কমেন্ট সিস্টেম
+        function openCommentModal(id) {
+            activeVideoId = id;
+            document.getElementById('commentModal').style.display = 'flex';
+            loadComments(id);
+        }
+        function closeCommentModal() { document.getElementById('commentModal').style.display = 'none'; }
+
+        function loadComments(id) {
+            let list = document.getElementById('commentList');
+            list.innerHTML = 'লোড হচ্ছে...';
+            db.ref('comments/' + id).on('value', snapshot => {
+                list.innerHTML = '';
+                let data = snapshot.val();
+                if(data) {
+                    Object.values(data).forEach(c => {
+                        list.innerHTML += `<div class="comment-item"><b>${c.name}:</b> ${c.text}</div>`;
+                    });
+                } else {
+                    list.innerHTML = '<div style="color: #8b949e;">কোনো কমেন্ট নেই। প্রথম কমেন্ট করুন!</div>';
+                }
+            });
+        }
+
+        function postComment() {
+            let text = document.getElementById('commentInputBox').value.trim();
+            if(!text) return;
+            db.ref('comments/' + activeVideoId).push({
+                name: currentUser.first_name,
+                text: text
+            });
+            document.getElementById('commentInputBox').value = '';
+            showToast("কমেন্ট পোস্ট করা হয়েছে!");
+        }
+
+        // অ্যাডমিন প্যানেল
+        function promptAdminPassword() {
+            let pass = prompt("অ্যাডমিন পাসওয়ার্ড দিন:");
+            if(pass === "Lamiya" || pass === "admin") {
+                closeSettingsModal();
+                document.getElementById('adminModal').style.display = 'flex';
+            } else if(pass !== null) {
+                showToast("ভুল পাসওয়ার্ড!");
+            }
+        }
+        function closeAdminModal() { document.getElementById('adminModal').style.display = 'none'; }
+
+        function addNewVideo() {
+            let title = document.getElementById('adminVidTitle').value;
+            let image = document.getElementById('adminVidImage').value;
+            let link = document.getElementById('adminVidLink').value;
+            let smartlink = document.getElementById('adminSmartlinkInput').value;
+
+            if(smartlink) {
+                db.ref('smartlink').set(smartlink);
+            }
+
+            if(title && image && link) {
+                db.ref('videos').push({
+                    title: title,
+                    image: image,
+                    link: link,
+                    views: 10,
+                    likes: 1
+                });
+                document.getElementById('adminVidTitle').value = '';
+                document.getElementById('adminVidImage').value = '';
+                document.getElementById('adminVidLink').value = '';
+                showToast("সফলভাবে ভিডিও যোগ করা হয়েছে!");
+            } else {
+                showToast("সব ফিল্ড পূরণ করুন!");
+            }
+        }
+
+        function renderAdminManageList() {
+            let list = document.getElementById('adminVideoManageList');
+            list.innerHTML = '';
+            videosData.forEach(v => {
+                list.innerHTML += `
+                    <div class="manage-item">
+                        <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px;">${v.title}</span>
+                        <button onclick="deleteVideo('${v.id}')">Delete</button>
+                    </div>
+                `;
+            });
+        }
+
+        function deleteVideo(id) {
+            if(confirm("ভিডিওটি ডিলিট করতে চান?")) {
+                db.ref('videos/' + id).remove();
+                showToast("ভিডিও ডিলিট করা হয়েছে!");
+            }
+        }
+    </script>
+</body>
+</html>
