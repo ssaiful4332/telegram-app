@@ -396,6 +396,26 @@
             border: 2px solid white;
             display: inline-block;
         }
+        .manage-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--border-color);
+            padding: 8px 10px;
+            border-radius: 6px;
+            margin-bottom: 6px;
+            font-size: 12px;
+            text-align: left;
+        }
+        .manage-item button {
+            background: #d32f2f;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -418,7 +438,7 @@
             <b id="userCoins" style="color: #ffeb3b;">0</b>
         </div>
         <div class="dash-card">
-            <span>🎖️ ইউজার র‍্যাংক</span>
+            <span>🎖️ ইউজার র‍‍্যাংক</span>
             <b id="userRank" style="color: #00e5ff;">Bronze</b>
         </div>
         <div class="dash-card">
@@ -454,6 +474,51 @@
 
     <div id="toast">বিজ্ঞপ্তি</div>
 
+    <!-- অ্যাড লক মডাল -->
+    <div id="adModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal()">&#10005;</span>
+            <h3 style="color: inherit; margin-top: 10px; font-size: 18px;" id="modalMainTitle">🔒 Watch 3 ads to unlock</h3>
+            <div id="modalBodyContent">
+                <p id="adStatusText" style="font-size: 14px; margin: 12px 0;">Progress: <b style="color: #ffeb3b;">0/3</b></p>
+                <button id="watchAdBtn" onclick="watchNextAd()" style="width: 100%; background: var(--btn-color); color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer;">🔓 WATCH AD</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- স্পিন হুইল মডাল -->
+    <div id="spinModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeSpinModal()">&#10005;</span>
+            <h3 style="color: #ff9800; margin-top: 5px; font-size: 18px;">🎡 Daily Lucky Spin</h3>
+            <p style="font-size: 13px; color: #b0bec5; margin: 10px 0;">চাকা ঘুরিয়ে প্রতিদিন ফ্রি কয়েন জিতে নিন!</p>
+            <div id="spinBox" style="font-size: 26px; padding: 20px; background: var(--border-color); border-radius: 10px; margin-bottom: 12px; font-weight: bold; color: #ffeb3b;">🎁 ?</div>
+            <button id="spinActionBtn" onclick="executeSpin()" style="width: 100%; background: #ff9800; color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer;">SPIN NOW</button>
+        </div>
+    </div>
+
+    <!-- লিডারবোর্ড মডাল -->
+    <div id="leaderboardModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeLeaderboardModal()">&#10005;</span>
+            <h3 style="color: #00e5ff; margin-top: 5px; font-size: 18px; margin-bottom: 12px;">🏆 Leaderboard</h3>
+            <div id="leaderboardList" style="text-align: left; font-size: 13px; max-height: 180px; overflow-y: auto;">
+                <div style="background: var(--border-color); padding: 8px; border-radius: 6px; margin-bottom: 6px; display: flex; justify-content: space-between;"><span>1. 👑 Saiful Islam</span> <b>24 Refers</b></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- কমেন্ট মডাল -->
+    <div id="commentModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeCommentModal()">&#10005;</span>
+            <h3 style="color: inherit; margin-top: 5px; font-size: 16px; margin-bottom: 10px;">💬 ভিডিও কমেন্ট বক্স</h3>
+            <div id="commentList" class="comment-list"></div>
+            <input type="text" id="commentInputBox" class="comment-input" placeholder="আপনার মন্তব্য লিখুন...">
+            <button onclick="postComment()" style="width: 100%; background: var(--btn-color); color: white; border: none; padding: 8px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 12px;">কমেন্ট পোস্ট করুন</button>
+        </div>
+    </div>
+
     <!-- সেটিংস মডাল -->
     <div id="settingsModal" class="modal">
         <div class="modal-content">
@@ -480,11 +545,32 @@
                     <span class="color-bubble" style="background: #ff9800;" onclick="setThemeAccent('#ff9800', '#f57c00')"></span>
                 </div>
             </div>
+
+            <div class="setting-item">
+                <span>🔐 Admin Panel</span>
+                <button onclick="promptAdminPassword()" style="background: #e91e63;">Open</button>
+            </div>
+            <div class="setting-item">
+                <span>📢 Support Channel</span>
+                <button onclick="openSupportChannel()">Join</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- অ্যাডমিন প্যানেল মডাল -->
+    <div id="adminModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeAdminModal()">&#10005;</span>
+            <h3 style="color: #e91e63; margin-top: 5px; font-size: 18px; margin-bottom: 12px;">🔐 Admin Panel</h3>
+            <input type="text" id="adminVidTitle" class="admin-input" placeholder="ভিডিও টাইটেল">
+            <input type="text" id="adminVidImage" class="admin-input" placeholder="থাম্বনেইল ইমেজ URL">
+            <input type="text" id="adminVidLink" class="admin-input" placeholder="মূল ভিডিও লিঙ্ক (Unlock Link)">
+            <button onclick="addNewVideo()" style="width: 100%; background: #e91e63; color: white; border: none; padding: 10px; border-radius: 6px; font-weight: bold; cursor: pointer; margin-bottom: 15px;">নতুন ভিডিও যোগ করুন</button>
+            <div id="adminVideoManageList" style="max-height: 120px; overflow-y: auto;"></div>
         </div>
     </div>
 
     <script>
-        // আপনার দেওয়া অফিশিয়াল ফায়ারবেস কনফিগারেশন
         const firebaseConfig = {
           apiKey: "AIzaSyCbVizR7Lq1Y71w3tOjwzMxI0R8g8sBCK4",
           authDomain: "unlimited-vids-8d309.firebaseapp.com",
@@ -496,9 +582,24 @@
           measurementId: "G-YKNY6RPTYN"
         };
 
-        // Firebase ইনিশিয়ালাইজেশন
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
+
+        let userData = {
+            coins: 50,
+            rank: "Bronze",
+            refers: 0,
+            unlocked: [],
+            favorites: [],
+            likes: []
+        };
+
+        let currentCategory = 'all';
+        let currentSearchQuery = '';
+        let videosList = [];
+        let activeVideoId = null;
+        let activeUnlockLink = '';
+        let adWatchCount = 0;
 
         function showToast(text) {
             const t = document.getElementById("toast");
@@ -507,29 +608,293 @@
             setTimeout(() => { t.className = t.className.replace("show", ""); }, 2300);
         }
 
-        // মডাল কন্ট্রোল ফাংশনসমূহ
         function openSettingsModal() { document.getElementById('settingsModal').style.display = 'flex'; }
         function closeSettingsModal() { document.getElementById('settingsModal').style.display = 'none'; }
-        function toggleTheme() { document.body.classList.toggle('light-theme'); }
-        
+        function openSpinModal() { document.getElementById('spinModal').style.display = 'flex'; }
+        function closeSpinModal() { document.getElementById('spinModal').style.display = 'none'; }
+        function openLeaderboardModal() { document.getElementById('leaderboardModal').style.display = 'flex'; }
+        function closeLeaderboardModal() { document.getElementById('leaderboardModal').style.display = 'none'; }
+        function closeCommentModal() { document.getElementById('commentModal').style.display = 'none'; }
+        function closeModal() { document.getElementById('adModal').style.display = 'none'; }
+        function closeAdminModal() { document.getElementById('adminModal').style.display = 'none'; }
+
+        function toggleTheme() {
+            document.body.classList.toggle('light-theme');
+        }
+
         function setThemeAccent(primary, secondary) {
             document.documentElement.style.setProperty('--accent-color', primary);
             document.documentElement.style.setProperty('--btn-color', secondary);
             showToast("থিম কালার আপডেট করা হয়েছে! ✨");
         }
 
-        // ফায়ারবেস থেকে রিয়েলটাইম ডেটা লোড করার বেসিক ফাংশন
-        function initApp() {
-            db.ref('settings/announcement').on('value', (snapshot) => {
+        function shareApp() {
+            if (window.Telegram && window.Telegram.WebApp) {
+                const shareUrl = "https://t.me/share/url?url=" + encodeURIComponent("https://t.me/your_bot_username/app") + "&text=" + encodeURIComponent("সেরা ভিডিও অ্যাপটি এখনই ট্রাই করুন!");
+                window.Telegram.WebApp.openTelegramLink(shareUrl);
+            } else {
+                showToast("লিংক কপি করা হয়েছে!");
+            }
+        }
+
+        function openSupportChannel() {
+            if (window.Telegram && window.Telegram.WebApp) {
+                window.Telegram.WebApp.openTelegramLink("https://t.me/your_channel");
+            }
+        }
+
+        // ডাটা রেন্ডার ও ফিল্টার ফাংশন
+        function renderVideos() {
+            const container = document.getElementById('card-container');
+            container.innerHTML = '';
+            
+            let filtered = videosList.filter(vid => {
+                let matchCat = true;
+                if(currentCategory === 'favorites') matchCat = userData.favorites.includes(vid.id);
+                else if(currentCategory === 'liked') matchCat = (vid.likes || 0) > 0;
+                
+                let matchSearch = vid.title.toLowerCase().includes(currentSearchQuery.toLowerCase());
+                return matchCat && matchSearch;
+            });
+
+            if(filtered.length === 0) {
+                document.getElementById('no-result').style.display = 'block';
+            } else {
+                document.getElementById('no-result').style.display = 'none';
+            }
+
+            filtered.forEach(vid => {
+                const isFav = userData.favorites.includes(vid.id);
+                const isLiked = userData.likes.includes(vid.id);
+                const isUnlocked = userData.unlocked.includes(vid.id);
+
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                    <div class="card-img-container">
+                        <img src="${vid.image || 'https://via.placeholder.com/300'}" class="card-img">
+                        <span class="preview-badge">PREVIEW</span>
+                        <span class="duration-badge">02:45</span>
+                        <button class="fav-icon ${isFav ? 'active' : ''}" onclick="toggleFavorite('${vid.id}')">♥</button>
+                    </div>
+                    <div class="card-body">
+                        <div class="card-title">${vid.title}</div>
+                        <div class="card-footer-info">
+                            <button class="like-btn ${isLiked ? 'liked' : ''}" onclick="toggleLike('${vid.id}')">
+                                👍 <span id="like-count-${vid.id}">${vid.likes || 0}</span>
+                            </button>
+                            <span>👁️️ 1.2K Views</span>
+                        </div>
+                        <button class="comment-section-btn" onclick="openCommentModal('${vid.id}')">💬 কমেন্ট দেখুন ও লিখুন</button>
+                        <button class="unlock-btn" onclick="handleUnlock('${vid.id}', '${vid.link}')">
+                            ${isUnlocked ? '🎬 WATCH FULL VIDEO' : '🔒 UNLOCK FULL VIDEO'}
+                        </button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function filterCategory(cat, btn) {
+            currentCategory = cat;
+            document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderVideos();
+        }
+
+        function filterContent() {
+            currentSearchQuery = document.getElementById('searchInput').value;
+            renderVideos();
+        }
+
+        function toggleFavorite(vidId) {
+            if(userData.favorites.includes(vidId)) {
+                userData.favorites = userData.favorites.filter(id => id !== vidId);
+                showToast("ফেভারিট থেকে সরানো হয়েছে!");
+            } else {
+                userData.favorites.push(vidId);
+                showToast("ফেভারিটে যোগ করা হয়েছে! ❤️");
+            }
+            renderVideos();
+        }
+
+        function toggleLike(vidId) {
+            const vidRef = db.ref('videos/' + vidId);
+            vidRef.once('value', snapshot => {
+                let vData = snapshot.val();
+                let currentLikes = vData.likes || 0;
+                if(userData.likes.includes(vidId)) {
+                    userData.likes = userData.likes.filter(id => id !== vidId);
+                    currentLikes = Math.max(0, currentLikes - 1);
+                    showToast("লাইক তুলে নেওয়া হয়েছে");
+                } else {
+                    userData.likes.push(vidId);
+                    currentLikes += 1;
+                    showToast("লাইক দেওয়া হয়েছে! 👍");
+                }
+                vidRef.update({ likes: currentLikes });
+            });
+        }
+
+        function handleUnlock(vidId, link) {
+            if(userData.unlocked.includes(vidId)) {
+                if(window.Telegram && window.Telegram.WebApp) {
+                    window.Telegram.WebApp.openLink(link);
+                } else {
+                    window.open(link, '_blank');
+                }
+            } else {
+                activeVideoId = vidId;
+                activeUnlockLink = link;
+                adWatchCount = 0;
+                document.getElementById('adStatusText').innerHTML = 'Progress: <b style="color: #ffeb3b;">0/3</b>';
+                document.getElementById('watchAdBtn').innerText = "🔓 WATCH AD 1/3";
+                document.getElementById('adModal').style.display = 'flex';
+            }
+        }
+
+        function watchNextAd() {
+            adWatchCount++;
+            if(adWatchCount < 3) {
+                document.getElementById('adStatusText').innerHTML = `Progress: <b style="color: #ffeb3b;">${adWatchCount}/3</b>`;
+                document.getElementById('watchAdBtn').innerText = `🔓 WATCH AD ${adWatchCount + 1}/3`;
+                showToast(`বিজ্ঞপ্তি ${adWatchCount}/3 দেখা শেষ!`);
+            } else {
+                userData.unlocked.push(activeVideoId);
+                document.getElementById('unlockedCount.innerText = userData.unlocked.length;` // Fix syntax below
+                document.getElementById('unlockedCount').innerText = userData.unlocked.length + 'টি';
+                document.getElementById('adModal').style.display = 'none';
+                showToast("ভিডিও সফলভাবে আনলক হয়েছে! 🎉");
+                renderVideos();
+                if(window.Telegram && window.Telegram.WebApp) {
+                    window.Telegram.WebApp.openLink(activeUnlockLink);
+                } else {
+                    window.open(activeUnlockLink, '_blank');
+                }
+            }
+        }
+
+        // স্পিন হুইল লজিক
+        function executeSpin() {
+            const btn = document.getElementById('spinActionBtn');
+            btn.disabled = true;
+            let count = 0;
+            let interval = setInterval(() => {
+                let rand = Math.floor(Math.random() * 50) + 10;
+                document.getElementById('spinBox').innerText = "🎁 " + rand + " Coins";
+                count++;
+                if(count > 10) {
+                    clearInterval(interval);
+                    let won = Math.floor(Math.random() * 40) + 20;
+                    userData.coins += won;
+                    document.getElementById('userCoins').innerText = userData.coins;
+                    document.getElementById('spinBox').innerText = "🎉 Won " + won + " Coins!";
+                    showToast(`অভিনন্দন! আপনি ${won} কয়েন জিতেছেন! 🪙`);
+                    btn.disabled = false;
+                }
+            }, 100);
+        }
+
+        // কমেন্ট সিস্টেম
+        function openCommentModal(vidId) {
+            activeVideoId = vidId;
+            document.getElementById('commentModal').style.display = 'flex';
+            loadComments(vidId);
+        }
+
+        function loadComments(vidId) {
+            const list = document.getElementById('commentList');
+            list.innerHTML = 'লোড হচ্ছে...';
+            db.ref('comments/' + vidId).on('value', snapshot => {
+                list.innerHTML = '';
                 if(snapshot.exists()) {
-                    document.getElementById('bannerTextDisplay').innerText = snapshot.val();
+                    snapshot.forEach(child => {
+                        let c = child.val();
+                        let item = document.createElement('div');
+                        item.className = 'comment-item';
+                        item.innerHTML = `<b>${c.user}:</b> ${c.text}`;
+                        list.appendChild(item);
+                    });
+                } else {
+                    list.innerHTML = '<p style="color:#8b949e; text-align:center;">কোনো কমেন্ট নেই। প্রথম কমেন্ট করুন!</p>';
                 }
             });
         }
 
+        function postComment() {
+            const box = document.getElementById('commentInputBox');
+            const text = box.value.trim();
+            if(!text) return;
+            const userName = (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe?.user?.first_name) || "User";
+            db.ref('comments/' + activeVideoId).push({
+                user: userName,
+                text: text,
+                time: Date.now()
+            });
+            box.value = '';
+            showToast("কমেন্ট পোস্ট করা হয়েছে! 💬");
+        }
+
+        // অ্যাডমিন প্যানেল
+        function promptAdminPassword() {
+            let pass = prompt("অ্যাডমিন পাসওয়ার্ড দিন:");
+            if(pass === "1234") {
+                closeSettingsModal();
+                document.getElementById('adminModal').style.display = 'flex';
+                loadAdminVideoList();
+            } else if(pass !== null) {
+                showToast("ভুল পাসওয়ার্ড! ❌");
+            }
+        }
+
+        function addNewVideo() {
+            let title = document.getElementById('adminVidTitle').value;
+            let image = document.getElementById('adminVidImage').value;
+            let link = document.getElementById('adminVidLink').value;
+            if(!title || !link) {
+                showToast("টাইটেল এবং লিঙ্ক আবশ্যক!");
+                return;
+            }
+            db.ref('videos').push({
+                title: title,
+                image: image || 'https://via.placeholder.com/300',
+                link: link,
+                likes: 0
+            });
+            document.getElementById('adminVidTitle').value = '';
+            document.getElementById('adminVidImage').value = '';
+            document.getElementById('adminVidLink').value = '';
+            showToast("নতুন ভিডিও যোগ করা হয়েছে! ✅");
+        }
+
+        function loadAdminVideoList() {
+            const mList = document.getElementById('adminVideoManageList');
+            mList.innerHTML = '';
+            db.ref('videos').on('value', snapshot => {
+                mList.innerHTML = '';
+                if(snapshot.exists()) {
+                    snapshot.forEach(child => {
+                        let v = child.val();
+                        let id = child.key;
+                        let div = document.createElement('div');
+                        div.className = 'manage-item';
+                        div.innerHTML = `<span>${v.title.substring(0, 20)}...</span> <button onclick="deleteVideo('${id}')">ডিলিট</button>`;
+                        mList.appendChild(div);
+                    });
+                }
+            });
+        }
+
+        function deleteVideo(id) {
+            if(confirm("ভিডিওটি ডিলিট করতে চান?")) {
+                db.ref('videos/' + id).remove();
+                showToast("ডিলিট করা হয়েছে!");
+            }
+        }
+
+        // অ্যাপ ইনিশিয়ালাইজেশন
         window.onload = function() {
-            initApp();
-            // টেলিগ্রাম ওয়েব অ্যাপ ইনিট
+            // টেলিগ্রাম ইউজার লোড
             if (window.Telegram && window.Telegram.WebApp) {
                 const tg = window.Telegram.WebApp;
                 tg.expand();
@@ -538,7 +903,32 @@
                 } else {
                     document.getElementById('tgUserName').innerText = "Web User";
                 }
+            } else {
+                document.getElementById('tgUserName').innerText = "Web Browser";
             }
+
+            // ফায়ারবেস থেকে ভিডিও লোড
+            db.ref('videos').on('value', snapshot => {
+                videosList = [];
+                if(snapshot.exists()) {
+                    snapshot.forEach(child => {
+                        videosList.push({
+                            id: child.key,
+                            ...child.val()
+                        });
+                    });
+                }
+                renderVideos();
+            });
+
+            // অ্যানাউন্সমেন্ট লোড
+            db.ref('settings/announcement').on('value', snapshot => {
+                if(snapshot.exists()) {
+                    document.getElementById('bannerTextDisplay').innerText = snapshot.val();
+                }
+            });
+
+            document.getElementById('userCoins').innerText = userData.coins;
         };
     </script>
 </body>
