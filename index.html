@@ -23,11 +23,11 @@
         <h1 class="font-bold text-lg tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-500">UNLIMITED VIDS</h1>
         <div class="flex gap-2">
             <button onclick="openSettings()" class="bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1">⚙️ Settings</button>
-            <button onclick="shareApp()" class="bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1">share Share</button>
+            <button onclick="shareApp()" class="bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1">🔗 Share</button>
         </div>
     </div>
 
-    <!-- Stats & Features Header -->
+    <!-- Header Stats & Actions -->
     <div class="p-4 space-y-3">
         <div class="bg-gradient-to-r from-pink-900/40 to-purple-900/40 border border-pink-500/30 rounded-xl p-3 text-xs text-pink-200 text-center animate-pulse">
             🔔 নতুন আপডেটটি লেবেল আপ করুন, ক্লিক করুন এবং লিডারবোর্ডে থাকুন!
@@ -85,7 +85,7 @@
 
     <!-- Video Feed Container -->
     <div id="videoFeed" class="px-4 space-y-4">
-        <!-- Dynamic Videos Will Load Here -->
+        <!-- Videos will load dynamically -->
     </div>
 
     <!-- Settings Modal -->
@@ -161,7 +161,6 @@
 
     <!-- Firebase & App Script Logic -->
     <script>
-        // Firebase Configuration
         const firebaseConfig = {
             databaseURL: "https://saifulappbot-default-rtdb.firebaseio.com/"
         };
@@ -175,7 +174,6 @@
         let categories = ["Viral & Trending"];
         let currentFilter = "All";
 
-        // Load Data on Startup
         window.onload = function() {
             loadDatabase();
         };
@@ -184,18 +182,15 @@
             db.ref('app_data').on('value', (snapshot) => {
                 const data = snapshot.val() || {};
                 
-                // Load Adlink
                 if(data.adLink) {
                     document.getElementById('adminAdLink').value = data.adLink;
                 }
 
-                // Load Categories
                 if(data.categories) {
                     categories = data.categories;
                     updateCategoryUI();
                 }
 
-                // Load Videos
                 if(data.videos) {
                     allVideos = Object.keys(data.videos).map(key => ({
                         id: key,
@@ -211,7 +206,6 @@
             });
         }
 
-        // Render Videos with Universal Player Compatibility (All Phones)
         function renderVideos(videos) {
             const feed = document.getElementById('videoFeed');
             feed.innerHTML = '';
@@ -249,13 +243,11 @@
             });
         }
 
-        // Universal Play Handler for All Devices
         function playVideo(btn, url) {
             const container = btn.parentElement;
             container.innerHTML = `
                 <video src="${url}" controls autoplay playsinline webkit-playsinline class="w-full h-full object-cover absolute inset-0"></video>
             `;
-            // Open Adsterra Smartlink on click
             db.ref('app_data/adLink').once('value').then(snapshot => {
                 const adLink = snapshot.val();
                 if(adLink) {
@@ -264,7 +256,6 @@
             });
         }
 
-        // Admin Functions
         function checkAdmin() {
             let pass = prompt("গোপন অ্যাডমিন পাসওয়ার্ড দিন:");
             if(pass === "Lamiya" || pass === "admin") {
