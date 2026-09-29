@@ -330,24 +330,29 @@
                 <button onclick="filterCategory('Favorites')" class="cat-btn bg-slate-900 border border-slate-800 text-slate-300 px-4 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap">⭐ Favorites</button>
                 <button onclick="filterCategory('Top Liked')" class="cat-btn bg-slate-900 border border-slate-800 text-slate-300 px-4 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap">🔥 Top Liked</button>
             `;
-            select.innerHTML = '';
+            let currentSelected = select.value;
+            select.innerHTML = '<option value="Viral & Trending">Viral & Trending</option>';
 
             categories.forEach(cat => {
                 tabs.innerHTML += `<button onclick="filterCategory('${cat}')" class="cat-btn bg-slate-900 border border-slate-800 text-slate-300 px-4 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap">${cat}</button>`;
-                select.innerHTML += `<option value="${cat}">${cat}</option>`;
+                if(cat !== "Viral & Trending") {
+                    select.innerHTML += `<option value="${cat}">${cat}</option>`;
+                }
             });
+            if(currentSelected) select.value = currentSelected;
         }
 
         function saveOrUpdateVideo() {
             let editId = document.getElementById('editVideoId').value;
-            let title = document.getElementById('vidTitle').value;
-            let thumb = document.getElementById('vidThumb').value;
-            let duration = document.getElementById('vidDuration').value;
-            let url = document.getElementById('vidUrl').value;
-            let category = document.getElementById('vidCategory').value;
+            let title = document.getElementById('vidTitle').value.trim();
+            let thumb = document.getElementById('vidThumb').value.trim();
+            let duration = document.getElementById('vidDuration').value.trim() || "0:00";
+            let url = document.getElementById('vidUrl').value.trim();
+            let catSelect = document.getElementById('vidCategory');
+            let category = catSelect.value ? catSelect.value : "Viral & Trending";
 
             if(!title || !url) {
-                alert("টাইটেল এবং ভিডিও লিংক আবশ্যক!");
+                alert("দয়া করে টাইটেল এবং ভিডিও লিংক দিন!");
                 return;
             }
 
@@ -358,7 +363,15 @@
                 }).catch(err => alert("ত্রুটি: " + err.message));
             } else {
                 let newVidRef = db.ref('videos').push();
-                newVidRef.set({ title, thumb, duration, url, category, likes: Math.floor(Math.random() * 80) + 10, views: Math.floor(Math.random() * 300) + 50 }).then(() => {
+                newVidRef.set({ 
+                    title: title, 
+                    thumb: thumb || "https://via.placeholder.com/640x360?text=Video", 
+                    duration: duration, 
+                    url: url, 
+                    category: category, 
+                    likes: Math.floor(Math.random() * 80) + 10, 
+                    views: Math.floor(Math.random() * 300) + 50 
+                }).then(() => {
                     resetForm();
                     alert("ভিডিও সফলভাবে পোস্ট করা হয়েছে!");
                 }).catch(err => alert("ত্রুটি: " + err.message));
@@ -441,7 +454,7 @@
 
         function spinWheel() { alert("লাকি স্পিন ফিচারটি চালু রয়েছে!"); }
         function openLeaderboard() { alert("লিডারবোর্ডে আপনি শীর্ষে আছেন!"); }
-        function shareApp() { if(tg.initDataUnsafe?.user) { tg.openTelegramLink(`https://t.me/share/url?url=https://t.me/saifulappbot`); } else { alert("লিংক কপি করা হয়েছে!"); } }
+        function shareApp() { if(tg.initDataUnsafe?.user) { tg.openTelegramLink(`https://t.me/share/url?url=https://t.me/saifulappbot`); } else { alert("লিংক কপি করা হয়েছে লিঙ্ক!"); } }
         function toggleTheme() { alert("থিম মোড পরিবর্তন করা হয়েছে!"); }
     </script>
 </body>
