@@ -1,3 +1,654 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UNLIMITED VIDS</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root {
+            --bg-color: #0b0713;
+            --card-bg: #151022;
+            --text-color: #ffffff;
+            --accent-color: #9c27b0;
+            --btn-color: #7b1fa2;
+            --border-color: #2a2040;
+        }
+        body.light-theme {
+            --bg-color: #f4f4f9;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --border-color: #dddddd;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 8px;
+            transition: 0.3s;
+            max-width: 450px;
+            margin: auto;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--card-bg);
+            padding: 12px 15px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+        .header h2 {
+            margin: 0;
+            font-size: 18px;
+            letter-spacing: 1px;
+            color: var(--accent-color);
+        }
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .action-btn {
+            background: var(--border-color);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            padding: 6px 10px;
+            border-radius: 8px;
+            font-size: 11px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .announcement-banner {
+            background: linear-gradient(135deg, var(--btn-color), var(--accent-color));
+            color: white;
+            padding: 10px 14px;
+            border-radius: 10px;
+            font-size: 13px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+        }
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        .dash-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 10px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 12px;
+        }
+        .dash-card b {
+            display: block;
+            font-size: 14px;
+            margin-top: 4px;
+        }
+        .action-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        .action-row button {
+            flex: 1;
+            background: var(--btn-color);
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .spin-btn { background: #ff9800 !important; }
+        .leaderboard-btn { background: #00bcd4 !important; }
+
+        .search-box {
+            margin-bottom: 12px;
+        }
+        .search-input {
+            width: 100%;
+            padding: 10px 15px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            color: var(--text-color);
+            font-size: 14px;
+            box-sizing: border-box;
+            outline: none;
+        }
+        .categories {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+            white-space: nowrap;
+            margin-bottom: 12px;
+        }
+        .categories::-webkit-scrollbar {
+            display: none;
+        }
+        .cat-btn {
+            background: var(--card-bg);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .cat-btn.active, .cat-btn:hover {
+            background: var(--btn-color);
+            color: white;
+            border-color: var(--btn-color);
+        }
+        .card {
+            background: var(--card-bg);
+            border-radius: 14px;
+            overflow: hidden;
+            margin-bottom: 15px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            padding: 15px;
+        }
+        .card-img-container {
+            position: relative;
+            width: 100%;
+            height: 190px;
+            overflow: hidden;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+        .card-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .preview-badge {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(156, 39, 176, 0.85);
+            color: white;
+            padding: 3px 8px;
+            font-size: 11px;
+            border-radius: 6px;
+            font-weight: bold;
+        }
+        .duration-badge {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 3px 8px;
+            font-size: 12px;
+            border-radius: 6px;
+            font-weight: bold;
+        }
+        .fav-icon {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.6);
+            border: none;
+            color: white;
+            font-size: 16px;
+            padding: 6px 10px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        .fav-icon.active {
+            color: #ff4444;
+        }
+        .card-title {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+        .card-footer-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            color: #b0bec5;
+            margin-bottom: 10px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 8px;
+        }
+        .like-btn {
+            background: none;
+            border: none;
+            color: inherit;
+            cursor: pointer;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .like-btn.liked {
+            color: #ff4444;
+            font-weight: bold;
+        }
+        .card-actions-row {
+            display: flex;
+            gap: 6px;
+            margin-top: 8px;
+        }
+        .comment-section-btn {
+            flex: 1;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border-color);
+            color: var(--accent-color);
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            padding: 8px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .share-link-btn {
+            flex: 1;
+            background: rgba(0, 229, 255, 0.1);
+            border: 1px solid #00e5ff;
+            color: #00e5ff;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            padding: 8px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .unlock-btn {
+            width: 100%;
+            background: linear-gradient(135deg, var(--btn-color), var(--accent-color));
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            margin-top: 8px;
+        }
+
+        #no-result {
+            text-align: center;
+            color: #8b949e;
+            padding: 20px;
+            display: none;
+        }
+
+        #toast {
+            visibility: hidden;
+            min-width: 200px;
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            text-align: center;
+            border-radius: 8px;
+            padding: 10px;
+            position: fixed;
+            z-index: 200;
+            left: 50%;
+            bottom: 30px;
+            transform: translateX(-50%);
+            font-size: 13px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+        #toast.show {
+            visibility: visible;
+            animation: fadein 0.3s, fadeout 0.3s 2s;
+        }
+        @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
+        @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 100;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.85);
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: var(--card-bg);
+            padding: 20px;
+            border-radius: 14px;
+            width: 88%;
+            max-width: 350px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.6);
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+        .close-modal {
+            float: right;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #8b949e;
+        }
+        .close-modal:hover { color: #fff; }
+
+        .admin-section {
+            background: rgba(156, 39, 176, 0.08);
+            border: 1px solid var(--border-color);
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            text-align: left;
+        }
+        .admin-section label {
+            font-size: 11px;
+            font-weight: bold;
+            color: #ffeb3b;
+            display: block;
+            margin-bottom: 4px;
+        }
+        .admin-input, .admin-select {
+            width: 100%;
+            padding: 8px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            border-radius: 6px;
+            font-size: 12px;
+            margin-bottom: 8px;
+            box-sizing: border-box;
+            outline: none;
+        }
+        .admin-btn {
+            background: var(--btn-color);
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 12px;
+            width: 100%;
+        }
+        .generated-link-box {
+            background: var(--border-color);
+            padding: 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            word-break: break-all;
+            margin-top: 6px;
+            color: #00e5ff;
+            text-align: left;
+            user-select: all;
+        }
+
+        .comment-input {
+            width: 100%;
+            padding: 9px;
+            background: var(--border-color);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            border-radius: 6px;
+            font-size: 12px;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+            outline: none;
+        }
+        .comment-list {
+            text-align: left;
+            max-height: 120px;
+            overflow-y: auto;
+            font-size: 12px;
+            margin-bottom: 10px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 5px;
+        }
+        .comment-item {
+            background: var(--border-color);
+            padding: 5px 8px;
+            border-radius: 5px;
+            margin-bottom: 5px;
+        }
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--border-color);
+            padding: 10px 14px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            font-size: 13px;
+            text-align: left;
+        }
+        .setting-item button {
+            background: var(--btn-color);
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            width: auto;
+        }
+        .theme-picker-row {
+            display: flex;
+            gap: 6px;
+            justify-content: center;
+            margin-top: 6px;
+        }
+        .color-bubble {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid white;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h2>UNLIMITED VIDS</h2>
+        <div class="header-right">
+            <button class="action-btn" onclick="openSettingsModal()">⚙️ Settings</button>
+            <button class="action-btn" onclick="shareApp()">🔗 Share</button>
+        </div>
+    </div>
+
+    <div class="announcement-banner">
+        <span id="bannerTextDisplay">🔥 নতুন আপডেট! প্রতিটি ভিডিওর আলাদা ইউনিক লিংক সিস্টেম চালু হয়েছে।</span>
+    </div>
+
+    <div class="dashboard-grid">
+        <div class="dash-card">
+            <span>🪙 কয়েন</span>
+            <b id="userCoins" style="color: #ffeb3b;">15</b>
+        </div>
+        <div class="dash-card">
+            <span>🎖️ ইউজার র‍্যাংক</span>
+            <b id="userRank" style="color: #00e5ff;">Diamond</b>
+        </div>
+        <div class="dash-card">
+            <span>👥 মোট রেফার</span>
+            <b id="referCount" style="color: #ab47bc;">0 জন</b>
+        </div>
+        <div class="dash-card">
+            <span>🔓 আনলকড ভিডিও</span>
+            <b id="unlockedCount" style="color: #66bb6a;">10টি</b>
+        </div>
+    </div>
+
+    <div class="action-row">
+        <button class="spin-btn" onclick="openSpinModal()">🎡 Lucky Spin</button>
+        <button class="leaderboard-btn" onclick="openLeaderboardModal()">🏆 Leaderboard</button>
+    </div>
+
+    <div class="search-box">
+        <input type="text" id="searchInput" class="search-input" placeholder="🔍 সার্চ করুন..." onkeyup="filterContent()">
+    </div>
+
+    <div class="categories" id="categoryContainer">
+        <button class="cat-btn active" onclick="filterCategory('all', this)">📹 All Videos</button>
+        <button class="cat-btn" onclick="filterCategory('favorites', this)">⭐ Favorites</button>
+        <button class="cat-btn" onclick="filterCategory('trending', this)">🔥 Trending</button>
+        <button class="cat-btn" onclick="filterCategory('liked', this)">👍 Top Liked</button>
+        <button class="cat-btn" onclick="filterCategory('new', this)">🆕 New Uploads</button>
+    </div>
+
+    <div id="no-result">কোনো কনটেন্ট পাওয়া যায়নি! ❌</div>
+
+    <div id="card-container">
+        <!-- ডিফল্ট কার্ড (ইউনিক আইডি: v1) -->
+        <div class="card" id="card-v1" data-id="v1">
+            <div class="card-img-container">
+                <img src="https://picsum.photos/400/200?random=1" class="card-img" alt="Video">
+                <span class="preview-badge">VIP PREVIEW</span>
+                <span class="duration-badge">03:38</span>
+                <button class="fav-icon" onclick="toggleFavorite(this)">⭐</button>
+            </div>
+            <div class="card-body">
+                <div class="card-title">জামাই বউ | নতুন ভাইরাল ভিডিও ২০২৬ 🎬</div>
+                <div class="card-footer-info">
+                    <span>👁️ 257 Views</span>
+                    <button class="like-btn" onclick="toggleLike(this)">👍 <span>58</span></button>
+                </div>
+                <div class="card-actions-row">
+                    <button class="comment-section-btn" onclick="openCommentModal()">💬 কমেন্ট</button>
+                    <button class="share-link-btn" onclick="copyVideoLink('v1')">🔗 লিংক কপি</button>
+                </div>
+                <button class="unlock-btn" onclick="openAdModal()">▶ WATCH NOW</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast">বিজ্ঞপ্তি</div>
+
+    <!-- অ্যাড লক মডাল -->
+    <div id="adModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal()">&#10005;</span>
+            <h3 style="color: inherit; margin-top: 10px; font-size: 18px;">🔒 Watch ads to unlock</h3>
+            <p style="font-size: 13px; color: #b0bec5; margin: 10px 0;">ভিডিও আনলক করতে অ্যাড সম্পন্ন করুন।</p>
+            <button onclick="closeModal(); showToast('ভিডিও আনলক সফল!');" style="width: 100%; background: var(--btn-color); color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer;">UNLOCK NOW</button>
+        </div>
+    </div>
+
+    <!-- স্পিন হুইল মডাল -->
+    <div id="spinModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeSpinModal()">&#10005;</span>
+            <h3 style="color: #ff9800; margin-top: 5px; font-size: 18px;">🎡 Daily Lucky Spin</h3>
+            <div id="spinBox" style="font-size: 26px; padding: 20px; background: var(--border-color); border-radius: 10px; margin-bottom: 12px; font-weight: bold; color: #ffeb3b;">🎁 ?</div>
+            <button onclick="executeSpin()" style="width: 100%; background: #ff9800; color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer;">SPIN NOW</button>
+        </div>
+    </div>
+
+    <!-- লিডারবোর্ড মডাল -->
+    <div id="leaderboardModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeLeaderboardModal()">&#10005;</span>
+            <h3 style="color: #00e5ff; margin-top: 5px; font-size: 18px; margin-bottom: 12px;">🏆 Leaderboard</h3>
+            <div style="text-align: left; font-size: 13px;">
+                <div style="background: var(--border-color); padding: 8px; border-radius: 6px; margin-bottom: 6px; display: flex; justify-content: space-between;"><span>1. 👑 Saiful Islam</span> <b>24 Refers</b></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- কমেন্ট মডাল -->
+    <div id="commentModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeCommentModal()">&#10005;</span>
+            <h3 style="color: inherit; margin-top: 5px; font-size: 16px; margin-bottom: 10px;">💬 ভিডিও কমেন্ট বক্স</h3>
+            <div id="commentList" class="comment-list">
+                <div class="comment-item"><b>Saiful:</b> অসাধারণ ভিডিও ভাই! 🔥</div>
+            </div>
+            <input type="text" id="commentInputBox" class="comment-input" placeholder="আপনার মন্তব্য লিখুন...">
+            <button onclick="postComment()" style="width: 100%; background: var(--btn-color); color: white; border: none; padding: 8px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 12px;">কমেন্ট পোস্ট করুন</button>
+        </div>
+    </div>
+
+    <!-- সেটিংস মডাল -->
+    <div id="settingsModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeSettingsModal()">&#10005;</span>
+            <h3 style="color: inherit; margin-top: 5px; font-size: 18px; margin-bottom: 15px;">⚙️ Personal Settings</h3>
+            <div class="setting-item">
+                <span>🎨 Dark / Light Mode</span>
+                <button onclick="toggleTheme()">Switch</button>
+            </div>
+            <div class="setting-item" style="flex-direction: column; align-items: flex-start; gap: 8px;">
+                <span>🎨 থিম কালার সিলেক্ট করুন:</span>
+                <div class="theme-picker-row">
+                    <span class="color-bubble" style="background: #9c27b0;" onclick="setThemeAccent('#9c27b0', '#7b1fa2')"></span>
+                    <span class="color-bubble" style="background: #2196f3;" onclick="setThemeAccent('#2196f3', '#1976d2')"></span>
+                    <span class="color-bubble" style="background: #e91e63;" onclick="setThemeAccent('#e91e63', '#c2185b')"></span>
+                </div>
+            </div>
+            <div class="setting-item">
+                <span>🛠️ Admin Panel</span>
+                <button onclick="checkAdminPassword()">Open</button>
+            </div>
+            <div class="setting-item">
+                <span>🗑️ Clear Cache</span>
+                <button onclick="localStorage.clear(); location.reload();" style="background: #d32f2f;">Clear</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- অ্যাডমিন প্যানেল মডাল -->
+    <div id="adminModal" class="modal">
+        <div class="modal-content" style="max-width: 380px;">
+            <span class="close-modal" onclick="closeAdminModal()">&#10005;</span>
+            <h3 style="color: #ffeb3b; margin-top: 5px; font-size: 18px; margin-bottom: 12px;">🛠️ Admin Control Panel</h3>
+            
+            <div class="admin-section">
+                <label>📢 অ্যানাউন্সমেন্ট ব্যানার আপডেট:</label>
+                <input type="text" id="adminBannerInput" class="admin-input" placeholder="নতুন নোটিশ লিখুন">
+                <button class="admin-btn" onclick="updateBanner()">ব্যানার পরিবর্তন করুন</button>
+            </div>
+
+            <div class="admin-section">
+                <label>🖼️ থাম্বনেইল ছবির লিংক:</label>
+                <input type="text" id="cardImgInput" class="admin-input" placeholder="https://...">
+
+                <label>📌 পোস্টের টাইটেল / নাম:</label>
+                <input type="text" id="cardTitleInput" class="admin-input" placeholder="ভিডিওর নাম লিখুন">
+
+                <label>⏱️ ভিডিওর সময় / ডিউরেশন:</label>
+                <input type="text" id="cardDurationInput" class="admin-input" placeholder="যেমন: 04:30">
+
+                <button class="admin-btn" onclick="createNewCardWithAutoLink()" style="background: #00e5ff; color: #000;">🚀 ভিডিও পোস্ট করুন ও ইউনিক লিংক তৈরি করুন</button>
+                
+                <!-- ভিডিও পোস্ট করার পর ইউনিক লিংক নিচে দেখানোর বক্স -->
+                <div id="lastGeneratedBox" style="display:none; margin-top: 10px;">
+                    <label style="color: #00e5ff;">✨ এই ভিডিওর ইউনিক মিনি অ্যাপ লিংক (কপি করে নিন):</label>
+                    <div class="generated-link-box" id="latestUniqueLinkText"></div>
+                    <button class="admin-btn" onclick="copyLatestGeneratedLink()" style="margin-top: 6px; background: #4caf50;">📋 লিংক কপি করুন</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         let tg = window.Telegram.WebApp;
         tg.expand();
@@ -28,18 +679,8 @@
         function closeLeaderboardModal() { document.getElementById('leaderboardModal').style.display = 'none'; }
         function openCommentModal() { document.getElementById('commentModal').style.display = 'flex'; }
         function closeCommentModal() { document.getElementById('commentModal').style.display = 'none'; }
-
-        function openVideoLink(url) {
-            if (url && url !== "" && url !== "#") {
-                if (tg && tg.openLink) {
-                    tg.openLink(url);
-                } else {
-                    window.open(url, '_blank');
-                }
-            } else {
-                showToast("দুঃখিত, এই ভিডিওর কোনো লিংক দেওয়া নেই!");
-            }
-        }
+        function openAdModal() { document.getElementById('adModal').style.display = 'flex'; }
+        function closeModal() { document.getElementById('adModal').style.display = 'none'; }
 
         function checkAdminPassword() {
             let pass = prompt("গোপন অ্যাডমিন পাসওয়ার্ড দিন:");
@@ -60,123 +701,59 @@
             }
         }
 
-        function getSavedVideos() {
-            let videos = localStorage.getItem('unlimited_vids_list');
-            if (!videos) {
-                let defaultVideos = [
-                    {
-                        id: 'v1',
-                        img: 'https://picsum.photos/400/200?random=1',
-                        videoUrl: 'https://t.me/example_video_link',
-                        title: 'জামাই বউ | নতুন ভাইরাল ভিডিও ২০২৬ 🎬',
-                        duration: '03:38',
-                        views: '257 Views',
-                        likes: 58
-                    }
-                ];
-                localStorage.setItem('unlimited_vids_list', JSON.stringify(defaultVideos));
-                return defaultVideos;
-            }
-            return JSON.parse(videos);
-        }
-
-        function renderCards() {
-            let container = document.getElementById('card-container');
-            container.innerHTML = '';
-            let videos = getSavedVideos();
-
-            videos.forEach(v => {
-                let card = document.createElement('div');
-                card.className = 'card';
-                card.id = `card-${v.id}`;
-                card.setAttribute('data-id', v.id);
-                card.setAttribute('data-video-url', v.videoUrl);
-
-                card.innerHTML = `
-                    <div class="card-img-container">
-                        <img src="${v.img}" class="card-img" alt="Video">
-                        <span class="preview-badge">VIP PREVIEW</span>
-                        <span class="duration-badge">${v.duration}</span>
-                        <button class="fav-icon" onclick="toggleFavorite(this)">⭐</button>
-                    </div>
-                    <div class="card-body">
-                        <div class="card-title">${v.title}</div>
-                        <div class="card-footer-info">
-                            <span>👁️ ${v.views}</span>
-                            <button class="like-btn" onclick="toggleLike(this, '${v.id}')">👍 <span>${v.likes}</span></button>
-                        </div>
-                        <div class="card-actions-row">
-                            <button class="comment-section-btn" onclick="openCommentModal()">💬 কমেন্ট</button>
-                            <button class="share-link-btn" onclick="copyVideoLink('${v.id}')">🔗 লিংক কপি</button>
-                        </div>
-                        <button class="unlock-btn" onclick="openVideoLink('${v.videoUrl}')">▶ WATCH / DOWNLOAD NOW</button>
-                        
-                        <div class="card-unique-link-box">
-                            <span>🔗 Unique Link: ...?startapp=${v.id}</span>
-                            <button onclick="copyVideoLink('${v.id}')">Copy</button>
-                        </div>
-                        <button class="admin-delete-card-btn" onclick="deleteVideoCard('${v.id}')">🗑️ ডিলিট কার্ড</button>
-                    </div>
-                `;
-                container.appendChild(card);
-            });
-        }
-
         let lastCreatedLink = "";
 
+        // অটো ইউনিক লিংক জেনারেট এবং কার্ড তৈরির ফাংশন
         function createNewCardWithAutoLink() {
             let img = document.getElementById('cardImgInput').value || "https://picsum.photos/400/200?random=" + Math.floor(Math.random()*100);
-            let videoUrl = document.getElementById('cardVideoUrlInput').value.trim();
             let title = document.getElementById('cardTitleInput').value || "নতুন ভাইরাল ভিডিও";
             let duration = document.getElementById('cardDurationInput').value || "04:30";
             
-            if(!videoUrl) {
-                showToast("দয়া করে ভিডিওর লিংক দিন!");
-                return;
-            }
-
+            // ইউনিক আইডি জেনারেট
             let uniqueId = "v_" + Math.random().toString(36).substring(2, 7);
+            
+            // বর্তমান বেজ লিংকের সাথে ইউনিক স্টার্ট অ্যাপ প্যারামিটার যুক্ত করা
             let currentBaseUrl = window.location.href.split('?')[0];
             lastCreatedLink = `${currentBaseUrl}?startapp=${uniqueId}`;
 
-            let newVideo = {
-                id: uniqueId,
-                img: img,
-                videoUrl: videoUrl,
-                title: title,
-                duration: duration,
-                views: '15 Views',
-                likes: 0
-            };
+            let container = document.getElementById('card-container');
+            let card = document.createElement('div');
+            card.className = 'card';
+            card.id = `card-${uniqueId}`;
+            card.setAttribute('data-id', uniqueId);
+            
+            card.innerHTML = `
+                <div class="card-img-container">
+                    <img src="${img}" class="card-img" alt="Video">
+                    <span class="preview-badge">VIP PREVIEW</span>
+                    <span class="duration-badge">${duration}</span>
+                    <button class="fav-icon" onclick="toggleFavorite(this)">⭐</button>
+                </div>
+                <div class="card-body">
+                    <div class="card-title">${title}</div>
+                    <div class="card-footer-info">
+                        <span>👁️ 15 Views</span>
+                        <button class="like-btn" onclick="toggleLike(this)">👍 <span>0</span></button>
+                    </div>
+                    <div class="card-actions-row">
+                        <button class="comment-section-btn" onclick="openCommentModal()">💬 কমেন্ট</button>
+                        <button class="share-link-btn" onclick="copyVideoLink('${uniqueId}')">🔗 লিংক কপি</button>
+                    </div>
+                    <button class="unlock-btn" onclick="openAdModal()">▶ WATCH NOW</button>
+                </div>
+            `;
+            container.prepend(card);
 
-            let videos = getSavedVideos();
-            videos.unshift(newVideo);
-            localStorage.setItem('unlimited_vids_list', JSON.stringify(videos));
-
-            renderCards();
-
+            // অ্যাডমিন প্যানেলের ভেতরে ঠিক নিচেই লিংকটি শো করাবে
             document.getElementById('lastGeneratedBox').style.display = 'block';
             document.getElementById('latestUniqueLinkText').innerText = lastCreatedLink;
             
-            showToast("ভিডিও পার্মানেন্টলি পোস্ট হয়েছে ও ইউনিক লিংক তৈরি হয়েছে!");
+            showToast("ভিডিও পোস্ট হয়েছে ও ইউনিক লিংক তৈরি হয়েছে!");
             
+            // ইনপুট ফিল্ড খালি করা
             document.getElementById('cardImgInput').value = '';
-            document.getElementById('cardVideoUrlInput').value = '';
             document.getElementById('cardTitleInput').value = '';
             document.getElementById('cardDurationInput').value = '';
-        }
-
-        function deleteVideoCard(id) {
-            let pass = prompt("ভিডিওটি ডিলিট করতে অ্যাডমিন পাসওয়ার্ড দিন:");
-            if (pass === "Lamiya" || pass === "admin" || pass === "1234") {
-                let videos = getSavedVideos();
-                videos = videos.filter(v => v.id !== id);
-                localStorage.setItem('unlimited_vids_list', JSON.stringify(videos));
-                renderCards();
-                showToast("কার্ড সফলভাবে ডিলিট করা হয়েছে!");
-            } else if (pass !== null) {
-                showToast("ভুল পাসওয়ার্ড!");
-            }
         }
 
         function copyLatestGeneratedLink() {
@@ -191,58 +768,28 @@
             let currentBaseUrl = window.location.href.split('?')[0];
             let videoLink = `${currentBaseUrl}?startapp=${uid}`;
             navigator.clipboard.writeText(videoLink).then(() => {
-                showToast("ভিডিওর ইউনিক লিংক কপি করা হয়েছে! 🔗");
+                showToast("ভিডিওর লিংক কপি করা হয়েছে! 🔗");
             });
         }
 
-        // ফিক্সড লোড ফাংশন যা সরাসরি ডেটা থেকে আইডি ম্যাচ করে পপআপ দেখাবে
-        window.addEventListener('load', () => {
-            renderCards();
-
+        // লিংকে ইউনিক আইডি থাকলে স্বয়ংক্রিয়ভাবে সেই ভিডিওতে ফোকাস করার লজিক
+        window.addEventListener('DOMContentLoaded', () => {
             const urlParams = new URLSearchParams(window.location.search);
-            let startAppParam = urlParams.get('startapp');
-            
-            if (!startAppParam && tg && tg.initDataUnsafe && tg.initDataUnsafe.start_param) {
-                startAppParam = tg.initDataUnsafe.start_param;
-            }
-
+            const startAppParam = urlParams.get('startapp');
             if (startAppParam) {
                 setTimeout(() => {
-                    let videos = getSavedVideos();
-                    let targetVideo = videos.find(v => v.id === startAppParam);
-
-                    if (targetVideo) {
-                        let focusContainer = document.getElementById('focusCardContainer');
-                        focusContainer.innerHTML = `
-                            <div class="card" style="margin:0; border:none; box-shadow:none;">
-                                <div class="card-img-container">
-                                    <img src="${targetVideo.img}" class="card-img" alt="Video">
-                                    <span class="preview-badge">VIP PREVIEW</span>
-                                    <span class="duration-badge">${targetVideo.duration}</span>
-                                    <button class="fav-icon" onclick="toggleFavorite(this)">⭐</button>
-                                </div>
-                                <div class="card-body" style="padding:0;">
-                                    <div class="card-title">${targetVideo.title}</div>
-                                    <div class="card-footer-info">
-                                        <span>👁️ ${targetVideo.views}</span>
-                                        <button class="like-btn" onclick="toggleLike(this, '${targetVideo.id}')">👍 <span>${targetVideo.likes}</span></button>
-                                    </div>
-                                    <button class="unlock-btn" onclick="openVideoLink('${targetVideo.videoUrl}')">▶ WATCH / DOWNLOAD NOW</button>
-                                </div>
-                            </div>
-                        `;
-                        document.getElementById('singleVideoFocusModal').style.display = 'flex';
+                    let targetCard = document.getElementById(`card-${startAppParam}`);
+                    if (targetCard) {
+                        targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        targetCard.style.border = "2px solid #00e5ff";
+                        setTimeout(() => { targetCard.style.border = "1px solid var(--border-color)"; }, 3000);
                     }
-                }, 150);
+                }, 500);
             }
         });
 
-        function closeFocusModal() {
-            document.getElementById('singleVideoFocusModal').style.display = 'none';
-        }
-
         function toggleFavorite(btn) { btn.classList.toggle('active'); }
-        function toggleLike(btn, id) {
+        function toggleLike(btn) {
             btn.classList.toggle('liked');
             let span = btn.querySelector('span');
             let count = parseInt(span.innerText);
@@ -287,3 +834,5 @@
             showToast("স্পিন সফল হয়েছে!");
         }
     </script>
+</body>
+</html>
