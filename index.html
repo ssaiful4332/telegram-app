@@ -396,26 +396,6 @@
             border: 2px solid white;
             display: inline-block;
         }
-        .manage-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: var(--border-color);
-            padding: 8px 10px;
-            border-radius: 6px;
-            margin-bottom: 6px;
-            font-size: 12px;
-            text-align: left;
-        }
-        .manage-item button {
-            background: #d32f2f;
-            color: white;
-            border: none;
-            padding: 4px 8px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: bold;
-        }
     </style>
 </head>
 <body>
@@ -460,7 +440,6 @@
         <input type="text" id="searchInput" class="search-input" placeholder="🔍 সার্চ করুন..." onkeyup="filterContent()">
     </div>
 
-    <!-- ডাইনামিক ক্যাটাগরি বার -->
     <div class="categories" id="categoryContainer">
         <button class="cat-btn active" onclick="filterCategory('all', this)">📹 All Videos</button>
         <button class="cat-btn" onclick="filterCategory('favorites', this)">⭐ Favorites</button>
@@ -471,56 +450,9 @@
 
     <div id="no-result">কোনো কনটেন্ট পাওয়া যায়নি! ❌</div>
 
-    <div id="card-container">
-    </div>
+    <div id="card-container"></div>
 
     <div id="toast">বিজ্ঞপ্তি</div>
-
-    <!-- অ্যাড লক মডাল -->
-    <div id="adModal" class="modal">
-        <div class="modal-content">
-            <span class="close-modal" onclick="closeModal()">&#10005;</span>
-            <h3 style="color: inherit; margin-top: 10px; font-size: 18px;" id="modalMainTitle">🔒 Watch 3 ads to unlock</h3>
-            <div id="modalBodyContent">
-                <p id="adStatusText" style="font-size: 14px; margin: 12px 0;">Progress: <b style="color: #ffeb3b;">0/3</b></p>
-                <button id="watchAdBtn" onclick="watchNextAd()" style="width: 100%; background: var(--btn-color); color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer;">🔓 UNLOCK LINK</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- স্পিন হুইল মডাল -->
-    <div id="spinModal" class="modal">
-        <div class="modal-content">
-            <span class="close-modal" onclick="closeSpinModal()">&#10005;</span>
-            <h3 style="color: #ff9800; margin-top: 5px; font-size: 18px;">🎡 Daily Lucky Spin</h3>
-            <p style="font-size: 13px; color: #b0bec5; margin: 10px 0;">চাকা ঘুরিয়ে প্রতিদিন ফ্রি কয়েন জিতে নিন!</p>
-            <div id="spinBox" style="font-size: 26px; padding: 20px; background: var(--border-color); border-radius: 10px; margin-bottom: 12px; font-weight: bold; color: #ffeb3b;">🎁 ?</div>
-            <button id="spinActionBtn" onclick="executeSpin()" style="width: 100%; background: #ff9800; color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer;">SPIN NOW</button>
-        </div>
-    </div>
-
-    <!-- লিডারবোর্ড মডাল -->
-    <div id="leaderboardModal" class="modal">
-        <div class="modal-content">
-            <span class="close-modal" onclick="closeLeaderboardModal()">&#10005;</span>
-            <h3 style="color: #00e5ff; margin-top: 5px; font-size: 18px; margin-bottom: 12px;">🏆 Top Referrer Leaderboard</h3>
-            <div id="leaderboardList" style="text-align: left; font-size: 13px; max-height: 180px; overflow-y: auto;">
-                <div style="background: var(--border-color); padding: 8px; border-radius: 6px; margin-bottom: 6px; display: flex; justify-content: space-between;"><span>1. 👑 Saiful Islam</span> <b>24 Refers</b></div>
-                <div style="background: var(--border-color); padding: 8px; border-radius: 6px; margin-bottom: 6px; display: flex; justify-content: space-between;"><span>2. 🥈 Lamiya</span> <b>18 Refers</b></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- কমেন্ট মডাল -->
-    <div id="commentModal" class="modal">
-        <div class="modal-content">
-            <span class="close-modal" onclick="closeCommentModal()">&#10005;</span>
-            <h3 style="color: inherit; margin-top: 5px; font-size: 16px; margin-bottom: 10px;">💬 ভিডিও কমেন্ট বক্স</h3>
-            <div id="commentList" class="comment-list"></div>
-            <input type="text" id="commentInputBox" class="comment-input" placeholder="আপনার মন্তব্য লিখুন...">
-            <button onclick="postComment()" style="width: 100%; background: var(--btn-color); color: white; border: none; padding: 8px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 12px;">কমেন্ট পোস্ট করুন</button>
-        </div>
-    </div>
 
     <!-- সেটিংস মডাল -->
     <div id="settingsModal" class="modal">
@@ -548,40 +480,26 @@
                     <span class="color-bubble" style="background: #ff9800;" onclick="setThemeAccent('#ff9800', '#f57c00')"></span>
                 </div>
             </div>
-
-            <div class="setting-item">
-                <span>🔐 Admin Panel</span>
-                <button onclick="promptAdminPassword()" style="background: #e91e63;">Open</button>
-            </div>
-            <div class="setting-item">
-                <span>📢 Support Channel</span>
-                <button onclick="openSupportChannel()">Join</button>
-            </div>
-            <div class="setting-item">
-                <span>🗑️ Clear Cache</span>
-                <button onclick="clearAppData()" style="background: #d32f2f;">Clear</button>
-            </div>
         </div>
     </div>
 
     <script>
-        // আপনার ফায়ারবেস কনফিগারেশন এখানে যুক্ত করা হয়েছে[span_0](start_span)[span_0](end_span)
+        // আপনার দেওয়া অফিশিয়াল ফায়ারবেস কনফিগারেশন
         const firebaseConfig = {
-            apiKey: "AIzaSyCbVizR7Lq1...",
-            authDomain: "unlimited-vi...",
-            databaseURL: "https://unlimited-vids-8d309-default-rtdb.firebaseio.com",
-            projectId: "unlimited-vids-8d309",
-            storageBucket: "unlimited...",
-            messagingSenderId: "866862984118",
-            appId: "1:866862984118:web:caf3d61c60fdd487ef6f17",
-            measurementId: "G-YKNY6RP..."
+          apiKey: "AIzaSyCbVizR7Lq1Y71w3tOjwzMxI0R8g8sBCK4",
+          authDomain: "unlimited-vids-8d309.firebaseapp.com",
+          databaseURL: "https://unlimited-vids-8d309-default-rtdb.firebaseio.com",
+          projectId: "unlimited-vids-8d309",
+          storageBucket: "unlimited-vids-8d309.firebasestorage.app",
+          messagingSenderId: "866862984118",
+          appId: "1:866862984118:web:caf3d61c60fdd487ef6f17",
+          measurementId: "G-YKNY6RPTYN"
         };
 
         // Firebase ইনিশিয়ালাইজেশন
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // বাকি অ্যাপ লজিক ও ফাংশনসমূহ এখানে যথারীতি কাজ করবে...
         function showToast(text) {
             const t = document.getElementById("toast");
             t.innerText = text;
@@ -589,17 +507,39 @@
             setTimeout(() => { t.className = t.className.replace("show", ""); }, 2300);
         }
 
-        // উদাহরণস্বরূপ ফায়ারবেস থেকে ডাটা লোড করার বেসিক ফাংশন স্ট্রাকচার
-        function loadVideosFromFirebase() {
-            db.ref('videos').on('value', (snapshot) => {
-                const data = snapshot.val();
-                // এখানে আপনার ভিডিও রেন্ডারিং লজিক বসবে
+        // মডাল কন্ট্রোল ফাংশনসমূহ
+        function openSettingsModal() { document.getElementById('settingsModal').style.display = 'flex'; }
+        function closeSettingsModal() { document.getElementById('settingsModal').style.display = 'none'; }
+        function toggleTheme() { document.body.classList.toggle('light-theme'); }
+        
+        function setThemeAccent(primary, secondary) {
+            document.documentElement.style.setProperty('--accent-color', primary);
+            document.documentElement.style.setProperty('--btn-color', secondary);
+            showToast("থিম কালার আপডেট করা হয়েছে! ✨");
+        }
+
+        // ফায়ারবেস থেকে রিয়েলটাইম ডেটা লোড করার বেসিক ফাংশন
+        function initApp() {
+            db.ref('settings/announcement').on('value', (snapshot) => {
+                if(snapshot.exists()) {
+                    document.getElementById('bannerTextDisplay').innerText = snapshot.val();
+                }
             });
         }
 
         window.onload = function() {
-            loadVideosFromFirebase();
-        }
+            initApp();
+            // টেলিগ্রাম ওয়েব অ্যাপ ইনিট
+            if (window.Telegram && window.Telegram.WebApp) {
+                const tg = window.Telegram.WebApp;
+                tg.expand();
+                if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+                    document.getElementById('tgUserName').innerText = "@" + (tg.initDataUnsafe.user.username || tg.initDataUnsafe.user.first_name);
+                } else {
+                    document.getElementById('tgUserName').innerText = "Web User";
+                }
+            }
+        };
     </script>
 </body>
 </html>
