@@ -96,6 +96,7 @@
                 let isFav = favoritesList.includes(id);
                 let isHot = views > 10 || likes > 5; 
 
+                // এখানে id="vid-${id}" যুক্ত করা হয়েছে যাতে স্ক্রোল টার্গেট ধরতে পারে
                 videoListContainer.innerHTML += `
                     <div class="video-card" id="vid-${id}">
                         <div class="thumbnail-container">
@@ -135,7 +136,7 @@
                         setTimeout(() => {
                             targetElement.classList.remove('highlight-flash');
                         }, 3000);
-                    }, 500);
+                    }, 600);
                 }
             }
         }
@@ -165,15 +166,15 @@
             }
         }
 
-        // নির্দিষ্ট ভিডিওর ডাইরেক্ট লিংক কপি করার ফাংশন
+        // নির্দিষ্ট ভিডিওর ডাইরেক্ট লিংক কপি করার ফাংশন (ফিক্সড)
         window.copyVideoDirectLink = function(id, title) {
-            let currentBaseUrl = window.location.href.split('#')[0];
-            let directLink = currentBaseUrl + '#vid-' + id;
+            let baseUrl = window.location.href.split('#')[0].split('?')[0];
+            let directLink = baseUrl + '#vid-' + id;
             
             navigator.clipboard.writeText(directLink).then(() => {
-                alert(`"${title.substring(0, 15)}..." ভিডিওটির ডাইরেক্ট লিংক কপি হয়েছে!\n\nলিংকটি: ${directLink}`);
+                alert(`সফল! "${title.substring(0, 15)}..." ভিডিওটির ডাইরেক্ট লিংক কপি হয়েছে।\n\nলিংকটি: ${directLink}`);
             }).catch(err => {
-                prompt("নিচের লিংকটি কপি করুন:", directLink);
+                prompt("লিংকটি কপি করে নিন:", directLink);
             });
         }
 
@@ -215,7 +216,7 @@
             update(videoRef, { views: currentViews });
         }
 
-        // অ্যাডমিন লিস্ট রেন্ডার করা (যেখানে ডাইরেক্ট লিংক কপি করার বাটন থাকবে)
+        // অ্যাডমিন লিস্ট রেন্ডার করা
         function renderAdminList() {
             adminVideoList.innerHTML = '';
             let keys = Object.keys(allVideosData).reverse();
@@ -227,9 +228,9 @@
                 let video = allVideosData[id];
                 adminVideoList.innerHTML += `
                     <div class="admin-item">
-                        <div style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 200px;">
+                        <div style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 190px;">
                             <b>${video.title}</b><br>
-                            <span style="font-size:10px; color:#38bdf8;">🔗 ডাইরেক্ট লিংক তৈরি আছে</span>
+                            <span style="font-size:10px; color:#38bdf8;">⏱️ ${video.duration || '0:00'}</span>
                         </div>
                         <div style="display: flex; gap: 4px;">
                             <button class="link-btn" onclick="copyVideoDirectLink('${id}', '${video.title.replace(/'/g, "")}')">লিংক</button>
@@ -407,7 +408,7 @@
         <!-- ক্যাটাগরি ট্যাব -->
         <div class="categories-container">
             <button class="cat-tab active-cat" onclick="filterCategory('All', this)">All</button>
-            <button class="cat-tab" onclick="filterCategory('Favorites', this)">❤️ Favorites</button>
+            <button class="cat-tab" onclick="filterCategory('Favorites', this)">❤️️ Favorites</button>
             <button class="cat-tab" onclick="filterCategory('Trending', this)">Trending</button>
             <button class="cat-tab" onclick="filterCategory('Latest', this)">Latest</button>
             <button class="cat-tab" onclick="filterCategory('Exclusive', this)">Exclusive</button>
