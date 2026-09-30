@@ -212,24 +212,25 @@
             update(videoRef, { views: currentViews });
         }
 
-        // অ্যাডমিন লিস্ট রেন্ডার (ডাটাবেসের ভিডিও অনুযায়ী ডিলিট বাটন দেখাবে)
+        // অ্যাডমিন লিস্ট রেন্ডার (পুরনো ও নতুন সব ভিডিওর জন্য ডিলিট বাটন নিশ্চিত করা হয়েছে)
         function renderAdminList() {
             adminVideoList.innerHTML = '';
             let keys = Object.keys(allVideosData).reverse();
             if(keys.length === 0) {
-                adminVideoList.innerHTML = '<div style="color:#94a3b8; font-size:12px; text-align:center; padding: 15px;">⚠️ ডাটাবেসে কোনো ভিডিও নেই! নতুন ভিডিও যোগ করুন।</div>';
+                adminVideoList.innerHTML = '<div style="color:#94a3b8; font-size:12px; text-align:center; padding: 15px;">⚠️️ ডাটাবেসে কোনো ভিডিও নেই!</div>';
                 return;
             }
             keys.forEach((id) => {
                 let video = allVideosData[id];
+                let vTitle = video.title || 'Untitled Video';
                 adminVideoList.innerHTML += `
                     <div class="admin-item">
-                        <div style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 180px;">
-                            <b>${video.title}</b><br>
+                        <div style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 170px;">
+                            <b>${vTitle}</b><br>
                             <span style="font-size:10px; color:#38bdf8;">ID: ${id}</span>
                         </div>
                         <div style="display: flex; gap: 4px;">
-                            <button class="link-btn" onclick="copyVideoDirectLink('${id}', '${video.title.replace(/'/g, "")}')">লিংক</button>
+                            <button class="link-btn" onclick="copyVideoDirectLink('${id}', '${vTitle.replace(/'/g, "")}')">লিংক</button>
                             <button class="delete-btn" onclick="deleteVideo('${id}')">ডিলিট</button>
                         </div>
                     </div>
@@ -270,8 +271,12 @@
         }
 
         window.deleteVideo = function(id) {
-            if(confirm('আপনি কি এই ভিডিওটি ডিলিট করতে চান?')) {
-                remove(ref(db, 'videos/' + id));
+            if(confirm('আপনি কি এই ভিডিওটি পাকাপাকিভাবে ডিলিট করতে চান?')) {
+                remove(ref(db, 'videos/' + id)).then(() => {
+                    alert('ভিডিও সফলভাবে ডিলিট করা হয়েছে!');
+                }).catch((error) => {
+                    alert('ডিলিট করতে সমস্যা হয়েছে: ' + error.message);
+                });
             }
         }
 
@@ -471,7 +476,7 @@
             <hr style="border: 0; border-top: 1px solid #334155; margin: 15px 0;">
 
             <h5 style="margin-bottom: 5px;">যুক্ত করা ভিডিওসমূহ ও আইডি:</h5>
-            <!-- স্ক্রোলযোগ্য অ্যাডমিন ভিডিও লিস্ট বক্স (ভিডিও থাকলেই ডিলিট বাটনসহ লিস্ট দেখাবে) -->
+            <!-- স্ক্রোলযোগ্য অ্যাডমিন ভিডিও লিস্ট বক্স (সব ভিডিওর জন্য আলাদা ডিলিট বাটনসহ) -->
             <div class="admin-list-container" id="adminVideoList"></div>
         </div>
     </div>
