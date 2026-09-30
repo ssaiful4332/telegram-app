@@ -41,6 +41,7 @@
         let currentCategory = 'All'; 
         let pendingUnlockLink = '';
         let favoritesList = JSON.parse(localStorage.getItem('my_favorites') || '[]');
+        let isAdminLoggedIn = false; // অ্যাডমিন লগইন স্ট্যাটাস চেক করার জন্য
 
         // রিয়েলটাইম ডাটাবেস থেকে ভিডিও এবং নোটিশ লোড করা
         const videosRef = ref(db, 'videos');
@@ -96,6 +97,13 @@
                 let isFav = favoritesList.includes(id);
                 let isHot = views > 10 || likes > 5; 
 
+                // যদি অ্যাডমিন লগইন করা থাকে, তবে ভিডিও কার্ডের ভেতরেই সরাসরি ডিলিট বাটন দেখাবে
+                let adminDeleteBtnHtml = isAdminLoggedIn ? `
+                    <div style="margin-top: 8px;">
+                        <button class="card-delete-btn" onclick="deleteVideo('${id}')">🗑️ এই ভিডিওটি ডিলিট করুন</button>
+                    </div>
+                ` : '';
+
                 videoListContainer.innerHTML += `
                     <div class="video-card" id="vid-${id}">
                         <div class="thumbnail-container">
@@ -119,7 +127,10 @@
                                     <button class="like-btn-action" onclick="handleLike('${id}')">❤️ <span id="like-count-${id}">${likes}</span></button>
                                 </div>
                             </div>
+                            
                             <button class="unlock-btn" onclick="openUnlockModal('${video.link}', '${id}')">🔒 UNLOCK FULL VIDEO</button>
+                            
+                            ${adminDeleteBtnHtml}
                         </div>
                     </div>
                 `;
@@ -212,25 +223,24 @@
             update(videoRef, { views: currentViews });
         }
 
-        // অ্যাডমিন লিস্ট রেন্ডার (পুরনো ও নতুন সব ভিডিওর জন্য ডিলিট বাটন নিশ্চিত করা হয়েছে)
+        // অ্যাডমিন লিস্ট রেন্ডার
         function renderAdminList() {
             adminVideoList.innerHTML = '';
             let keys = Object.keys(allVideosData).reverse();
             if(keys.length === 0) {
-                adminVideoList.innerHTML = '<div style="color:#94a3b8; font-size:12px; text-align:center; padding: 15px;">⚠️️ ডাটাবেসে কোনো ভিডিও নেই!</div>';
+                adminVideoList.innerHTML = '<div style="color:#94a3b8; font-size:12px; text-align:center; padding: 15px;">⚠️ ডাটাবেসে কোনো ভিডিও নেই!</div>';
                 return;
             }
             keys.forEach((id) => {
                 let video = allVideosData[id];
-                let vTitle = video.title || 'Untitled Video';
                 adminVideoList.innerHTML += `
                     <div class="admin-item">
-                        <div style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 170px;">
-                            <b>${vTitle}</b><br>
+                        <div style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 180px;">
+                            <b>${video.title}</b><br>
                             <span style="font-size:10px; color:#38bdf8;">ID: ${id}</span>
                         </div>
                         <div style="display: flex; gap: 4px;">
-                            <button class="link-btn" onclick="copyVideoDirectLink('${id}', '${vTitle.replace(/'/g, "")}')">লিংক</button>
+                            <button class="link-btn" onclick="copyVideoDirectLink('${id}', '${video.title.replace(/'/g, "")}')">লিংক</button>
                             <button class="delete-btn" onclick="deleteVideo('${id}')">ডিলিট</button>
                         </div>
                     </div>
@@ -271,12 +281,8 @@
         }
 
         window.deleteVideo = function(id) {
-            if(confirm('আপনি কি এই ভিডিওটি পাকাপাকিভাবে ডিলিট করতে চান?')) {
-                remove(ref(db, 'videos/' + id)).then(() => {
-                    alert('ভিডিও সফলভাবে ডিলিট করা হয়েছে!');
-                }).catch((error) => {
-                    alert('ডিলিট করতে সমস্যা হয়েছে: ' + error.message);
-                });
+            if(confirm('আপনি কি এই ভিডিওটি ডিলিট করতে চান?')) {
+                remove(ref(db, 'videos/' + id));
             }
         }
 
@@ -294,6 +300,21 @@
 
         window.toggleTheme = function() {
             document.body.classList.toggle('light-theme');
+        }
+
+        window.openSettings = function() {
+            let pass = prompt('অ্যাডমিন পাসওয়ার্ড দিন:');
+            if(pass === 'Lamiya') {
+                isAdminLoggedIn = true; // অ্যাডমিন পাসওয়ার্ড সঠিক হলে লগইন স্ট্যাটাস অন হবে
+                renderVideos(); // ভিডিও কার্ডগুলোতে ডিলিট বাটন দেখানোর জন্য রি-রেন্ডার
+                document.getElementById('settingsModal').style.display = 'flex';
+            } else if(pass !== null) {
+                alert('ভুল পাসওয়ার্ড!');
+            }
+        }
+
+        window.closeSettings = function() {
+            document.getElementById('settingsModal').style.display = 'none';
         }
     </script>
 
@@ -355,6 +376,9 @@
         .fav-btn-action { background: #0f172a; border: 1px solid #334155; padding: 4px 8px; border-radius: 6px; cursor: pointer; font-size: 12px; }
         .unlock-btn { width: 100%; background: linear-gradient(135deg, #7c3aed, #db2777); color: #fff; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; }
         
+        /* ভিডিও কার্ডের ভেতরের ডিলিট বাটন স্টাইল */
+        .card-delete-btn { width: 100%; background: #ef4444; color: #fff; border: none; padding: 8px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 12px; margin-top: 6px; }
+
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); justify-content: center; align-items: center; z-index: 1000; padding: 15px; }
         .modal-content { background: #1e293b; width: 100%; max-width: 400px; border-radius: 12px; padding: 20px; max-height: 90vh; overflow-y: auto; text-align: center; }
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
@@ -363,7 +387,7 @@
         input, select { background: #0f172a; color: #fff; border: 1px solid #334155; outline: none; }
         button.action-btn { background: #db2777; color: #fff; font-weight: bold; cursor: pointer; }
         
-        /* অ্যাডমিন ভিডিও লিস্ট এবং স্ক্রোলযোগ্য কন্টেইনার */
+        /* অ্যাডমিন প্যানেল লিস্ট */
         .admin-list-container { max-height: 220px; overflow-y: auto; padding-right: 4px; margin-top: 8px; border: 1px solid #334155; border-radius: 8px; padding: 8px; background: #0b0f19; }
         .admin-item { display: flex; justify-content: space-between; align-items: center; background: #1e293b; padding: 8px 10px; border-radius: 6px; margin-bottom: 6px; font-size: 12px; text-align: left; gap: 8px; border: 1px solid #334155; }
         .delete-btn { background: #ef4444; color: #fff; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold; }
@@ -476,23 +500,8 @@
             <hr style="border: 0; border-top: 1px solid #334155; margin: 15px 0;">
 
             <h5 style="margin-bottom: 5px;">যুক্ত করা ভিডিওসমূহ ও আইডি:</h5>
-            <!-- স্ক্রোলযোগ্য অ্যাডমিন ভিডিও লিস্ট বক্স (সব ভিডিওর জন্য আলাদা ডিলিট বাটনসহ) -->
             <div class="admin-list-container" id="adminVideoList"></div>
         </div>
     </div>
-
-    <script>
-        function openSettings() {
-            let pass = prompt('অ্যাডমিন পাসওয়ার্ড দিন:');
-            if(pass === 'Lamiya') {
-                document.getElementById('settingsModal').style.display = 'flex';
-            } else if(pass !== null) {
-                alert('ভুল পাসওয়ার্ড!');
-            }
-        }
-        function closeSettings() {
-            document.getElementById('settingsModal').style.display = 'none';
-        }
-    </script>
 </body>
 </html>
