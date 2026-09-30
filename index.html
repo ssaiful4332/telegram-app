@@ -42,6 +42,7 @@
             margin-bottom: 12px;
             border: 1px solid var(--border-color);
             box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            transition: background 0.3s ease, border-color 0.3s ease;
         }
         .header h2 {
             margin: 0;
@@ -63,6 +64,7 @@
             font-size: 11px;
             cursor: pointer;
             font-weight: bold;
+            transition: all 0.2s ease-in-out;
         }
         .announcement-banner {
             background: linear-gradient(135deg, var(--btn-color), var(--accent-color));
@@ -75,6 +77,7 @@
             justify-content: space-between;
             align-items: center;
             font-weight: bold;
+            transition: background 0.3s ease;
         }
         .dashboard-grid {
             display: grid;
@@ -89,6 +92,7 @@
             border-radius: 10px;
             text-align: center;
             font-size: 12px;
+            transition: background 0.3s ease, border-color 0.3s ease;
         }
         .dash-card b {
             display: block;
@@ -110,6 +114,7 @@
             font-weight: bold;
             cursor: pointer;
             font-size: 12px;
+            transition: all 0.2s ease-in-out;
         }
         .spin-btn { background: #ff9800 !important; }
         .leaderboard-btn { background: #00bcd4 !important; }
@@ -127,6 +132,7 @@
             font-size: 14px;
             box-sizing: border-box;
             outline: none;
+            transition: border-color 0.3s ease;
         }
         .categories {
             display: flex;
@@ -147,13 +153,26 @@
             border-radius: 20px;
             font-size: 13px;
             cursor: pointer;
-            transition: 0.3s;
+            transition: all 0.2s ease-in-out;
         }
         .cat-btn.active, .cat-btn:hover {
             background: var(--btn-color);
             color: white;
             border-color: var(--btn-color);
         }
+
+        /* অ্যানিমেশন ও ট্রানজিশন অংশ */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
         .card {
             background: var(--card-bg);
             border-radius: 14px;
@@ -161,7 +180,15 @@
             margin-bottom: 15px;
             border: 1px solid var(--border-color);
             box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            animation: fadeInUp 0.4s ease-out forwards;
+            transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.3s ease;
         }
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(156, 39, 176, 0.25);
+            border-color: var(--accent-color);
+        }
+
         .card-img-container {
             position: relative;
             width: 100%;
@@ -172,6 +199,10 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+        .card:hover .card-img {
+            transform: scale(1.03);
         }
         .preview-badge {
             position: absolute;
@@ -206,6 +237,10 @@
             padding: 6px 10px;
             border-radius: 50%;
             cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        .fav-icon:active {
+            transform: scale(0.85);
         }
         .fav-icon.active {
             color: #ff4444;
@@ -238,6 +273,10 @@
             display: flex;
             align-items: center;
             gap: 5px;
+            transition: transform 0.2s ease;
+        }
+        .like-btn:active {
+            transform: scale(0.9);
         }
         .like-btn.liked {
             color: #ff4444;
@@ -267,7 +306,12 @@
             align-items: center;
             justify-content: center;
             gap: 6px;
+            transition: all 0.2s ease-in-out;
         }
+        button:active, .unlock-btn:active, .action-btn:active {
+            transform: scale(0.96);
+        }
+
         #no-result {
             text-align: center;
             color: #8b949e;
@@ -310,6 +354,18 @@
             justify-content: center;
             align-items: center;
         }
+
+        @keyframes modalScale {
+            from {
+                opacity: 0;
+                transform: scale(0.85);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
         .modal-content {
             background-color: var(--card-bg);
             padding: 20px;
@@ -321,6 +377,7 @@
             box-shadow: 0 6px 20px rgba(0,0,0,0.6);
             max-height: 85vh;
             overflow-y: auto;
+            animation: modalScale 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
         }
         .close-modal {
             float: right;
@@ -328,6 +385,7 @@
             font-weight: bold;
             cursor: pointer;
             color: #8b949e;
+            transition: color 0.2s ease;
         }
         .close-modal:hover { color: #fff; }
         .comment-input, .admin-input {
@@ -376,6 +434,7 @@
             border-radius: 6px;
             cursor: pointer;
             font-weight: bold;
+            transition: transform 0.2s ease;
         }
         .theme-picker-row {
             display: flex;
@@ -390,6 +449,10 @@
             cursor: pointer;
             border: 2px solid white;
             display: inline-block;
+            transition: transform 0.2s ease;
+        }
+        .color-bubble:hover {
+            transform: scale(1.15);
         }
         .manage-item {
             display: flex;
@@ -558,12 +621,10 @@
 
     <!-- স্ক্রিপ্ট লজিক -->
     <script>
-        // ফায়ারবেস কনফিগারেশন
         const firebaseConfig = {
             databaseURL: "https://saifulappbot-default-rtdb.firebaseio.com/"
         };
         
-        // ফায়ারবেস চেক ও ইনিশিয়ালাইজেশন
         if (!firebase.apps.length) {
             firebase.initializeApp(firebaseConfig);
         }
