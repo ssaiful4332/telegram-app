@@ -7,12 +7,11 @@
     <!-- টেলিগ্রাম ওয়েব অ্যাপ এসডিকে -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     
-    <!-- Firebase SDK (Modular Version) -->
+    <!-- Firebase SDK for Realtime Database -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getDatabase, ref, push, remove, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-        // আপনার ফায়ারবেস কনফিগারেশন
         const firebaseConfig = {
             apiKey: "AIzaSyCbVizR7Lq1Y71w3tOjwzMxI0R8g8sBCK4",
             authDomain: "unlimited-vids-8d309.firebaseapp.com",
@@ -25,7 +24,7 @@
         };
 
         const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+        const db = getDatabase(app);
 
         let tg = window.Telegram.WebApp;
         tg.expand();
@@ -36,19 +35,20 @@
         const videoListContainer = document.getElementById('videoListContainer');
         const adminVideoList = document.getElementById('adminVideoList');
 
-        // ফায়ারবেস থেকে রিয়েলটাইম ডাটা লোড করা
-        onSnapshot(collection(db, "videos"), (snapshot) => {
+        // রিয়েলটাইম ডাটাবেস থেকে ভিডিও লোড করা
+        const videosRef = ref(db, 'videos');
+        onValue(videosRef, (snapshot) => {
             videoListContainer.innerHTML = '';
             adminVideoList.innerHTML = '';
 
-            if (snapshot.empty) {
+            const data = snapshot.val();
+            if (!data) {
                 videoListContainer.innerHTML = '<div class="no-video">কোনো ভিডিও নেই। অ্যাডমিন প্যানেল থেকে ভিডিও যুক্ত করুন।</div>';
                 return;
             }
 
-            snapshot.forEach((docSnap) => {
-                let video = docSnap.data();
-                let id = docSnap.id;
+            Object.keys(data).forEach((id) => {
+                let video = data[id];
 
                 // হোমপেজে ভিডিও শো করা
                 videoListContainer.innerHTML += `
@@ -60,7 +60,7 @@
                         <div class="video-info">
                             <div class="video-title">${video.title}</div>
                             <div class="video-meta">
-                                <span>👁️ 1.2K Views</span>
+                                <span>👁️️ 1.2K Views</span>
                                 <span>❤️ 0</span>
                             </div>
                             <a href="${video.link}" target="_blank">
@@ -80,8 +80,8 @@
             });
         });
 
-        // নতুন ভিডিও যোগ করার ফাংশন
-        window.addNewVideo = async function() {
+        // নতুন ভিডিও যোগ করা
+        window.addNewVideo = function() {
             const title = document.getElementById('vidTitle').value;
             const thumb = document.getElementById('vidThumb').value;
             const link = document.getElementById('vidLink').value;
@@ -91,28 +91,25 @@
                 return;
             }
 
-            try {
-                await addDoc(collection(db, "videos"), {
-                    title: title,
-                    thumb: thumb,
-                    link: link,
-                    createdAt: Date.now()
-                });
-
+            push(videosRef, {
+                title: title,
+                thumb: thumb,
+                link: link,
+                createdAt: Date.now()
+            }).then(() => {
                 document.getElementById('vidTitle').value = '';
                 document.getElementById('vidThumb').value = '';
                 document.getElementById('vidLink').value = '';
-                alert('ভিডিও সফলভাবে ক্লাউডে যুক্ত করা হয়েছে!');
-            } catch (e) {
-                console.error("Error adding document: ", e);
-                alert('ভিডিও যোগ করতে সমস্যা হয়েছে!');
-            }
+                alert('ভিডিও সফলভাবে যুক্ত করা হয়েছে!');
+            }).catch((error) => {
+                alert('ভিডিও যোগ করতে সমস্যা হয়েছে: ' + error.message);
+            });
         }
 
-        // ভিডিও ডিলিট করার ফাংশন
-        window.deleteVideo = async function(id) {
+        // ভিডিও ডিলিট করা
+        window.deleteVideo = function(id) {
             if(confirm('আপনি কি এই ভিডিওটি ডিলিট করতে চান?')) {
-                await deleteDoc(doc(db, "videos", id));
+                remove(ref(db, 'videos/' + id));
             }
         }
     </script>
@@ -169,13 +166,11 @@
             </div>
         </div>
 
-        <!-- ভিডিও লিস্ট কনটেইনার -->
         <div id="videoListContainer">
             <div class="no-video">লোড হচ্ছে...</div>
         </div>
     </div>
 
-    <!-- সেটিংস ও অ্যাডমিন প্যানেল মডাল -->
     <div class="modal" id="settingsModal">
         <div class="modal-content">
             <div class="modal-header">
