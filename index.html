@@ -41,6 +41,7 @@
         let currentCategory = 'All'; 
         let favoritesList = JSON.parse(localStorage.getItem('my_favorites') || '[]');
 
+        // রিয়েলটাইম ডাটাবেস থেকে ভিডিও এবং নোটিশ লোড করা
         const videosRef = ref(db, 'videos');
         const noticeRef = ref(db, 'notice');
 
@@ -58,9 +59,11 @@
             }
         });
 
+        // ভিডিও রেন্ডার ও ফিল্টার করার ফাংশন
         window.renderVideos = function() {
             videoListContainer.innerHTML = '';
             const searchQuery = searchInput.value.toLowerCase();
+            
             let keys = Object.keys(allVideosData).reverse(); 
             
             let filteredKeys = keys.filter(id => {
@@ -96,16 +99,16 @@
                     <div class="video-card" id="vid-${id}">
                         <div class="thumbnail-container">
                             <span class="preview-badge">${video.category || 'General'}</span>
-                            <span class="duration-badge">⏱ ${duration}</span>
+                            <span class="duration-badge">⏱️️ ${duration}</span>
                             ${isHot ? '<span class="hot-badge">🔥 Hot</span>' : ''}
                             <img src="${video.thumb}" alt="Thumbnail" oncontextmenu="return false;">
                         </div>
                         <div class="video-info">
                             <div class="video-title">${video.title}</div>
                             
-                            <div class="video-id-section" onclick="copyCardId('${id}')">
+                            <div class="video-id-section" onclick="copyVideoDirectLink('${id}', '${video.title.replace(/'/g, "")}')">
                                 <span>🔑 ID: ${id}</span>
-                                <span class="copy-hint-text">📋 আইডি কপি</span>
+                                <span class="copy-hint-text">📋 কপি লিংক</span>
                             </div>
 
                             <div class="video-meta">
@@ -164,30 +167,19 @@
             }
         }
 
-        // অ্যাডমিন প্যানেল থেকে লিংক কপি করার সময় কোনো স্ক্রল বা এনিমেশন হবে না
-        window.copyVideoDirectLink = function(id) {
+        window.copyVideoDirectLink = function(id, title) {
             let baseUrl = window.location.href.split('#')[0].split('?')[0];
             let directLink = baseUrl + '#vid-' + id;
             
             navigator.clipboard.writeText(directLink).then(() => {
-                alert(`সফল! ভিডিওটির লিংক কপি হয়েছে:\n${directLink}`);
+                alert(`সফল! ভিডিওটির ডাইরেক্ট লিংক কপি হয়েছে。\n\nলিংক: ${directLink}`);
             }).catch(err => {
                 prompt("লিংকটি কপি করে নিন:", directLink);
             });
         }
 
-        window.copyCardId = function(id) {
-            navigator.clipboard.writeText(id).then(() => {
-                alert('ভিডিও আইডি কপি হয়েছে: ' + id);
-            });
-        }
-
         window.openDirectVideo = function(link, id) {
-            let videoRef = ref(db, 'videos/' + id);
-            onValue(videoRef, (snap) => {
-                let currentViews = (snap.val()?.views || 0) + 1;
-                update(videoRef, { views: currentViews });
-            }, { onlyOnce: true });
+            incrementView(id);
             window.open(link, '_blank');
         }
 
@@ -200,17 +192,22 @@
 
         window.handleLike = function(id) {
             let videoRef = ref(db, 'videos/' + id);
-            onValue(videoRef, (snap) => {
-                let currentLikes = (snap.val()?.likes || 0) + 1;
-                update(videoRef, { likes: currentLikes });
-            }, { onlyOnce: true });
+            let currentLikes = (allVideosData[id].likes || 0) + 1;
+            update(videoRef, { likes: currentLikes });
         }
 
+        window.incrementView = function(id) {
+            let videoRef = ref(db, 'videos/' + id);
+            let currentViews = (allVideosData[id].views || 0) + 1;
+            update(videoRef, { views: currentViews });
+        }
+
+        // অ্যাডমিন লিস্ট রেন্ডার ও ডিলিট অপشن
         function renderAdminList() {
             adminVideoList.innerHTML = '';
             let keys = Object.keys(allVideosData).reverse();
             if(keys.length === 0) {
-                adminVideoList.innerHTML = '<div style="color:#fbbf24; font-size:12px; text-align:center; padding: 15px;">⚠️ কোনো ভিডিও যোগ করা হয়নি!</div>';
+                adminVideoList.innerHTML = '<div style="color:#94a3b8; font-size:12px; text-align:center; padding: 15px;">⚠️ ডাটাবেসে কোনো ভিডিও নেই!</div>';
                 return;
             }
             keys.forEach((id) => {
@@ -218,11 +215,11 @@
                 adminVideoList.innerHTML += `
                     <div class="admin-item">
                         <div style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 170px;">
-                            <b>${video.title || 'Untitled'}</b><br>
+                            <b>${video.title}</b><br>
                             <span style="font-size:10px; color:#38bdf8;">ID: ${id}</span>
                         </div>
                         <div style="display: flex; gap: 4px;">
-                            <button class="link-btn" onclick="copyVideoDirectLink('${id}')">লিংক</button>
+                            <button class="link-btn" onclick="copyVideoDirectLink('${id}', '${video.title.replace(/'/g, "")}')">লিংক</button>
                             <button class="delete-btn" onclick="deleteVideo('${id}')">ডিলিট</button>
                         </div>
                     </div>
@@ -351,7 +348,8 @@
         .video-info { padding: 12px; }
         .video-title { font-size: 14px; margin-bottom: 8px; line-height: 1.4; }
         
-        .video-id-section { background: #0f172a; border: 1px dashed #334155; padding: 6px 10px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: #38bdf8; margin-bottom: 8px; cursor: pointer; }
+        .video-id-section { background: #0f172a; border: 1px dashed #334155; padding: 6px 10px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: #38bdf8; margin-bottom: 8px; cursor: pointer; transition: 0.2s; }
+        .video-id-section:hover { background: #1e293b; border-color: #38bdf8; }
         .copy-hint-text { background: #1e293b; padding: 2px 6px; border-radius: 4px; font-size: 10px; color: #cbd5e1; }
 
         .video-meta { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: #94a3b8; margin-bottom: 10px; }
@@ -360,7 +358,7 @@
         .unlock-btn { width: 100%; background: linear-gradient(135deg, #7c3aed, #db2777); color: #fff; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; }
 
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); justify-content: center; align-items: center; z-index: 1000; padding: 15px; }
-        .modal-content { background: #1e293b; width: 100%; max-width: 400px; border-radius: 12px; padding: 20px; max-height: 90vh; overflow-y: auto; text-align: left; }
+        .modal-content { background: #1e293b; width: 100%; max-width: 400px; border-radius: 12px; padding: 20px; max-height: 90vh; overflow-y: auto; text-align: center; }
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .close-btn { background: none; border: none; color: #fff; font-size: 18px; cursor: pointer; }
         input, select, button.action-btn { width: 100%; padding: 10px; margin: 8px 0; border-radius: 8px; border: none; }
@@ -368,8 +366,8 @@
         button.action-btn { background: #db2777; color: #fff; font-weight: bold; cursor: pointer; }
         
         /* অ্যাডমিন প্যানেল লিস্ট */
-        .admin-list-container { max-height: 250px; overflow-y: auto; padding: 8px; margin-top: 8px; border: 1px solid #7c3aed; border-radius: 8px; background: #0b0f19; }
-        .admin-item { display: flex; justify-content: space-between; align-items: center; background: #1e293b; padding: 8px 10px; border-radius: 6px; margin-bottom: 6px; font-size: 12px; gap: 8px; border: 1px solid #334155; }
+        .admin-list-container { max-height: 220px; overflow-y: auto; padding-right: 4px; margin-top: 8px; border: 1px solid #334155; border-radius: 8px; padding: 8px; background: #0b0f19; }
+        .admin-item { display: flex; justify-content: space-between; align-items: center; background: #1e293b; padding: 8px 10px; border-radius: 6px; margin-bottom: 6px; font-size: 12px; text-align: left; gap: 8px; border: 1px solid #334155; }
         .delete-btn { background: #ef4444; color: #fff; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold; }
         .link-btn { background: #0284c7; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 11px; }
         
@@ -429,7 +427,7 @@
 
     <!-- সেটিংস ও অ্যাডমিন প্যানেল মডাল -->
     <div class="modal" id="settingsModal">
-        <div class="modal-content">
+        <div class="modal-content" style="text-align: left;">
             <div class="modal-header">
                 <h3>Admin & Settings</h3>
                 <button class="close-btn" onclick="closeSettings()">✕</button>
@@ -446,7 +444,7 @@
 
             <hr style="border: 0; border-top: 1px solid #334155; margin: 15px 0;">
 
-            <h4>🛠 Admin Panel (নতুন ভিডিও)</h4>
+            <h4>🛠️ Admin Panel (নতুন ভিডিও)</h4>
             <div style="margin-top: 8px;">
                 <input type="text" id="vidTitle" placeholder="ভিডিও টাইটেল...">
                 <input type="text" id="vidThumb" placeholder="থাম্বনেইল ইমেজ URL...">
@@ -463,9 +461,7 @@
             <hr style="border: 0; border-top: 1px solid #334155; margin: 15px 0;">
 
             <h5 style="margin-bottom: 5px; color: #38bdf8;">যুক্ত করা ভিডিওসমূহ ও ডিলিট অপশন:</h5>
-            <div class="admin-list-container" id="adminVideoList">
-                <div style="color:#94a3b8; font-size:12px; text-align:center; padding: 15px;">লোড হচ্ছে...</div>
-            </div>
+            <div class="admin-list-container" id="adminVideoList"></div>
         </div>
     </div>
 </body>
