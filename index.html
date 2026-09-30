@@ -38,8 +38,9 @@
         const noticeText = document.getElementById('noticeText');
 
         let allVideosData = {};
-        let currentCategory = 'All';
+        let currentCategory = 'All'; // 'All', 'Favorites', বা নির্দিষ্ট ক্যাটাগরি
         let pendingUnlockLink = '';
+        let favoritesList = JSON.parse(localStorage.getItem('my_favorites') || '[]');
 
         // রিয়েলটাইম ডাটাবেস থেকে ভিডিও এবং নোটিশ লোড করা
         const videosRef = ref(db, 'videos');
@@ -59,7 +60,7 @@
             }
         });
 
-        // ভিডিও রেন্ডার ও ফিল্টার করার ফাংশন (নতুন ভিডিও সবার উপরে)
+        // ভিডিও রেন্ডার ও ফিল্টার করার ফাংশন
         window.renderVideos = function() {
             videoListContainer.innerHTML = '';
             const searchQuery = searchInput.value.toLowerCase();
@@ -69,12 +70,21 @@
             let filteredKeys = keys.filter(id => {
                 let video = allVideosData[id];
                 let matchesSearch = video.title.toLowerCase().includes(searchQuery);
+                
+                if (currentCategory === 'Favorites') {
+                    return matchesSearch && favoritesList.includes(id);
+                }
+                
                 let matchesCategory = currentCategory === 'All' || video.category === currentCategory;
                 return matchesSearch && matchesCategory;
             });
 
             if (filteredKeys.length === 0) {
-                videoListContainer.innerHTML = '<div class="no-video">কোনো ভিডিও পাওয়া যায়নি।</div>';
+                if(currentCategory === 'Favorites') {
+                    videoListContainer.innerHTML = '<div class="no-video">আপনার কোনো ফেভারিট ভিডিও নেই! ❤️ আইকনে ক্লিক করে সেভ করুন।</div>';
+                } else {
+                    videoListContainer.innerHTML = '<div class="no-video">কোনো ভিডিও পাওয়া যায়নি।</div>';
+                }
                 return;
             }
 
@@ -82,18 +92,24 @@
                 let video = allVideosData[id];
                 let likes = video.likes || 0;
                 let views = video.views || 1200;
+                let isFav = favoritesList.includes(id);
+                let isHot = views > 1250 || likes > 5; // হট বা টপ ব্যাজ লজিক
 
                 videoListContainer.innerHTML += `
                     <div class="video-card">
                         <div class="thumbnail-container">
                             <span class="preview-badge">${video.category || 'General'}</span>
+                            ${isHot ? '<span class="hot-badge">🔥 Hot</span>' : ''}
                             <img src="${video.thumb}" alt="Thumbnail" oncontextmenu="return false;">
                         </div>
                         <div class="video-info">
                             <div class="video-title">${video.title}</div>
                             <div class="video-meta">
                                 <span>👁️ ${views} Views</span>
-                                <button class="like-btn-action" onclick="handleLike('${id}')">❤️ <span id="like-count-${id}">${likes}</span></button>
+                                <div style="display: flex; gap: 6px; align-items: center;">
+                                    <button class="fav-btn-action" onclick="toggleFavorite('${id}')">${isFav ? '❤️' : '🤍'}</button>
+                                    <button class="like-btn-action" onclick="handleLike('${id}')">❤️ <span id="like-count-${id}">${likes}</span></button>
+                                </div>
                             </div>
                             <button class="unlock-btn" onclick="openUnlockModal('${video.link}', '${id}')">🔒 UNLOCK FULL VIDEO</button>
                         </div>
@@ -102,7 +118,32 @@
             });
         }
 
-        // আনলক মডাল ওপেন করা (চ্যানেল জয়েন করার শর্তসহ)
+        // ফেভারিট টগল করার ফাংশন
+        window.toggleFavorite = function(id) {
+            if(favoritesList.includes(id)) {
+                favoritesList = favoritesList.filter(item => item !== id);
+            } else {
+                favoritesList.push(id);
+            }
+            localStorage.setItem('my_favorites', JSON.stringify(favoritesList));
+            renderVideos();
+        }
+
+        // অ্যাপ শেয়ার করার ফাংশন
+        window.shareApp = function() {
+            let botUrl = "https://t.me/saifulappbot";
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Unlimited Vids',
+                    text: 'সেরা সব ভিডিও দেখতে আমাদের মিনি অ্যাপে ভিজিট করুন:',
+                    url: botUrl,
+                }).catch(() => {});
+            } else {
+                prompt("অ্যাপটির লিংক কপি করুন:", botUrl);
+            }
+        }
+
+        // আনলক মডাল ওপেন করা
         window.openUnlockModal = function(link, id) {
             pendingUnlockLink = link;
             incrementView(id);
@@ -228,8 +269,8 @@
         .container { width: 100%; max-width: 450px; }
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
         .app-title { font-size: 18px; font-weight: bold; }
-        .header-btns { display: flex; gap: 6px; }
-        .icon-btn { background: #1e293b; border: none; color: #fff; padding: 6px 10px; border-radius: 8px; cursor: pointer; font-size: 12px; }
+        .header-btns { display: flex; gap: 5px; }
+        .icon-btn { background: #1e293b; border: none; color: #fff; padding: 6px 8px; border-radius: 8px; cursor: pointer; font-size: 11px; }
         
         /* নোটিশ বোর্ড */
         .notice-board { background: #1e1b4b; border: 1px solid #312e81; color: #c7d2fe; padding: 10px; border-radius: 8px; font-size: 12px; margin-bottom: 12px; text-align: center; }
@@ -249,10 +290,13 @@
         .thumbnail-container { position: relative; width: 100%; height: 180px; }
         .thumbnail-container img { width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
         .preview-badge { position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.7); color: #fbbf24; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; }
+        .hot-badge { position: absolute; top: 10px; right: 10px; background: #ef4444; color: #fff; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; }
+        
         .video-info { padding: 12px; }
         .video-title { font-size: 14px; margin-bottom: 8px; line-height: 1.4; }
         .video-meta { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: #94a3b8; margin-bottom: 10px; }
         .like-btn-action { background: #0f172a; border: 1px solid #334155; color: #f43f5e; padding: 4px 10px; border-radius: 6px; cursor: pointer; font-size: 12px; }
+        .fav-btn-action { background: #0f172a; border: 1px solid #334155; padding: 4px 8px; border-radius: 6px; cursor: pointer; font-size: 12px; }
         .unlock-btn { width: 100%; background: linear-gradient(135deg, #7c3aed, #db2777); color: #fff; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; }
         
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); justify-content: center; align-items: center; z-index: 1000; padding: 15px; }
@@ -275,8 +319,9 @@
         <div class="header">
             <div class="app-title">Unlimited Vids</div>
             <div class="header-btns">
+                <button class="icon-btn" onclick="shareApp()">🔗 Share</button>
                 <button class="icon-btn" onclick="toggleTheme()">🌓 Theme</button>
-                <button class="icon-btn" onclick="openSettings()">⚙️ Settings</button>
+                <button class="icon-btn" onclick="openSettings()">⚙️ Admin</button>
             </div>
         </div>
 
@@ -303,9 +348,10 @@
         <!-- সার্চ বার -->
         <input type="text" id="searchInput" class="search-box" placeholder="🔍 ভিডিও সার্চ করুন..." onkeyup="renderVideos()">
 
-        <!-- ক্যাটাগরি ট্যাব -->
+        <!-- ক্যাটাগরি ট্যাব (ফেভারিট সহ) -->
         <div class="categories-container">
             <button class="cat-tab active-cat" onclick="filterCategory('All', this)">All</button>
+            <button class="cat-tab" onclick="filterCategory('Favorites', this)">❤️ Favorites</button>
             <button class="cat-tab" onclick="filterCategory('Trending', this)">Trending</button>
             <button class="cat-tab" onclick="filterCategory('Latest', this)">Latest</button>
             <button class="cat-tab" onclick="filterCategory('Exclusive', this)">Exclusive</button>
@@ -321,7 +367,7 @@
     <div class="modal" id="unlockModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>⚠️️ ভিডিও আনলক করতে হবে</h3>
+                <h3>⚠ ভিডিও আনলক করতে হবে</h3>
                 <button class="close-btn" onclick="closeUnlockModal()">✕</button>
             </div>
             <p style="font-size: 13px; color: #94a3b8; margin-bottom: 15px; line-height: 1.5;">
