@@ -330,7 +330,7 @@
             color: #8b949e;
         }
         .close-modal:hover { color: #fff; }
-        .comment-input, .admin-input, .admin-select {
+        .comment-input, .admin-input {
             width: 100%;
             padding: 9px;
             background: var(--border-color);
@@ -424,7 +424,7 @@
     </div>
 
     <div class="announcement-banner">
-        <span id="bannerTextDisplay">🔥 নতুন আপডেট! ভিডিওগুলো উপভোগ করুন।</span>
+        <span id="bannerTextDisplay">🔥 নতুন আপডেট! লেভেল আপ করুন, স্পিন করুন এবং লিডারবোর্ডে থাকুন।</span>
     </div>
 
     <div class="dashboard-grid">
@@ -466,14 +466,14 @@
     <div id="card-container"></div>
     <div id="toast">বিজ্ঞপ্তি</div>
 
-    <!-- স্মার্টলিংক অ্যাড লক মডাল -->
+    <!-- অ্যাড লক মডাল (Watch 3 ads) -->
     <div id="adModal" class="modal">
         <div class="modal-content">
             <span class="close-modal" onclick="closeModal()">&#10005;</span>
-            <h3 style="color: inherit; margin-top: 10px; font-size: 18px;">🔒 Watch Ads to Unlock</h3>
-            <p style="font-size: 12px; color: #b0bec5; margin: 5px 0 12px 0;">নিচের বাটনে ক্লিক করে ভিডিও আনলক করুন!</p>
+            <h3 style="color: inherit; margin-top: 10px; font-size: 18px;">🔒 Watch 3 ads to unlock</h3>
             <div id="modalBodyContent">
-                <button id="watchAdBtn" onclick="openAdSmartlink()" style="width: 100%; background: var(--btn-color); color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer;">🌐 WATCH NOW</button>
+                <p id="adStatusText" style="font-size: 14px; margin: 12px 0;">Progress: <b style="color: #ffeb3b;">0/3</b></p>
+                <button id="watchAdBtn" onclick="watchNextAd()" style="width: 100%; background: var(--btn-color); color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer;">🔓 WATCH AD 1/3</button>
             </div>
         </div>
     </div>
@@ -515,7 +515,7 @@
     <div id="settingsModal" class="modal">
         <div class="modal-content">
             <span class="close-modal" onclick="closeSettingsModal()">&#10005;</span>
-            <h3 style="color: inherit; margin-top: 5px; font-size: 18px; margin-bottom: 15px;">⚙️️ Personal Settings</h3>
+            <h3 style="color: inherit; margin-top: 5px; font-size: 18px; margin-bottom: 15px;">⚙️ Personal Settings</h3>
             
             <div id="tgUserSection" style="margin-bottom: 12px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; text-align: left; font-size: 13px;">
                 <p style="margin: 0 0 4px 0; color: #b0bec5;">Telegram User:</p>
@@ -551,15 +551,8 @@
             <input type="text" id="adminVidTitle" class="admin-input" placeholder="ভিডিও টাইটেল">
             <input type="text" id="adminVidImage" class="admin-input" placeholder="থাম্বনেইল ইমেজ URL">
             <input type="text" id="adminVidLink" class="admin-input" placeholder="মূল ভিডিও লিঙ্ক (Unlock Link)">
-            <select id="adminVidCategory" class="admin-select">
-                <option value="trending">Trending</option>
-                <option value="exclusive">Exclusive</option>
-                <option value="comedy">Comedy</option>
-                <option value="action">Action</option>
-            </select>
-            
-            <button onclick="addNewVideo()" style="width: 100%; background: #e91e63; color: white; border: none; padding: 10px; border-radius: 6px; font-weight: bold; cursor: pointer; margin-bottom: 12px;">➕ নতুন ভিডিও যোগ করুন</button>
-            <div id="adminVideoManageList" style="max-height: 150px; overflow-y: auto;"></div>
+            <button onclick="addNewVideo()" style="width: 100%; background: #e91e63; color: white; border: none; padding: 10px; border-radius: 6px; font-weight: bold; cursor: pointer; margin-bottom: 15px;">নতুন ভিডিও যোগ করুন</button>
+            <div id="adminVideoManageList" style="max-height: 120px; overflow-y: auto;"></div>
         </div>
     </div>
 
@@ -575,7 +568,6 @@
         tg.expand();
 
         let currentUser = tg.initDataUnsafe?.user || { id: 12345, first_name: "Saiful Islam", username: "SAIFUL676" };
-        let userId = "user_" + currentUser.id;
 
         let videosData = [];
         let unlockedVideos = JSON.parse(localStorage.getItem('unlocked_videos') || '[]');
@@ -585,6 +577,7 @@
         let currentFilter = 'all';
         let activeVideoId = null;
         let activeVideoLink = '';
+        let currentAdProgress = 0;
 
         document.getElementById('tgUserName').innerText = `${currentUser.first_name} (@${currentUser.username || 'user'})`;
         document.getElementById('userCoins').innerText = userCoins;
@@ -625,7 +618,6 @@
                 if(!matchSearch) return false;
                 if(currentFilter === 'favorites') return favorites.includes(v.id);
                 if(currentFilter === 'liked') return (v.likes || 0) > 0;
-                if(currentFilter !== 'all') return v.category === currentFilter;
                 return true;
             });
 
@@ -646,7 +638,7 @@
                     <div class="card">
                         <div class="card-img-container">
                             <img class="card-img" src="${v.image}" alt="thumb">
-                            <div class="preview-badge">✨ ${v.category || 'Exclusive'}</div>
+                            <div class="preview-badge">✨ Exclusive</div>
                             <div class="duration-badge">⏱️ 05:20</div>
                             <button class="fav-icon ${isFav ? 'active' : ''}" onclick="toggleFavorite('${v.id}')">&#9733;</button>
                         </div>
@@ -717,6 +709,8 @@
                 window.open(link, '_blank');
                 db.ref('videos/' + id + '/views').transaction(v => (v || 0) + 1);
             } else {
+                currentAdProgress = 0;
+                updateAdModalUI();
                 document.getElementById('adModal').style.display = 'flex';
             }
         }
@@ -725,14 +719,31 @@
             document.getElementById('adModal').style.display = 'none';
         }
 
-        function openAdSmartlink() {
-            unlockedVideos.push(activeVideoId);
-            localStorage.setItem('unlocked_videos', JSON.stringify(unlockedVideos));
-            document.getElementById('unlockedCount').innerText = unlockedVideos.length;
-            closeModal();
-            showToast("ভিডিও সফলভাবে আনলক হয়েছে!");
-            renderVideos();
-            window.open(activeVideoLink, '_blank');
+        function updateAdModalUI() {
+            document.getElementById('adStatusText').innerHTML = `Progress: <b style="color: #ffeb3b;">${currentAdProgress}/3</b>`;
+            let btn = document.getElementById('watchAdBtn');
+            if(currentAdProgress < 3) {
+                btn.innerText = `🔓 WATCH AD ${currentAdProgress + 1}/3`;
+            } else {
+                btn.innerText = `🎉 UNLOCK NOW!`;
+            }
+        }
+
+        function watchNextAd() {
+            if(currentAdProgress < 3) {
+                currentAdProgress++;
+                updateAdModalUI();
+                showToast(`বিজ্ঞাপন ${currentAdProgress} দেখা সম্পন্ন হয়েছে!`);
+            }
+            if(currentAdProgress >= 3) {
+                unlockedVideos.push(activeVideoId);
+                localStorage.setItem('unlocked_videos', JSON.stringify(unlockedVideos));
+                document.getElementById('unlockedCount').innerText = unlockedVideos.length;
+                closeModal();
+                showToast("ভিডিও সফলভাবে আনলক হয়েছে!");
+                renderVideos();
+                window.open(activeVideoLink, '_blank');
+            }
         }
 
         function openSpinModal() { document.getElementById('spinModal').style.display = 'flex'; }
@@ -818,30 +829,26 @@
             let title = document.getElementById('adminVidTitle').value.trim();
             let image = document.getElementById('adminVidImage').value.trim();
             let link = document.getElementById('adminVidLink').value.trim();
-            let category = document.getElementById('adminVidCategory').value;
 
             if(title && image && link) {
                 let newVideoData = {
                     title: title,
                     image: image,
                     link: link,
-                    category: category,
                     views: 120,
                     likes: 0
                 };
 
-                // ফায়ারবেসে পুশ করার সময় যেন কোনো ব্লক বা এরর না ধরে তার ব্যবস্থা
                 db.ref('videos').push(newVideoData).then(() => {
                     showToast("সফলভাবে নতুন ভিডিও যোগ করা হয়েছে!");
                     document.getElementById('adminVidTitle').value = '';
                     document.getElementById('adminVidImage').value = '';
                     document.getElementById('adminVidLink').value = '';
                 }).catch((error) => {
-                    showToast("ভিডিও আপলোড করতে সমস্যা হয়েছে: " + error.message);
-                    console.error("Firebase Error:", error);
+                    showToast("ত্রুটি: " + error.message);
                 });
             } else {
-                showToast("দয়া করে টাইটেল, ইমেজ এবং লিঙ্ক পূরণ করুন!");
+                showToast("দয়া করে সব ফিল্ড পূরণ করুন!");
             }
         }
 
