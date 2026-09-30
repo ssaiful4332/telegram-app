@@ -10,7 +10,7 @@
     <!-- Firebase SDK for Realtime Database -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, push, remove, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getDatabase, ref, push, remove, update, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCbVizR7Lq1Y71w3tOjwzMxI0R8g8sBCK4",
@@ -34,43 +34,95 @@
 
         const videoListContainer = document.getElementById('videoListContainer');
         const adminVideoList = document.getElementById('adminVideoList');
+        const searchInput = document.getElementById('searchInput');
+
+        let allVideosData = {};
+        let currentCategory = 'All';
 
         // রিয়েলটাইম ডাটাবেস থেকে ভিডিও লোড করা
         const videosRef = ref(db, 'videos');
         onValue(videosRef, (snapshot) => {
-            videoListContainer.innerHTML = '';
-            adminVideoList.innerHTML = '';
-
             const data = snapshot.val();
-            if (!data) {
-                videoListContainer.innerHTML = '<div class="no-video">কোনো ভিডিও নেই। অ্যাডমিন প্যানেল থেকে ভিডিও যুক্ত করুন।</div>';
+            allVideosData = data || {};
+            renderVideos();
+            renderAdminList();
+        });
+
+        // ভিডিও রেন্ডার ও ফিল্টার করার ফাংশন
+        window.renderVideos = function() {
+            videoListContainer.innerHTML = '';
+            const searchQuery = searchInput.value.toLowerCase();
+            
+            let filteredKeys = Object.keys(allVideosData).filter(id => {
+                let video = allVideosData[id];
+                let matchesSearch = video.title.toLowerCase().includes(searchQuery);
+                let matchesCategory = currentCategory === 'All' || video.category === currentCategory;
+                return matchesSearch && matchesCategory;
+            });
+
+            if (filteredKeys.length === 0) {
+                videoListContainer.innerHTML = '<div class="no-video">কোনো ভিডিও পাওয়া যায়নি।</div>';
                 return;
             }
 
-            Object.keys(data).forEach((id) => {
-                let video = data[id];
+            filteredKeys.forEach((id) => {
+                let video = allVideosData[id];
+                let likes = video.likes || 0;
+                let views = video.views || 1200;
 
-                // হোমপেজে ভিডিও শো করা
                 videoListContainer.innerHTML += `
                     <div class="video-card">
                         <div class="thumbnail-container">
-                            <span class="preview-badge">PREVIEW</span>
+                            <span class="preview-badge">${video.category || 'General'}</span>
                             <img src="${video.thumb}" alt="Thumbnail">
                         </div>
                         <div class="video-info">
                             <div class="video-title">${video.title}</div>
                             <div class="video-meta">
-                                <span>👁️️ 1.2K Views</span>
-                                <span>❤️ 0</span>
+                                <span>👁️ ${views} Views</span>
+                                <button class="like-btn-action" onclick="handleLike('${id}')">❤️ <span id="like-count-${id}">${likes}</span></button>
                             </div>
-                            <a href="${video.link}" target="_blank">
+                            <a href="${video.link}" target="_blank" onclick="incrementView('${id}')">
                                 <button class="unlock-btn">🔒 UNLOCK FULL VIDEO</button>
                             </a>
                         </div>
                     </div>
                 `;
+            });
+        }
 
-                // অ্যাডমিন প্যানেলে লিস্ট ও ডিলিট অপশন
+        // ক্যাটাগরি পরিবর্তনের ফাংশন
+        window.filterCategory = function(cat, btn) {
+            currentCategory = cat;
+            document.querySelectorAll('.cat-tab').forEach(b => b.classList.remove('active-cat'));
+            btn.classList.add('active-cat');
+            renderVideos();
+        }
+
+        // লাইক বাড়ানোর ফাংশন
+        window.handleLike = function(id) {
+            let videoRef = ref(db, 'videos/' + id);
+            let currentLikes = (allVideosData[id].likes || 0) + 1;
+            update(videoRef, { likes: currentLikes });
+        }
+
+        // ভিউ বাড়ানোর ফাংশন
+        window.incrementView = function(id) {
+            let videoRef = ref(db, 'videos/' + id);
+            let currentViews = (allVideosData[id].views || 1200) + 1;
+            update(videoRef, { views: currentViews });
+        }
+
+        // অ্যাডমিন লিস্ট রেন্ডার করা
+        function renderAdminList() {
+            adminVideoList.innerHTML = '';
+            let keys = Object.keys(allVideosData);
+            if(keys.length === 0) {
+                adminVideoList.innerHTML = '<div style="color:#64748b; font-size:12px;">কোনো ভিডিও নেই</div>';
+                return;
+            }
+            keys.forEach((id) => {
+                let video = allVideosData[id];
                 adminVideoList.innerHTML += `
                     <div class="admin-item">
                         <span>${video.title.substring(0, 20)}...</span>
@@ -78,13 +130,14 @@
                     </div>
                 `;
             });
-        });
+        }
 
         // নতুন ভিডিও যোগ করা
         window.addNewVideo = function() {
             const title = document.getElementById('vidTitle').value;
             const thumb = document.getElementById('vidThumb').value;
             const link = document.getElementById('vidLink').value;
+            const category = document.getElementById('vidCategory').value;
 
             if(!title || !thumb || !link) {
                 alert('দয়া করে সবগুলো ঘর পূরণ করুন!');
@@ -95,6 +148,9 @@
                 title: title,
                 thumb: thumb,
                 link: link,
+                category: category,
+                likes: 0,
+                views: 1200,
                 createdAt: Date.now()
             }).then(() => {
                 document.getElementById('vidTitle').value = '';
@@ -121,28 +177,41 @@
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .app-title { font-size: 18px; font-weight: bold; }
         .icon-btn { background: #1e293b; border: none; color: #fff; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 13px; }
+        
+        /* সার্চ বার ও ক্যাটাগরি স্টাইল */
+        .search-box { width: 100%; padding: 10px; background: #1e293b; border: 1px solid #334155; border-radius: 8px; color: #fff; margin-bottom: 12px; font-size: 14px; outline: none; }
+        .categories-container { display: flex; gap: 8px; overflow-x: auto; margin-bottom: 15px; padding-bottom: 5px; }
+        .categories-container::-webkit-scrollbar { display: none; }
+        .cat-tab { background: #1e293b; border: 1px solid #334155; color: #94a3b8; padding: 6px 14px; border-radius: 20px; font-size: 12px; cursor: pointer; white-space: nowrap; transition: 0.3s; }
+        .cat-tab.active-cat { background: #7c3aed; color: #fff; border-color: #7c3aed; font-weight: bold; }
+
         .stats-box { background: #1e293b; border-radius: 12px; padding: 15px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; text-align: center; }
         .stat-item { background: #0f172a; padding: 10px; border-radius: 8px; }
         .stat-item span { display: block; font-size: 12px; color: #94a3b8; }
         .stat-item b { font-size: 16px; color: #fbbf24; }
+        
         .video-card { background: #1e293b; border-radius: 12px; overflow: hidden; margin-bottom: 15px; border: 1px solid #334155; }
         .thumbnail-container { position: relative; width: 100%; height: 180px; }
         .thumbnail-container img { width: 100%; height: 100%; object-fit: cover; }
         .preview-badge { position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.7); color: #fbbf24; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; }
         .video-info { padding: 12px; }
         .video-title { font-size: 14px; margin-bottom: 8px; line-height: 1.4; }
-        .video-meta { display: flex; justify-content: space-between; font-size: 12px; color: #94a3b8; margin-bottom: 10px; }
+        .video-meta { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: #94a3b8; margin-bottom: 10px; }
+        .like-btn-action { background: #0f172a; border: 1px solid #334155; color: #f43f5e; padding: 4px 10px; border-radius: 6px; cursor: pointer; font-size: 12px; }
         .unlock-btn { width: 100%; background: linear-gradient(135deg, #7c3aed, #db2777); color: #fff; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); justify-content: center; align-items: center; z-index: 1000; padding: 15px; }
         .modal-content { background: #1e293b; width: 100%; max-width: 400px; border-radius: 12px; padding: 20px; max-height: 90vh; overflow-y: auto; }
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .close-btn { background: none; border: none; color: #fff; font-size: 18px; cursor: pointer; }
-        input, button.action-btn { width: 100%; padding: 10px; margin: 8px 0; border-radius: 8px; border: none; }
-        input { background: #0f172a; color: #fff; border: 1px solid #334155; }
+        input, select, button.action-btn { width: 100%; padding: 10px; margin: 8px 0; border-radius: 8px; border: none; }
+        input, select { background: #0f172a; color: #fff; border: 1px solid #334155; outline: none; }
         button.action-btn { background: #db2777; color: #fff; font-weight: bold; cursor: pointer; }
         .admin-item { display: flex; justify-content: space-between; align-items: center; background: #0f172a; padding: 8px 12px; border-radius: 6px; margin-bottom: 8px; font-size: 13px; }
         .delete-btn { background: #ef4444; color: #fff; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
         .no-video { text-align: center; color: #64748b; padding: 30px; font-size: 14px; }
+        .bot-link-box { text-align: center; margin-bottom: 15px; font-size: 13px; color: #94a3b8; }
+        .bot-link-box a { color: #38bdf8; text-decoration: none; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -153,6 +222,10 @@
             <div class="header-btns">
                 <button class="icon-btn" onclick="openSettings()">⚙️ Settings</button>
             </div>
+        </div>
+
+        <div class="bot-link-box">
+            সরাসরি বটে যুক্ত হতে: <a href="https://t.me/saifulappbot" target="_blank">@saifulappbot</a>
         </div>
 
         <div class="stats-box">
@@ -166,11 +239,24 @@
             </div>
         </div>
 
+        <!-- সার্চ বার -->
+        <input type="text" id="searchInput" class="search-box" placeholder="🔍 ভিডিও সার্চ করুন..." onkeyup="renderVideos()">
+
+        <!-- ক্যাটাগরি ট্যাব -->
+        <div class="categories-container">
+            <button class="cat-tab active-cat" onclick="filterCategory('All', this)">All</button>
+            <button class="cat-tab" onclick="filterCategory('Trending', this)">Trending</button>
+            <button class="cat-tab" onclick="filterCategory('Latest', this)">Latest</button>
+            <button class="cat-tab" onclick="filterCategory('Exclusive', this)">Exclusive</button>
+        </div>
+
+        <!-- ভিডিও লিস্ট কনটেইনার -->
         <div id="videoListContainer">
             <div class="no-video">লোড হচ্ছে...</div>
         </div>
     </div>
 
+    <!-- সেটিংস ও অ্যাডমিন প্যানেল মডাল -->
     <div class="modal" id="settingsModal">
         <div class="modal-content">
             <div class="modal-header">
@@ -186,6 +272,11 @@
                 <input type="text" id="vidTitle" placeholder="ভিডিও টাইটেল...">
                 <input type="text" id="vidThumb" placeholder="থাম্বনেইল ইমেজ URL...">
                 <input type="text" id="vidLink" placeholder="আনলক লিংক (Telegram/Web)...">
+                <select id="vidCategory">
+                    <option value="Trending">Trending</option>
+                    <option value="Latest">Latest</option>
+                    <option value="Exclusive">Exclusive</option>
+                </select>
                 <button class="action-btn" onclick="addNewVideo()">নতুন ভিডিও যোগ করুন</button>
             </div>
 
@@ -199,7 +290,7 @@
     <script>
         function openSettings() {
             let pass = prompt('অ্যাডমিন পাসওয়ার্ড দিন:');
-            if(pass === '1234' || pass === 'admin') {
+            if(pass === 'Lamiya') {
                 document.getElementById('settingsModal').style.display = 'flex';
             } else if(pass !== null) {
                 alert('ভুল পাসওয়ার্ড!');
