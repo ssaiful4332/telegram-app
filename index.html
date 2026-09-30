@@ -222,7 +222,7 @@
             update(videoRef, { views: currentViews });
         }
 
-        // অ্যাডমিন লিস্ট রেন্ডার করা (যেখানে আলাদা আলাদা বা একসাথে ডিলিট করার অপশন আছে)
+        // অ্যাডমিন লিস্ট রেন্ডার করা (আলাদা আলাদা ডিলিট করার বাটন সহ)
         function renderAdminList() {
             adminVideoList.innerHTML = '';
             let keys = Object.keys(allVideosData).reverse();
@@ -234,7 +234,7 @@
                 let video = allVideosData[id];
                 adminVideoList.innerHTML += `
                     <div class="admin-item">
-                        <div style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 160px;">
+                        <div style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 170px;">
                             <b>${video.title}</b><br>
                             <span style="font-size:10px; color:#38bdf8;">ID: ${id}</span>
                         </div>
@@ -284,17 +284,6 @@
         window.deleteVideo = function(id) {
             if(confirm('আপনি কি এই ভিডিওটি ডিলিট করতে চান?')) {
                 remove(ref(db, 'videos/' + id));
-            }
-        }
-
-        // আগের সব ভিডিও একসাথে ডিলিট করা
-        window.deleteAllVideos = function() {
-            if(confirm('সতর্কবার্তা! আপনি কি সত্যিই ডাটাবেসের আগের সব ভিডিও একসাথে ডিলিট করতে চান? এই প্রক্রিয়াটি আর ফিরিয়ে আনা যাবে না।')) {
-                remove(videosRef).then(() => {
-                    alert('সব ভিডিও সফলভাবে মুছে ফেলা হয়েছে!');
-                }).catch((error) => {
-                    alert('মুছে ফেলতে সমস্যা হয়েছে: ' + error.message);
-                });
             }
         }
 
@@ -383,9 +372,13 @@
         input, select, button.action-btn { width: 100%; padding: 10px; margin: 8px 0; border-radius: 8px; border: none; }
         input, select { background: #0f172a; color: #fff; border: 1px solid #334155; outline: none; }
         button.action-btn { background: #db2777; color: #fff; font-weight: bold; cursor: pointer; }
-        .admin-item { display: flex; justify-content: space-between; align-items: center; background: #0f172a; padding: 8px 12px; border-radius: 6px; margin-bottom: 8px; font-size: 12px; text-align: left; gap: 8px; }
-        .delete-btn { background: #ef4444; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; }
-        .link-btn { background: #0284c7; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; }
+        
+        /* অ্যাডমিন প্যানেল ভিডিও লিস্টের জন্য স্ক্রোল এবং সুন্দর ডিজাইন */
+        .admin-list-container { max-height: 220px; overflow-y: auto; padding-right: 4px; margin-top: 8px; border: 1px solid #334155; border-radius: 8px; padding: 8px; background: #0b0f19; }
+        .admin-item { display: flex; justify-content: space-between; align-items: center; background: #1e293b; padding: 8px 10px; border-radius: 6px; margin-bottom: 6px; font-size: 12px; text-align: left; gap: 8px; border: 1px solid #334155; }
+        .delete-btn { background: #ef4444; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 11px; }
+        .link-btn { background: #0284c7; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 11px; }
+        
         .no-video { text-align: center; color: #64748b; padding: 30px; font-size: 14px; }
         .bot-link-box { text-align: center; margin-bottom: 12px; font-size: 13px; color: #94a3b8; }
         .bot-link-box a { color: #38bdf8; text-decoration: none; font-weight: bold; }
@@ -492,12 +485,9 @@
 
             <hr style="border: 0; border-top: 1px solid #334155; margin: 15px 0;">
 
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                <h5>যুক্ত করা ভিডিওসমূহ ও আইডি:</h5>
-                <!-- একসাথে সব ভিডিও ডিলিট করার বাটন -->
-                <button class="delete-btn" style="font-size: 10px; padding: 5px 8px;" onclick="deleteAllVideos()">🗑️ সব ডিলিট (All)</button>
-            </div>
-            <div id="adminVideoList" style="margin-top: 8px; max-height: 200px; overflow-y: auto;"></div>
+            <h5 style="margin-bottom: 5px;">যুক্ত করা ভিডিওসমূহ ও আইডি (আলাদা ডিলিট):</h5>
+            <!-- স্ক্রোলযোগ্য অ্যাডমিন ভিডিও লিস্ট বক্স -->
+            <div class="admin-list-container" id="adminVideoList"></div>
         </div>
     </div>
 
