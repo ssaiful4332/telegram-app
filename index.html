@@ -1,8 +1,207 @@
-{
-  "id": "1",
-  "title": "নতুন ভাইরাল কলেজ ছাত্রী ও তার বয়ফ্রেন্ডের ভিডিও!",
-  "thumbnail": "https://images.unsplash.com/...jpg",
-  "videoLink": "https://t.me/your_channel_link",
-  "likes": 14,
-  "views": 1077
-}
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Awesome App</title>
+    <!-- টেলিগ্রাম ওয়েব অ্যাপ এসডিকে -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #0b0f19; color: #ffffff; padding: 10px; display: flex; justify-content: center; }
+        .container { width: 100%; max-width: 450px; }
+        
+        /* টপ হেডার ও ব্যালেন্স সেকশন */
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .app-title { font-size: 18px; font-weight: bold; }
+        .header-btns { display: flex; gap: 8px; }
+        .icon-btn { background: #1e293b; border: none; color: #fff; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 13px; }
+
+        .stats-box { background: #1e293b; border-radius: 12px; padding: 15px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; text-align: center; }
+        .stat-item { background: #0f172a; padding: 10px; border-radius: 8px; }
+        .stat-item span { display: block; font-size: 12px; color: #94a3b8; }
+        .stat-item b { font-size: 16px; color: #fbbf24; }
+
+        /* ভিডিও কার্ড স্টাইল */
+        .video-card { background: #1e293b; border-radius: 12px; overflow: hidden; margin-bottom: 15px; border: 1px: #334155; }
+        .thumbnail-container { position: relative; width: 100%; height: 180px; }
+        .thumbnail-container img { width: 100%; height: 100%; object-fit: cover; }
+        .preview-badge { position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.7); color: #fbbf24; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; }
+        
+        .video-info { padding: 12px; }
+        .video-title { font-size: 14px; margin-bottom: 8px; line-height: 1.4; }
+        .video-meta { display: flex; justify-content: space-between; font-size: 12px; color: #94a3b8; margin-bottom: 10px; }
+        
+        .unlock-btn { width: 100%; background: linear-gradient(135deg, #7c3aed, #db2777); color: #fff; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+
+        /* অ্যাডমিন প্যানেল ও সেটিংস মডাল */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); justify-content: center; align-items: center; z-index: 1000; padding: 15px; }
+        .modal-content { background: #1e293b; width: 100%; max-width: 400px; border-radius: 12px; padding: 20px; max-height: 90vh; overflow-y: auto; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .close-btn { background: none; border: none; color: #fff; font-size: 18px; cursor: pointer; }
+        
+        input, button.action-btn { width: 100%; padding: 10px; margin: 8px 0; border-radius: 8px; border: none; }
+        input { background: #0f172a; color: #fff; border: 1px solid #334155; }
+        button.action-btn { background: #db2777; color: #fff; font-weight: bold; cursor: pointer; }
+        
+        .admin-item { display: flex; justify-content: space-between; align-items: center; background: #0f172a; padding: 8px 12px; border-radius: 6px; margin-bottom: 8px; font-size: 13px; }
+        .delete-btn { background: #ef4444; color: #fff; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
+
+        .no-video { text-align: center; color: #64748b; padding: 30px; font-size: 14px; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- টপ বার -->
+        <div class="header">
+            <div class="app-title">My Awesome App</div>
+            <div class="header-btns">
+                <button class="icon-btn" onclick="openSettings()">⚙️ Settings</button>
+            </div>
+        </div>
+
+        <!-- ব্যালেন্স বক্স -->
+        <div class="stats-box">
+            <div class="stat-item">
+                <span>কয়েন</span>
+                <b>50</b>
+            </div>
+            <div class="stat-item">
+                <span>ইউজার র‍্যাংক</span>
+                <b>Bronze</b>
+            </div>
+        </div>
+
+        <!-- ভিডিও লিস্ট কনটেইনার (শুরুতে খালি থাকবে) -->
+        <div id="videoListContainer">
+            <div class="no-video">কোনো ভিডিও নেই। অ্যাডমিন প্যানেল থেকে ভিডিও যুক্ত করুন।</div>
+        </div>
+    </div>
+
+    <!-- সেটিংস ও অ্যাডমিন প্যানেল মডাল -->
+    <div class="modal" id="settingsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Admin & Settings</h3>
+                <button class="close-btn" onclick="closeSettings()">✕</button>
+            </div>
+            <p style="font-size: 13px; color: #94a3b8; margin-bottom: 10px;">Telegram User: <b id="tgUser">@User</b></p>
+            
+            <hr style="border: 0; border-top: 1px solid #334155; margin: 15px 0;">
+
+            <h4>🛠️ Admin Panel</h4>
+            <div style="margin-top: 10px;">
+                <input type="text" id="vidTitle" placeholder="ভিডিও টাইটেল...">
+                <input type="text" id="vidThumb" placeholder="থাম্বনেইল ইমেজ URL...">
+                <input type="text" id="vidLink" placeholder="আনলক লিংক (Telegram/Web)...">
+                <button class="action-btn" onclick="addNewVideo()">নতুন ভিডিও যোগ করুন</button>
+            </div>
+
+            <div style="margin-top: 15px;">
+                <h5>যুক্ত করা ভিডিওসমূহ:</h5>
+                <div id="adminVideoList" style="margin-top: 8px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let tg = window.Telegram.WebApp;
+        tg.expand();
+        if(tg.initDataUnsafe && tg.initDataUnsafe.user) {
+            document.getElementById('tgUser').innerText = "@" + (tg.initDataUnsafe.user.username || tg.initDataUnsafe.user.first_name);
+        }
+
+        // লোকাল স্টোরেজ থেকে ভিডিও লোড করা (যাতে রিফ্রেশ করলেও ডাটা থাকে)
+        let videos = JSON.parse(localStorage.getItem('miniAppVideos')) || [];
+
+        function renderVideos() {
+            const container = document.getElementById('videoListContainer');
+            const adminList = document.getElementById('adminVideoList');
+            
+            container.innerHTML = '';
+            adminList.innerHTML = '';
+
+            if (videos.length === 0) {
+                container.innerHTML = '<div class="no-video">কোনো ভিডিও নেই। অ্যাডমিন প্যানেল থেকে ভিডিও যুক্ত করুন।</div>';
+                return;
+            }
+
+            videos.forEach((video, index) => {
+                // হোমপেজে রেন্ডার করা
+                container.innerHTML += `
+                    <div class="video-card">
+                        <div class="thumbnail-container">
+                            <span class="preview-badge">PREVIEW</span>
+                            <img src="${video.thumb}" alt="Thumbnail">
+                        </div>
+                        <div class="video-info">
+                            <div class="video-title">${video.title}</div>
+                            <div class="video-meta">
+                                <span>👁️ 1.2K Views</span>
+                                <span>❤️ 0</span>
+                            </div>
+                            <a href="${video.link}" target="_blank">
+                                <button class="unlock-btn">🔒 UNLOCK FULL VIDEO</button>
+                            </a>
+                        </div>
+                    </div>
+                `;
+
+                // অ্যাডমিন প্যানেলে লিস্ট ও ডিলিট অপশন রেন্ডার করা
+                adminList.innerHTML += `
+                    <div class="admin-item">
+                        <span>${video.title.substring(0, 20)}...</span>
+                        <button class="delete-btn" onclick="deleteVideo(${index})">ডিলিট</button>
+                    </div>
+                `;
+            });
+        }
+
+        function addNewVideo() {
+            const title = document.getElementById('vidTitle').value;
+            const thumb = document.getElementById('vidThumb').value;
+            const link = document.getElementById('vidLink').value;
+
+            if(!title || !thumb || !link) {
+                alert('দয়া করে সবগুলো ঘর পূরণ করুন!');
+                return;
+            }
+
+            videos.push({ title, thumb, link });
+            localStorage.setItem('miniAppVideos', JSON.stringify(videos));
+
+            // ইনপুট ক্লিয়ার করা
+            document.getElementById('vidTitle').value = '';
+            document.getElementById('vidThumb').value = '';
+            document.getElementById('vidLink').value = '';
+
+            renderVideos();
+            alert('ভিডিও সফলভাবে যুক্ত করা হয়েছে!');
+        }
+
+        function deleteVideo(index) {
+            videos.splice(index, 1);
+            localStorage.setItem('miniAppVideos', JSON.stringify(videos));
+            renderVideos();
+        }
+
+        function openSettings() {
+            let pass = prompt('অ্যাডমিন পাসওয়ার্ড দিন:');
+            if(pass === '1234' || pass === 'admin') { // আপনার ইচ্ছামতো পাসওয়ার্ড দিতে পারেন
+                document.getElementById('settingsModal').style.display = 'flex';
+                renderVideos();
+            } else if(pass !== null) {
+                alert('ভুল পাসওয়ার্ড!');
+            }
+        }
+
+        function closeSettings() {
+            document.getElementById('settingsModal').style.display = 'none';
+        }
+
+        // প্রথমে পেজ লোড হলে কল করা
+        renderVideos();
+    </script>
+</body>
+</html>
