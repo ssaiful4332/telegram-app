@@ -515,7 +515,7 @@
     <div id="settingsModal" class="modal">
         <div class="modal-content">
             <span class="close-modal" onclick="closeSettingsModal()">&#10005;</span>
-            <h3 style="color: inherit; margin-top: 5px; font-size: 18px; margin-bottom: 15px;">⚙️ Personal Settings</h3>
+            <h3 style="color: inherit; margin-top: 5px; font-size: 18px; margin-bottom: 15px;">⚙️️ Personal Settings</h3>
             
             <div id="tgUserSection" style="margin-bottom: 12px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; text-align: left; font-size: 13px;">
                 <p style="margin: 0 0 4px 0; color: #b0bec5;">Telegram User:</p>
@@ -826,18 +826,19 @@
                     image: image,
                     link: link,
                     category: category,
-                    views: 10,
-                    likes: 1
+                    views: 120,
+                    likes: 0
                 };
 
+                // ফায়ারবেসে পুশ করার সময় যেন কোনো ব্লক বা এরর না ধরে তার ব্যবস্থা
                 db.ref('videos').push(newVideoData).then(() => {
                     showToast("সফলভাবে নতুন ভিডিও যোগ করা হয়েছে!");
                     document.getElementById('adminVidTitle').value = '';
                     document.getElementById('adminVidImage').value = '';
                     document.getElementById('adminVidLink').value = '';
                 }).catch((error) => {
-                    showToast("ভিডিও আপলোড করতে সমস্যা হয়েছে!");
-                    console.error(error);
+                    showToast("ভিডিও আপলোড করতে সমস্যা হয়েছে: " + error.message);
+                    console.error("Firebase Error:", error);
                 });
             } else {
                 showToast("দয়া করে টাইটেল, ইমেজ এবং লিঙ্ক পূরণ করুন!");
@@ -859,8 +860,9 @@
 
         function deleteVideo(id) {
             if(confirm("ভিডিওটি ডিলিট করতে চান?")) {
-                db.ref('videos/' + id).remove();
-                showToast("ভিডিও ডিলিট করা হয়েছে!");
+                db.ref('videos/' + id).remove().then(() => {
+                    showToast("ভিডিও ডিলিট করা হয়েছে!");
+                });
             }
         }
     </script>
