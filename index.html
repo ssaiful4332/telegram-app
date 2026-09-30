@@ -99,7 +99,7 @@
                     <div class="video-card" id="vid-${id}">
                         <div class="thumbnail-container">
                             <span class="preview-badge">${video.category || 'General'}</span>
-                            <span class="duration-badge">⏱️️ ${duration}</span>
+                            <span class="duration-badge">⏱️ ${duration}</span>
                             ${isHot ? '<span class="hot-badge">🔥 Hot</span>' : ''}
                             <img src="${video.thumb}" alt="Thumbnail" oncontextmenu="return false;">
                         </div>
@@ -178,6 +178,7 @@
             });
         }
 
+        // সরাসরি নতুন ট্যাবে ভিডিও লিংক ওপেন করবে (টেলিগ্রাম জয়েন পপআপ ছাড়াই)
         window.openDirectVideo = function(link, id) {
             incrementView(id);
             window.open(link, '_blank');
@@ -202,7 +203,7 @@
             update(videoRef, { views: currentViews });
         }
 
-        // অ্যাডমিন লিস্ট রেন্ডার ও ডিলিট অপشن
+        // অ্যাডমিন লিস্ট রেন্ডার
         function renderAdminList() {
             adminVideoList.innerHTML = '';
             let keys = Object.keys(allVideosData).reverse();
@@ -214,7 +215,7 @@
                 let video = allVideosData[id];
                 adminVideoList.innerHTML += `
                     <div class="admin-item">
-                        <div style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 170px;">
+                        <div style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 180px;">
                             <b>${video.title}</b><br>
                             <span style="font-size:10px; color:#38bdf8;">ID: ${id}</span>
                         </div>
@@ -260,12 +261,8 @@
         }
 
         window.deleteVideo = function(id) {
-            if(confirm('আপনি কি নিশ্চিতভাবে এই ভিডিওটি ডিলিট করতে চান?')) {
-                remove(ref(db, 'videos/' + id)).then(() => {
-                    alert('ভিডিও সফলভাবে ডিলিট করা হয়েছে!');
-                }).catch((error) => {
-                    alert('ডিলিট করতে সমস্যা হয়েছে: ' + error.message);
-                });
+            if(confirm('আপনি কি এই ভিডিওটি ডিলিট করতে চান?')) {
+                remove(ref(db, 'videos/' + id));
             }
         }
 
@@ -460,7 +457,7 @@
 
             <hr style="border: 0; border-top: 1px solid #334155; margin: 15px 0;">
 
-            <h5 style="margin-bottom: 5px; color: #38bdf8;">যুক্ত করা ভিডিওসমূহ ও ডিলিট অপশন:</h5>
+            <h5 style="margin-bottom: 5px;">যুক্ত করা ভিডিওসমূহ ও আইডি:</h5>
             <div class="admin-list-container" id="adminVideoList"></div>
         </div>
     </div>
