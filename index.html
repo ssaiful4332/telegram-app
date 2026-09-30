@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Unlimited Vids</title>
+    <title>Media Hub</title>
     <!-- টেলিগ্রাম ওয়েব অ্যাপ এসডিকে -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     
@@ -30,38 +30,70 @@
         tg.expand();
         if(tg.initDataUnsafe && tg.initDataUnsafe.user) {
             document.getElementById('tgUser').innerText = "@" + (tg.initDataUnsafe.user.username || tg.initDataUnsafe.user.first_name);
+            document.getElementById('profileName').innerText = tg.initDataUnsafe.user.first_name || "User";
+            document.getElementById('profileUsername').innerText = "@" + (tg.initDataUnsafe.user.username || "unknown");
         }
 
         const videoListContainer = document.getElementById('videoListContainer');
+        const featuredContainer = document.getElementById('featuredContainer');
         const adminVideoList = document.getElementById('adminVideoList');
         const searchInput = document.getElementById('searchInput');
-        const noticeText = document.getElementById('noticeText');
 
         let allVideosData = {};
         let currentCategory = 'All'; 
+        let currentTab = 'home'; // home, browser, profile, support
         let pendingUnlockLink = '';
+        let pendingVideoId = '';
+        let unlockStepsLeft = 4; // ৪টি টাস্ক/অ্যাড ভিজিট করতে হবে
         let favoritesList = JSON.parse(localStorage.getItem('my_favorites') || '[]');
 
-        // রিয়েলটাইম ডাটাবেস থেকে ভিডিও এবং নোটিশ লোড করা
         const videosRef = ref(db, 'videos');
-        const noticeRef = ref(db, 'notice');
 
         onValue(videosRef, (snapshot) => {
             const data = snapshot.val();
             allVideosData = data || {};
-            renderVideos();
+            renderAll();
             renderAdminList();
         });
 
-        onValue(noticeRef, (snapshot) => {
-            const notice = snapshot.val();
-            if(notice) {
-                noticeText.innerText = notice;
-            }
-        });
+        window.renderAll = function() {
+            renderFeatured();
+            renderVideos();
+        }
 
-        // ভিডিও রেন্ডার ও ফিল্টার করার ফাংশন
+        // টপ স্টোরি বা ফিচারড রেন্ডার (স্ক্রিনশটের ওপরের গোল গোল বৃত্তের মতো)
+        function renderFeatured() {
+            featuredContainer.innerHTML = '';
+            let keys = Object.keys(allVideosData).slice(-6).reverse(); // শেষের ৬টি ভিডিও
+            if(keys.length === 0) {
+                featuredContainer.innerHTML = '<div style="color:#64748b; font-size:12px; padding:10px;">কোনো ফিচারড ভিডিও নেই</div>';
+                return;
+            }
+            keys.forEach(id => {
+                let video = allVideosData[id];
+                featuredContainer.innerHTML += `
+                    <div class="featured-item" onclick="scrollToVideo('${id}')">
+                        <div class="featured-img-wrap">
+                            <img src="${video.thumb}" alt="Featured">
+                        </div>
+                        <span>${video.title.substring(0, 10)}...</span>
+                    </div>
+                `;
+            });
+        }
+
+        window.scrollToVideo = function(id) {
+            let el = document.getElementById('vid-' + id);
+            if(el) {
+                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                el.classList.add('highlight-flash');
+                setTimeout(() => el.classList.remove('highlight-flash'), 3000);
+            }
+        }
+
+        // মূল ভিডিও ফিড রেন্ডার
         window.renderVideos = function() {
+            if(currentTab !== 'home') return;
             videoListContainer.innerHTML = '';
             const searchQuery = searchInput.value.toLowerCase();
             
@@ -74,17 +106,16 @@
                 if (currentCategory === 'Favorites') {
                     return matchesSearch && favoritesList.includes(id);
                 }
+                if (currentCategory === 'Trending Resources') {
+                    return matchesSearch && (video.category === 'Trending' || (video.views > 10));
+                }
                 
                 let matchesCategory = currentCategory === 'All' || video.category === currentCategory;
                 return matchesSearch && matchesCategory;
             });
 
             if (filteredKeys.length === 0) {
-                if(currentCategory === 'Favorites') {
-                    videoListContainer.innerHTML = '<div class="no-video">আপনার কোনো ফেভারিট ভিডিও নেই! ❤️ আইকনে ক্লিক করে সেভ করুন।</div>';
-                } else {
-                    videoListContainer.innerHTML = '<div class="no-video">কোনো ভিডিও পাওয়া যায়নি।</div>';
-                }
+                videoListContainer.innerHTML = '<div class="no-video">কোনো ভিডিও পাওয়া যায়নি।</div>';
                 return;
             }
 
@@ -92,56 +123,81 @@
                 let video = allVideosData[id];
                 let likes = video.likes || 0;
                 let views = video.views || 0;
-                let duration = video.duration || '0:00';
                 let isFav = favoritesList.includes(id);
-                let isHot = views > 10 || likes > 5; 
 
-                // এখানে id="vid-${id}" যুক্ত করা হয়েছে যাতে স্ক্রোল টার্গেট ধরতে পারে
                 videoListContainer.innerHTML += `
                     <div class="video-card" id="vid-${id}">
                         <div class="thumbnail-container">
-                            <span class="preview-badge">${video.category || 'General'}</span>
-                            <span class="duration-badge">⏱️ ${duration}</span>
-                            ${isHot ? '<span class="hot-badge">🔥 Hot</span>' : ''}
+                            <span class="preview-badge">${video.category || 'Trending Resources'}</span>
+                            <div class="video-id-badge">🆔 ID: ${id.slice(-8)}</div>
                             <img src="${video.thumb}" alt="Thumbnail" oncontextmenu="return false;">
                         </div>
                         <div class="video-info">
                             <div class="video-title">${video.title}</div>
                             <div class="video-meta">
-                                <span>👁️ <span id="view-count-${id}">${views}</span> Views</span>
-                                <div style="display: flex; gap: 6px; align-items: center;">
+                                <span>👁️ ${views}K &nbsp; 💬 946</span>
+                                <div style="display: flex; gap: 8px; align-items: center;">
+                                    <button class="like-btn-action" onclick="handleLike('${id}')">👍 ${likes}</button>
                                     <button class="fav-btn-action" onclick="toggleFavorite('${id}')">${isFav ? '❤️' : '🤍'}</button>
-                                    <button class="like-btn-action" onclick="handleLike('${id}')">❤️ <span id="like-count-${id}">${likes}</span></button>
                                 </div>
                             </div>
-                            <button class="unlock-btn" onclick="openUnlockModal('${video.link}', '${id}')">🔒 UNLOCK FULL VIDEO</button>
+                            <button class="unlock-btn" onclick="startUnlockProcess('${video.link}', '${id}')">
+                                🔓 UNLOCK ACCESS (${unlockStepsLeft} LEFT)
+                            </button>
                         </div>
                     </div>
                 `;
             });
-
-            // পেজ লোড হওয়ার পর URL-এ যদি নির্দিষ্ট ভিডিও আইডি থাকে, তবে সেখানে স্মুথলি স্ক্রোল করবে
             checkUrlHashAndScroll();
         }
 
-        // ইউআরএল চেক করে নির্দিষ্ট ভিডিওতে স্ক্রোল এবং অ্যানিমেশন দেওয়ার ফাংশন
         function checkUrlHashAndScroll() {
-            const hash = window.location.hash; // যেমন: #vid-abc123xyz
+            const hash = window.location.hash;
             if (hash) {
                 const targetElement = document.querySelector(hash);
                 if (targetElement) {
                     setTimeout(() => {
                         targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
                         targetElement.classList.add('highlight-flash');
-                        setTimeout(() => {
-                            targetElement.classList.remove('highlight-flash');
-                        }, 3000);
-                    }, 600);
+                        setTimeout(() => targetElement.classList.remove('highlight-flash'), 3000);
+                    }, 500);
                 }
             }
         }
 
-        // ফেভারিট টগল করার ফাংশন
+        // আনলক সিস্টেম ও স্ক্রিনশটের মতো অ্যাড/টাস্ক পপআপ ফ্লো
+        window.startUnlockProcess = function(link, id) {
+            pendingUnlockLink = link;
+            pendingVideoId = id;
+            document.getElementById('pendingModal').style.display = 'flex';
+        }
+
+        window.closePendingModal = function() {
+            document.getElementById('pendingModal').style.display = 'none';
+        }
+
+        window.proceedUnlockStep = function() {
+            closePendingModal();
+            // মোনিট্যাগ বা যেকোনো শর্টলিংক অ্যাড সাইটে রিডাইরেক্ট করা
+            window.open("https://yllix.com/publishers/signup", "_blank"); 
+
+            // ধাপ কমানো simulate করা (স্ক্রিনশটের মতো: Task Completed! 3 more to go.)
+            setTimeout(() => {
+                if(unlockStepsLeft > 1) {
+                    unlockStepsLeft--;
+                    alert(`⚠️ Task Completed! ${unlockStepsLeft} more to go.`);
+                    renderVideos();
+                } else {
+                    unlockStepsLeft = 0;
+                    incrementView(pendingVideoId);
+                    alert('🎉 সব টাস্ক সম্পন্ন হয়েছে! এখন সরাসরি ভিডিওটি ওপেন হচ্ছে।');
+                    window.open(pendingUnlockLink, '_blank');
+                    unlockStepsLeft = 4; // আবার রিসেট
+                    renderVideos();
+                }
+            }, 1000);
+        }
+
         window.toggleFavorite = function(id) {
             if(favoritesList.includes(id)) {
                 favoritesList = favoritesList.filter(item => item !== id);
@@ -152,49 +208,14 @@
             renderVideos();
         }
 
-        // অ্যাপ শেয়ার করার ফাংশন
-        window.shareApp = function() {
-            let botUrl = "https://t.me/saifulappbot";
-            if (navigator.share) {
-                navigator.share({
-                    title: 'Unlimited Vids',
-                    text: 'সেরা সব ভিডিও দেখতে আমাদের মিনি অ্যাপে ভিজিট করুন:',
-                    url: botUrl,
-                }).catch(() => {});
-            } else {
-                prompt("অ্যাপটির লিংক কপি করুন:", botUrl);
-            }
-        }
-
-        // নির্দিষ্ট ভিডিওর ডাইরেক্ট লিংক কপি করার ফাংশন (ফিক্সড)
         window.copyVideoDirectLink = function(id, title) {
             let baseUrl = window.location.href.split('#')[0].split('?')[0];
             let directLink = baseUrl + '#vid-' + id;
-            
             navigator.clipboard.writeText(directLink).then(() => {
-                alert(`সফল! "${title.substring(0, 15)}..." ভিডিওটির ডাইরেক্ট লিংক কপি হয়েছে।\n\nলিংকটি: ${directLink}`);
-            }).catch(err => {
-                prompt("লিংকটি কপি করে নিন:", directLink);
+                alert(`ডাইরেক্ট লিংক কপি হয়েছে:\n${directLink}`);
             });
         }
 
-        // আনলক মডাল ওপেন করা ও ভিউ রিয়েলটাইম আপডেট করা
-        window.openUnlockModal = function(link, id) {
-            pendingUnlockLink = link;
-            incrementView(id);
-            document.getElementById('unlockModal').style.display = 'flex';
-        }
-
-        window.closeUnlockModal = function() {
-            document.getElementById('unlockModal').style.display = 'none';
-        }
-
-        window.proceedToVideo = function() {
-            window.open(pendingUnlockLink, '_blank');
-            closeUnlockModal();
-        }
-
-        // ক্যাটাগরি পরিবর্তনের ফাংশন
         window.filterCategory = function(cat, btn) {
             currentCategory = cat;
             document.querySelectorAll('.cat-tab').forEach(b => b.classList.remove('active-cat'));
@@ -202,21 +223,32 @@
             renderVideos();
         }
 
-        // রিয়েলটাইম লাইক বাড়ানোর ফাংশন
         window.handleLike = function(id) {
             let videoRef = ref(db, 'videos/' + id);
             let currentLikes = (allVideosData[id].likes || 0) + 1;
             update(videoRef, { likes: currentLikes });
         }
 
-        // রিয়েলটাইম ভিউ বাড়ানোর ফাংশন
         window.incrementView = function(id) {
             let videoRef = ref(db, 'videos/' + id);
             let currentViews = (allVideosData[id].views || 0) + 1;
             update(videoRef, { views: currentViews });
         }
 
-        // অ্যাডমিন লিস্ট রেন্ডার করা
+        // ট্যাব সুইচিং (Home, Browser, Profile, Support)
+        window.switchTab = function(tabName, btnElement) {
+            currentTab = tabName;
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active-nav'));
+            btnElement.classList.add('active-nav');
+
+            document.getElementById('homeView').style.display = (tabName === 'home') ? 'block' : 'none';
+            document.getElementById('browserView').style.display = (tabName === 'browser') ? 'block' : 'none';
+            document.getElementById('profileView').style.display = (tabName === 'profile') ? 'block' : 'none';
+            document.getElementById('supportView').style.display = (tabName === 'support') ? 'block' : 'none';
+
+            if(tabName === 'home') renderVideos();
+        }
+
         function renderAdminList() {
             adminVideoList.innerHTML = '';
             let keys = Object.keys(allVideosData).reverse();
@@ -228,9 +260,9 @@
                 let video = allVideosData[id];
                 adminVideoList.innerHTML += `
                     <div class="admin-item">
-                        <div style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 190px;">
+                        <div style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 170px;">
                             <b>${video.title}</b><br>
-                            <span style="font-size:10px; color:#38bdf8;">⏱️ ${video.duration || '0:00'}</span>
+                            <span style="font-size:10px; color:#38bdf8;">ID: ${id}</span>
                         </div>
                         <div style="display: flex; gap: 4px;">
                             <button class="link-btn" onclick="copyVideoDirectLink('${id}', '${video.title.replace(/'/g, "")}')">লিংক</button>
@@ -241,16 +273,14 @@
             });
         }
 
-        // নতুন ভিডিও যোগ করা
         window.addNewVideo = function() {
             const title = document.getElementById('vidTitle').value;
             const thumb = document.getElementById('vidThumb').value;
             const link = document.getElementById('vidLink').value;
-            const duration = document.getElementById('vidDuration').value || '2:30';
             const category = document.getElementById('vidCategory').value;
 
             if(!title || !thumb || !link) {
-                alert('দয়া করে সবগুলো ঘর পূরণ করুন!');
+                alert('সবগুলো ঘর পূরণ করুন!');
                 return;
             }
 
@@ -258,227 +288,233 @@
                 title: title,
                 thumb: thumb,
                 link: link,
-                duration: duration,
                 category: category,
-                likes: 0,
-                views: 0,
+                likes: 11,
+                views: 19,
                 createdAt: Date.now()
             }).then(() => {
                 document.getElementById('vidTitle').value = '';
                 document.getElementById('vidThumb').value = '';
                 document.getElementById('vidLink').value = '';
-                document.getElementById('vidDuration').value = '';
-                alert('ভিডিও সফলভাবে যুক্ত করা হয়েছে! এখন অ্যাডমিন প্যানেল থেকে লিংক কপি করতে পারবেন।');
-            }).catch((error) => {
-                alert('ভিডিও যোগ করতে সমস্যা হয়েছে: ' + error.message);
+                alert('ভিডিও সফলভাবে যোগ করা হয়েছে!');
             });
         }
 
-        // ভিডিও ডিলিট করা
         window.deleteVideo = function(id) {
-            if(confirm('আপনি কি এই ভিডিওটি ডিলিট করতে চান?')) {
+            if(confirm('ভিডিওটি ডিলিট করতে চান?')) {
                 remove(ref(db, 'videos/' + id));
             }
-        }
-
-        // নোটিশ আপডেট করা
-        window.updateNotice = function() {
-            const newNotice = document.getElementById('noticeInput').value;
-            if(!newNotice) {
-                alert('নোটিশ লিখুন!');
-                return;
-            }
-            set(noticeRef, newNotice).then(() => {
-                alert('নোটিশ আপডেট সফল হয়েছে!');
-                document.getElementById('noticeInput').value = '';
-            });
-        }
-
-        // থিম পরিবর্তন (ডার্ক/লাইট মোড)
-        window.toggleTheme = function() {
-            document.body.classList.toggle('light-theme');
         }
     </script>
 
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; user-select: none; }
-        body { background-color: #0b0f19; color: #ffffff; padding: 10px; display: flex; justify-content: center; transition: 0.3s; scroll-behavior: smooth; }
+        body { background-color: #0d1117; color: #ffffff; padding-bottom: 70px; display: flex; justify-content: center; }
+        .container { width: 100%; max-width: 450px; min-height: 100vh; background: #0d1117; position: relative; }
         
-        /* লাইট মোড ডিজাইন */
-        body.light-theme { background-color: #f1f5f9; color: #0f172a; }
-        body.light-theme .container .header .app-title { color: #0f172a; }
-        body.light-theme .icon-btn, body.light-theme .search-box, body.light-theme .cat-tab, body.light-theme .stats-box, body.light-theme .stat-item, body.light-theme .video-card, body.light-theme .modal-content, body.light-theme input, body.light-theme select { background: #ffffff; color: #0f172a; border-color: #cbd5e1; }
-        body.light-theme .notice-board { background: #e0f2fe; color: #0369a1; border-color: #bae6fd; }
+        /* হেডার সেকশন */
+        .app-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; background: #161b22; border-bottom: 1px solid #30363d; position: sticky; top: 0; z-index: 99; }
+        .media-hub-title { font-size: 16px; font-weight: bold; color: #fff; letter-spacing: 0.5px; }
+        .header-right { display: flex; align-items: center; gap: 10px; }
+        .top12-badge { background: #21262d; border: 1px solid #30363d; color: #fff; padding: 4px 10px; border-radius: 15px; font-size: 11px; font-weight: bold; display: flex; align-items: center; gap: 4px; }
+        .admin-gear { background: none; border: none; color: #8b949e; font-size: 16px; cursor: pointer; }
 
-        .container { width: 100%; max-width: 450px; }
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-        .app-title { font-size: 18px; font-weight: bold; }
-        .header-btns { display: flex; gap: 5px; }
-        .icon-btn { background: #1e293b; border: none; color: #fff; padding: 6px 8px; border-radius: 8px; cursor: pointer; font-size: 11px; }
-        
-        /* নোটিশ বোর্ড */
-        .notice-board { background: #1e1b4b; border: 1px solid #312e81; color: #c7d2fe; padding: 10px; border-radius: 8px; font-size: 12px; margin-bottom: 12px; text-align: center; }
+        /* সার্চ বার */
+        .search-area { padding: 10px 15px; background: #161b22; }
+        .search-box-input { width: 100%; padding: 8px 12px; background: #0d1117; border: 1px solid #30363d; border-radius: 20px; color: #fff; font-size: 13px; outline: none; }
 
-        .search-box { width: 100%; padding: 10px; background: #1e293b; border: 1px solid #334155; border-radius: 8px; color: #fff; margin-bottom: 12px; font-size: 14px; outline: none; }
-        .categories-container { display: flex; gap: 8px; overflow-x: auto; margin-bottom: 15px; padding-bottom: 5px; }
+        /* ফিচারড হরিজেন্টাল স্টোরি লিস্ট */
+        .featured-wrapper { padding: 12px 15px; overflow-x: auto; display: flex; gap: 12px; background: #0d1117; border-bottom: 1px solid #21262d; }
+        .featured-wrapper::-webkit-scrollbar { display: none; }
+        .featured-item { text-align: center; cursor: pointer; flex-shrink: 0; width: 65px; }
+        .featured-img-wrap { width: 60px; height: 60px; border-radius: 50%; border: 2px solid #58a6ff; overflow: hidden; margin: 0 auto 4px auto; }
+        .featured-img-wrap img { width: 100%; height: 100%; object-fit: cover; }
+        .featured-item span { font-size: 10px; color: #8b949e; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        /* ক্যাটাগরি ট্যাব */
+        .section-title { font-size: 14px; font-weight: bold; padding: 12px 15px 6px 15px; color: #c9d1d9; }
+        .categories-container { display: flex; gap: 8px; overflow-x: auto; padding: 0 15px 10px 15px; }
         .categories-container::-webkit-scrollbar { display: none; }
-        .cat-tab { background: #1e293b; border: 1px solid #334155; color: #94a3b8; padding: 6px 14px; border-radius: 20px; font-size: 12px; cursor: pointer; white-space: nowrap; transition: 0.3s; }
-        .cat-tab.active-cat { background: #7c3aed; color: #fff; border-color: #7c3aed; font-weight: bold; }
+        .cat-tab { background: #21262d; border: 1px solid #30363d; color: #8b949e; padding: 6px 14px; border-radius: 20px; font-size: 12px; cursor: pointer; white-space: nowrap; transition: 0.2s; }
+        .cat-tab.active-cat { background: #1f6feb; color: #fff; border-color: #388bfd; font-weight: bold; }
 
-        .stats-box { background: #1e293b; border-radius: 12px; padding: 15px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; text-align: center; }
-        .stat-item { background: #0f172a; padding: 10px; border-radius: 8px; }
-        .stat-item span { display: block; font-size: 12px; color: #94a3b8; }
-        .stat-item b { font-size: 16px; color: #fbbf24; }
+        /* ভিডিও কার্ড ডিজাইন */
+        .video-card { background: #161b22; border-radius: 12px; overflow: hidden; margin: 0 15px 15px 15px; border: 1px solid #30363d; transition: 0.3s; }
         
-        .video-card { background: #1e293b; border-radius: 12px; overflow: hidden; margin-bottom: 15px; border: 1px solid #334155; transition: all 0.3s ease; }
-        
-        /* টার্গেটেড ভিডিও হাইলাইট বা ফ্ল্যাশ অ্যানিমেশন */
         @keyframes glowFlash {
-            0% { border-color: #7c3aed; box-shadow: 0 0 20px #7c3aed; transform: scale(1.02); }
-            50% { border-color: #db2777; box-shadow: 0 0 25px #db2777; transform: scale(1.02); }
-            100% { border-color: #334155; box-shadow: none; transform: scale(1); }
+            0% { border-color: #58a6ff; box-shadow: 0 0 15px #58a6ff; transform: scale(1.02); }
+            100% { border-color: #30363d; box-shadow: none; transform: scale(1); }
         }
-        .highlight-flash {
-            animation: glowFlash 3s ease-in-out;
-        }
+        .highlight-flash { animation: glowFlash 2.5s ease-in-out; }
 
-        .thumbnail-container { position: relative; width: 100%; height: 180px; }
+        .thumbnail-container { position: relative; width: 100%; height: 190px; }
         .thumbnail-container img { width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
-        .preview-badge { position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.7); color: #fbbf24; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; }
-        .duration-badge { position: absolute; bottom: 10px; right: 10px; background: rgba(0,0,0,0.8); color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: bold; }
-        .hot-badge { position: absolute; top: 10px; right: 10px; background: #ef4444; color: #fff; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; }
+        .preview-badge { position: absolute; top: 10px; left: 10px; background: #1f6feb; color: #fff; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; }
+        .video-id-badge { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.7); color: #58a6ff; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-family: monospace; }
         
         .video-info { padding: 12px; }
-        .video-title { font-size: 14px; margin-bottom: 8px; line-height: 1.4; }
-        .video-meta { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: #94a3b8; margin-bottom: 10px; }
-        .like-btn-action { background: #0f172a; border: 1px solid #334155; color: #f43f5e; padding: 4px 10px; border-radius: 6px; cursor: pointer; font-size: 12px; }
-        .fav-btn-action { background: #0f172a; border: 1px solid #334155; padding: 4px 8px; border-radius: 6px; cursor: pointer; font-size: 12px; }
-        .unlock-btn { width: 100%; background: linear-gradient(135deg, #7c3aed, #db2777); color: #fff; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .video-title { font-size: 14px; margin-bottom: 8px; color: #f0f6fc; font-weight: 500; }
+        .video-meta { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: #8b949e; margin-bottom: 12px; }
+        .like-btn-action, .fav-btn-action { background: #21262d; border: 1px solid #30363d; color: #c9d1d9; padding: 4px 8px; border-radius: 6px; cursor: pointer; font-size: 11px; }
         
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); justify-content: center; align-items: center; z-index: 1000; padding: 15px; }
-        .modal-content { background: #1e293b; width: 100%; max-width: 400px; border-radius: 12px; padding: 20px; max-height: 90vh; overflow-y: auto; text-align: center; }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .close-btn { background: none; border: none; color: #fff; font-size: 18px; cursor: pointer; }
-        input, select, button.action-btn { width: 100%; padding: 10px; margin: 8px 0; border-radius: 8px; border: none; }
-        input, select { background: #0f172a; color: #fff; border: 1px solid #334155; outline: none; }
-        button.action-btn { background: #db2777; color: #fff; font-weight: bold; cursor: pointer; }
-        .admin-item { display: flex; justify-content: space-between; align-items: center; background: #0f172a; padding: 8px 12px; border-radius: 6px; margin-bottom: 8px; font-size: 12px; text-align: left; gap: 8px; }
-        .delete-btn { background: #ef4444; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; }
-        .link-btn { background: #0284c7; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; }
-        .no-video { text-align: center; color: #64748b; padding: 30px; font-size: 14px; }
-        .bot-link-box { text-align: center; margin-bottom: 12px; font-size: 13px; color: #94a3b8; }
-        .bot-link-box a { color: #38bdf8; text-decoration: none; font-weight: bold; }
+        .unlock-btn { width: 100%; background: #1f6feb; color: #fff; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 12px; letter-spacing: 0.5px; transition: 0.2s; }
+        .unlock-btn:hover { background: #388bfd; }
+
+        /* বটম নেভিগেশন বার (স্ক্রিনশটের মতো নিচে হোম, ব্রাউজার, প্রোফাইল, সাপোর্ট) */
+        .bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 450px; background: #161b22; border-top: 1px solid #30363d; display: flex; justify-content: space-around; padding: 8px 0; z-index: 1000; }
+        .nav-item { background: none; border: none; color: #8b949e; font-size: 11px; display: flex; flex-direction: column; align-items: center; cursor: pointer; gap: 3px; }
+        .nav-item span { font-size: 16px; }
+        .nav-item.active-nav { color: #58a6ff; font-weight: bold; }
+
+        /* পপআপ মডাল (Downloads pending / Task completed) */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); justify-content: center; align-items: center; z-index: 2000; padding: 15px; }
+        .modal-content { background: #161b22; width: 100%; max-width: 340px; border-radius: 12px; padding: 20px; border: 1px solid #30363d; text-align: center; }
+        .modal-title { font-size: 15px; font-weight: bold; color: #fff; margin-bottom: 8px; }
+        .modal-text { font-size: 12px; color: #8b949e; margin-bottom: 15px; line-height: 1.4; }
+        .modal-btn-row { display: flex; gap: 10px; }
+        .modal-btn { flex: 1; padding: 9px; border-radius: 6px; border: none; font-weight: bold; cursor: pointer; font-size: 12px; }
+        .close-modal-btn { background: #21262d; color: #8b949e; border: 1px solid #30363d; }
+        .continue-modal-btn { background: #238636; color: #fff; }
+
+        /* অন্যান্য পেজ (Browser, Profile, Support) ভিউ */
+        .page-view { padding: 15px; display: none; }
+        .profile-card { background: #161b22; border: 1px solid #30363d; border-radius: 10px; padding: 15px; text-align: center; }
+        
+        .admin-item { display: flex; justify-content: space-between; align-items: center; background: #21262d; padding: 8px 10px; border-radius: 6px; margin-bottom: 6px; font-size: 11px; border: 1px solid #30363d; text-align: left; }
+        .delete-btn { background: #da3633; color: #fff; border: none; padding: 4px 6px; border-radius: 4px; cursor: pointer; }
+        .link-btn { background: #1f6feb; color: #fff; border: none; padding: 4px 6px; border-radius: 4px; cursor: pointer; }
+        input, select { width: 100%; padding: 8px; margin: 6px 0; background: #0d1117; border: 1px solid #30363d; color: #fff; border-radius: 6px; font-size: 12px; outline: none; }
+        .action-btn { width: 100%; background: #238636; color: #fff; border: none; padding: 8px; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 5px; }
+        .no-video { text-align: center; color: #8b949e; padding: 40px; font-size: 13px; }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <div class="header">
-            <div class="app-title">Unlimited Vids</div>
-            <div class="header-btns">
-                <button class="icon-btn" onclick="shareApp()">🔗 Share</button>
-                <button class="icon-btn" onclick="toggleTheme()">🌓 Theme</button>
-                <button class="icon-btn" onclick="openSettings()">⚙️ Admin</button>
+        <!-- হেডার -->
+        <div class="app-header">
+            <div class="media-hub-title">MEDIA HUB</div>
+            <div class="header-right">
+                <div class="top12-badge">🔥 Top 12</div>
+                <button class="admin-gear" onclick="openSettingsModal()">⚙️</button>
             </div>
         </div>
 
-        <div class="bot-link-box">
-            বট লিংক: <a href="https://t.me/saifulappbot" target="_blank">@saifulappbot</a>
-        </div>
-
-        <!-- নোটিশ বোর্ড -->
-        <div class="notice-board" id="noticeText">
-            📢 নতুন ভিডিও দেখতে চ্যানেলটি পিন করে রাখুন!
-        </div>
-
-        <div class="stats-box">
-            <div class="stat-item">
-                <span>কয়েন</span>
-                <b>50</b>
+        <!-- HOME TAB VIEW -->
+        <div id="homeView">
+            <!-- সার্চ বার -->
+            <div class="search-area">
+                <input type="text" id="searchInput" class="search-box-input" placeholder="Search ID or Paste Link..." onkeyup="renderVideos()">
             </div>
-            <div class="stat-item">
-                <span>ইউজার র‍্যাংক</span>
-                <b>Bronze</b>
+
+            <!-- ফিচারড স্টোরি লিস্ট -->
+            <div class="featured-wrapper" id="featuredContainer"></div>
+
+            <!-- ক্যাটাগরি সেকশন -->
+            <div class="section-title">Browse by Category</div>
+            <div class="categories-container">
+                <button class="cat-tab active-cat" onclick="filterCategory('All', this)">All</button>
+                <button class="cat-tab" onclick="filterCategory('Trending Resources', this)">Trending Resources</button>
+                <button class="cat-tab" onclick="filterCategory('Latest', this)">Latest</button>
+                <button class="cat-tab" onclick="filterCategory('Exclusive', this)">Exclusive</button>
+            </div>
+
+            <!-- ভিডিও লিস্ট -->
+            <div id="videoListContainer">
+                <div class="no-video">লোড হচ্ছে...</div>
             </div>
         </div>
 
-        <!-- সার্চ বার -->
-        <input type="text" id="searchInput" class="search-box" placeholder="🔍 ভিডিও সার্চ করুন..." onkeyup="renderVideos()">
-
-        <!-- ক্যাটাগরি ট্যাব -->
-        <div class="categories-container">
-            <button class="cat-tab active-cat" onclick="filterCategory('All', this)">All</button>
-            <button class="cat-tab" onclick="filterCategory('Favorites', this)">❤️️ Favorites</button>
-            <button class="cat-tab" onclick="filterCategory('Trending', this)">Trending</button>
-            <button class="cat-tab" onclick="filterCategory('Latest', this)">Latest</button>
-            <button class="cat-tab" onclick="filterCategory('Exclusive', this)">Exclusive</button>
+        <!-- BROWSER TAB VIEW -->
+        <div id="browserView" class="page-view">
+            <h3 style="margin-bottom: 10px; font-size: 15px;">🌐 Web Browser</h3>
+            <p style="font-size: 12px; color: #8b949e; margin-bottom: 12px;">এখানে যেকোনো ভিডিও লিংক পেস্ট করে সরাসরি দেখতে পারবেন।</p>
+            <input type="text" placeholder="https://example.com/video...">
+            <button class="action-btn">ওপেন করুন</button>
         </div>
 
-        <!-- ভিডিও লিস্ট কনটেইনার -->
-        <div id="videoListContainer">
-            <div class="no-video">লোড হচ্ছে...</div>
-        </div>
-    </div>
-
-    <!-- চ্যানেল জয়েন শর্তযুক্ত আনলক পপ-আপ মডাল -->
-    <div class="modal" id="unlockModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>⚠ ভিডিও আনলক করতে হবে</h3>
-                <button class="close-btn" onclick="closeUnlockModal()">✕</button>
+        <!-- PROFILE TAB VIEW -->
+        <div id="profileView" class="page-view">
+            <div class="profile-card">
+                <div style="font-size: 35px; margin-bottom: 5px;">👤</div>
+                <h3 id="profileName">User</h3>
+                <p id="profileUsername" style="font-size: 12px; color: #58a6ff; margin-bottom: 10px;">@username</p>
+                <hr style="border:0; border-top:1px solid #30363d; margin: 10px 0;">
+                <p style="font-size: 12px; color: #8b949e;">স্ট্যাটাস: <b style="color: #238636;">Active Member</b></p>
             </div>
-            <p style="font-size: 13px; color: #94a3b8; margin-bottom: 15px; line-height: 1.5;">
-                ফুল ভিডিও দেখতে হলে প্রথমে আমাদের টেলিগ্রাম চ্যানেলে জয়েন করুন, এরপর ভিডিওটি দেখতে পাবেন।
+        </div>
+
+        <!-- SUPPORT TAB VIEW -->
+        <div id="supportView" class="page-view">
+            <h3 style="margin-bottom: 10px; font-size: 15px;">🎧 Support & Help</h3>
+            <p style="font-size: 12px; color: #8b949e; line-height: 1.5; margin-bottom: 15px;">
+                কোনো সমস্যা হলে বা ভিডিও আনলক করতে না পারলে আমাদের সাপোর্ট চ্যানেলে যোগাযোগ করুন।
             </p>
             <a href="https://t.me/saifulappbot" target="_blank">
-                <button class="action-btn" style="background: #2563eb; margin-bottom: 8px;">📢 টেলিগ্রাম চ্যানেলে জয়েন করুন</button>
+                <button class="action-btn" style="background: #1f6feb;">টেলিগ্রাম সাপোর্ট চ্যানেল</button>
             </a>
-            <button class="action-btn" onclick="proceedToVideo()">✅ ভিডিও দেখুন</button>
+        </div>
+
+        <!-- বটম নেভিগেশন বার (স্ক্রিনশটের আদলে তৈরি) -->
+        <div class="bottom-nav">
+            <button class="nav-item active-nav" onclick="switchTab('home', this)">
+                <span>🏠</span> Home
+            </button>
+            <button class="nav-item" onclick="switchTab('browser', this)">
+                <span>🌐</span> Browser
+            </button>
+            <button class="nav-item" onclick="switchTab('profile', this)">
+                <span>👤</span> Profile
+            </button>
+            <button class="nav-item" onclick="switchTab('support', this)">
+                <span>🎧</span> Support
+            </button>
         </div>
     </div>
 
-    <!-- সেটিংস ও অ্যাডমিন প্যানেল মডাল -->
+    <!-- আনলক পেন্ডিং অ্যাড মডাল (স্ক্রিনশটের মতো) -->
+    <div class="modal" id="pendingModal">
+        <div class="modal-content">
+            <div class="modal-title">Media Hub</div>
+            <div class="modal-text">
+                ⚠️ Downloads pending: Proceed now to complete steps!
+            </div>
+            <div class="modal-btn-row">
+                <button class="modal-btn close-modal-btn" onclick="closePendingModal()">CLOSE</button>
+                <button class="modal-btn continue-modal-btn" onclick="proceedUnlockStep()">CONTINUE</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- অ্যাডমিন প্যানেল মডাল -->
     <div class="modal" id="settingsModal">
-        <div class="modal-content" style="text-align: left;">
-            <div class="modal-header">
-                <h3>Admin & Settings</h3>
-                <button class="close-btn" onclick="closeSettings()">✕</button>
+        <div class="modal-content" style="max-height: 85vh; overflow-y: auto; text-align: left;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <h3 style="font-size: 14px;">🛠️ Admin Dashboard</h3>
+                <button onclick="closeSettingsModal()" style="background:none; border:none; color:#fff; font-size:16px; cursor:pointer;">✕</button>
             </div>
-            <p style="font-size: 13px; color: #94a3b8; margin-bottom: 10px;">Telegram User: <b id="tgUser">@User</b></p>
+            <p style="font-size: 11px; color: #8b949e; margin-bottom: 10px;" id="tgUser">Telegram User</p>
             
-            <hr style="border: 0; border-top: 1px solid #334155; margin: 15px 0;">
+            <hr style="border:0; border-top:1px solid #30363d; margin: 10px 0;">
+            
+            <h4 style="font-size: 12px; margin-bottom: 5px;">নতুন ভিডিও যোগ করুন:</h4>
+            <input type="text" id="vidTitle" placeholder="ভিডিও টাইটেল...">
+            <input type="text" id="vidThumb" placeholder="থাম্বনেইল ইমেজ URL...">
+            <input type="text" id="vidLink" placeholder="মূল ভিডিও লিংক...">
+            <select id="vidCategory">
+                <option value="Trending Resources">Trending Resources</option>
+                <option value="Latest">Latest</option>
+                <option value="Exclusive">Exclusive</option>
+            </select>
+            <button class="action-btn" onclick="addNewVideo()">যুক্ত করুন</button>
 
-            <h4>📢 নোটিশ পরিবর্তন করুন</h4>
-            <div style="margin-top: 8px; margin-bottom: 15px;">
-                <input type="text" id="noticeInput" placeholder="নতুন নোটিশ লিখুন...">
-                <button class="action-btn" style="background: #0284c7;" onclick="updateNotice()">নোটিশ আপডেট করুন</button>
-            </div>
-
-            <hr style="border: 0; border-top: 1px solid #334155; margin: 15px 0;">
-
-            <h4>🛠️ Admin Panel (নতুন ভিডিও)</h4>
-            <div style="margin-top: 8px;">
-                <input type="text" id="vidTitle" placeholder="ভিডিও টাইটেল...">
-                <input type="text" id="vidThumb" placeholder="থাম্বনেইল ইমেজ URL...">
-                <input type="text" id="vidLink" placeholder="আনলক লিংক (Telegram/Web)...">
-                <input type="text" id="vidDuration" placeholder="সময়সীমা (যেমন: 2:45 min)">
-                <select id="vidCategory">
-                    <option value="Trending">Trending</option>
-                    <option value="Latest">Latest</option>
-                    <option value="Exclusive">Exclusive</option>
-                </select>
-                <button class="action-btn" onclick="addNewVideo()">নতুন ভিডিও যোগ করুন</button>
-            </div>
-
-            <div style="margin-top: 15px;">
-                <h5>যুক্ত করা ভিডিওসমূহ ও ডাইরেক্ট লিংক:</h5>
-                <div id="adminVideoList" style="margin-top: 8px;"></div>
-            </div>
+            <h4 style="font-size: 12px; margin-top: 15px; margin-bottom: 5px;">ভিডিও লিস্ট ও ডাইরেক্ট লিংক:</h4>
+            <div id="adminVideoList"></div>
         </div>
     </div>
 
     <script>
-        function openSettings() {
+        function openSettingsModal() {
             let pass = prompt('অ্যাডমিন পাসওয়ার্ড দিন:');
             if(pass === 'Lamiya') {
                 document.getElementById('settingsModal').style.display = 'flex';
@@ -486,7 +522,7 @@
                 alert('ভুল পাসওয়ার্ড!');
             }
         }
-        function closeSettings() {
+        function closeSettingsModal() {
             document.getElementById('settingsModal').style.display = 'none';
         }
     </script>
