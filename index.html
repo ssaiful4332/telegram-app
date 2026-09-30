@@ -101,7 +101,7 @@
                     <div class="video-card" id="vid-${id}">
                         <div class="thumbnail-container">
                             <span class="preview-badge">${video.category || 'General'}</span>
-                            <span class="duration-badge">⏱️ ${duration}</span>
+                            <span class="duration-badge">⏱️️ ${duration}</span>
                             ${isHot ? '<span class="hot-badge">🔥 Hot</span>' : ''}
                             <img src="${video.thumb}" alt="Thumbnail" oncontextmenu="return false;">
                         </div>
@@ -178,7 +178,7 @@
             let directLink = baseUrl + '#vid-' + id;
             
             navigator.clipboard.writeText(directLink).then(() => {
-                alert(`সফল! ভিডিওটির ডাইরেক্ট লিংক কপি হয়েছে।\n\nলিংক: ${directLink}`);
+                alert(`সফল! ভিডিওটির ডাইরেক্ট লিংক কপি হয়েছে。\n\nলিংক: ${directLink}`);
             }).catch(err => {
                 prompt("লিংকটি কপি করে নিন:", directLink);
             });
@@ -251,7 +251,7 @@
         window.addNewVideo = function() {
             const title = document.getElementById('vidTitle').value;
             const thumb = document.getElementById('vidThumb').value;
-            const link = document.getElementById('vidLink').value;
+            const link = document.getElementById('vidLink,').value || document.getElementById('vidLink').value;
             const duration = document.getElementById('vidDuration').value || '2:30';
             const category = document.getElementById('vidCategory').value;
 
@@ -280,10 +280,21 @@
             });
         }
 
-        // ভিডিও ডিলিট করা
+        // নির্দিষ্ট ভিডিও ডিলিট করা
         window.deleteVideo = function(id) {
             if(confirm('আপনি কি এই ভিডিওটি ডিলিট করতে চান?')) {
                 remove(ref(db, 'videos/' + id));
+            }
+        }
+
+        // সব ভিডিও একসাথে ডিলিট করার নতুন ফাংশন
+        window.deleteAllVideos = function() {
+            if(confirm('সতর্কবার্তা! আপনি কি সত্যিই ডাটাবেসের আগের সব ভিডিও একসাথে ডিলিট করতে চান? এই প্রক্রিয়াটি আর ফিরিয়ে আনা যাবে না।')) {
+                remove(videosRef).then(() => {
+                    alert('সব ভিডিও সফলভাবে মুছে ফেলা হয়েছে!');
+                }).catch((error) => {
+                    alert('মুছে ফেলতে সমস্যা হয়েছে: ' + error.message);
+                });
             }
         }
 
@@ -479,10 +490,14 @@
                 <button class="action-btn" onclick="addNewVideo()">নতুন ভিডিও যোগ করুন</button>
             </div>
 
-            <div style="margin-top: 15px;">
+            <hr style="border: 0; border-top: 1px solid #334155; margin: 15px 0;">
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                 <h5>যুক্ত করা ভিডিওসমূহ ও আইডি:</h5>
-                <div id="adminVideoList" style="margin-top: 8px;"></div>
+                <!-- আগের সব ভিডিও একসাথে ডিলিট করার বাটন -->
+                <button class="delete-btn" style="font-size: 10px; padding: 5px 8px;" onclick="deleteAllVideos()">🗑️ সব ভিডিও মুছুন</button>
             </div>
+            <div id="adminVideoList" style="margin-top: 8px; max-height: 200px; overflow-y: auto;"></div>
         </div>
     </div>
 
