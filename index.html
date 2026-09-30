@@ -94,10 +94,10 @@
                 let views = video.views || 0;
                 let duration = video.duration || '0:00';
                 let isFav = favoritesList.includes(id);
-                let isHot = views > 10 || likes > 5; // হট বা টপ ব্যাজ লজিক
+                let isHot = views > 10 || likes > 5; 
 
                 videoListContainer.innerHTML += `
-                    <div class="video-card">
+                    <div class="video-card" id="vid-${id}">
                         <div class="thumbnail-container">
                             <span class="preview-badge">${video.category || 'General'}</span>
                             <span class="duration-badge">⏱️ ${duration}</span>
@@ -118,6 +118,26 @@
                     </div>
                 `;
             });
+
+            // পেজ লোড হওয়ার পর URL-এ যদি নির্দিষ্ট ভিডিও আইডি থাকে, তবে সেখানে স্মুথলি স্ক্রোল করবে
+            checkUrlHashAndScroll();
+        }
+
+        // ইউআরএল চেক করে নির্দিষ্ট ভিডিওতে স্ক্রোল এবং অ্যানিমেশন দেওয়ার ফাংশন
+        function checkUrlHashAndScroll() {
+            const hash = window.location.hash; // যেমন: #vid-abc123xyz
+            if (hash) {
+                const targetElement = document.querySelector(hash);
+                if (targetElement) {
+                    setTimeout(() => {
+                        targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        targetElement.classList.add('highlight-flash');
+                        setTimeout(() => {
+                            targetElement.classList.remove('highlight-flash');
+                        }, 3000);
+                    }, 500);
+                }
+            }
         }
 
         // ফেভারিট টগল করার ফাংশন
@@ -143,6 +163,18 @@
             } else {
                 prompt("অ্যাপটির লিংক কপি করুন:", botUrl);
             }
+        }
+
+        // নির্দিষ্ট ভিডিওর ডাইরেক্ট লিংক কপি করার ফাংশন
+        window.copyVideoDirectLink = function(id, title) {
+            let currentBaseUrl = window.location.href.split('#')[0];
+            let directLink = currentBaseUrl + '#vid-' + id;
+            
+            navigator.clipboard.writeText(directLink).then(() => {
+                alert(`"${title.substring(0, 15)}..." ভিডিওটির ডাইরেক্ট লিংক কপি হয়েছে!\n\nলিংকটি: ${directLink}`);
+            }).catch(err => {
+                prompt("নিচের লিংকটি কপি করুন:", directLink);
+            });
         }
 
         // আনলক মডাল ওপেন করা ও ভিউ রিয়েলটাইম আপডেট করা
@@ -183,7 +215,7 @@
             update(videoRef, { views: currentViews });
         }
 
-        // অ্যাডমিন লিস্ট রেন্ডার করা
+        // অ্যাডমিন লিস্ট রেন্ডার করা (যেখানে ডাইরেক্ট লিংক কপি করার বাটন থাকবে)
         function renderAdminList() {
             adminVideoList.innerHTML = '';
             let keys = Object.keys(allVideosData).reverse();
@@ -195,14 +227,20 @@
                 let video = allVideosData[id];
                 adminVideoList.innerHTML += `
                     <div class="admin-item">
-                        <span>${video.title.substring(0, 18)}... (${video.duration || '0:00'})</span>
-                        <button class="delete-btn" onclick="deleteVideo('${id}')">ডিলিট</button>
+                        <div style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 200px;">
+                            <b>${video.title}</b><br>
+                            <span style="font-size:10px; color:#38bdf8;">🔗 ডাইরেক্ট লিংক তৈরি আছে</span>
+                        </div>
+                        <div style="display: flex; gap: 4px;">
+                            <button class="link-btn" onclick="copyVideoDirectLink('${id}', '${video.title.replace(/'/g, "")}')">লিংক</button>
+                            <button class="delete-btn" onclick="deleteVideo('${id}')">ডিলিট</button>
+                        </div>
                     </div>
                 `;
             });
         }
 
-        // নতুন ভিডিও যোগ করা (সময়সীমা সহ)
+        // নতুন ভিডিও যোগ করা
         window.addNewVideo = function() {
             const title = document.getElementById('vidTitle').value;
             const thumb = document.getElementById('vidThumb').value;
@@ -229,7 +267,7 @@
                 document.getElementById('vidThumb').value = '';
                 document.getElementById('vidLink').value = '';
                 document.getElementById('vidDuration').value = '';
-                alert('ভিডিও সফলভাবে যুক্ত করা হয়েছে!');
+                alert('ভিডিও সফলভাবে যুক্ত করা হয়েছে! এখন অ্যাডমিন প্যানেল থেকে লিংক কপি করতে পারবেন।');
             }).catch((error) => {
                 alert('ভিডিও যোগ করতে সমস্যা হয়েছে: ' + error.message);
             });
@@ -263,7 +301,7 @@
 
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; user-select: none; }
-        body { background-color: #0b0f19; color: #ffffff; padding: 10px; display: flex; justify-content: center; transition: 0.3s; }
+        body { background-color: #0b0f19; color: #ffffff; padding: 10px; display: flex; justify-content: center; transition: 0.3s; scroll-behavior: smooth; }
         
         /* লাইট মোড ডিজাইন */
         body.light-theme { background-color: #f1f5f9; color: #0f172a; }
@@ -291,7 +329,18 @@
         .stat-item span { display: block; font-size: 12px; color: #94a3b8; }
         .stat-item b { font-size: 16px; color: #fbbf24; }
         
-        .video-card { background: #1e293b; border-radius: 12px; overflow: hidden; margin-bottom: 15px; border: 1px solid #334155; }
+        .video-card { background: #1e293b; border-radius: 12px; overflow: hidden; margin-bottom: 15px; border: 1px solid #334155; transition: all 0.3s ease; }
+        
+        /* টার্গেটেড ভিডিও হাইলাইট বা ফ্ল্যাশ অ্যানিমেশন */
+        @keyframes glowFlash {
+            0% { border-color: #7c3aed; box-shadow: 0 0 20px #7c3aed; transform: scale(1.02); }
+            50% { border-color: #db2777; box-shadow: 0 0 25px #db2777; transform: scale(1.02); }
+            100% { border-color: #334155; box-shadow: none; transform: scale(1); }
+        }
+        .highlight-flash {
+            animation: glowFlash 3s ease-in-out;
+        }
+
         .thumbnail-container { position: relative; width: 100%; height: 180px; }
         .thumbnail-container img { width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
         .preview-badge { position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.7); color: #fbbf24; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; }
@@ -312,8 +361,9 @@
         input, select, button.action-btn { width: 100%; padding: 10px; margin: 8px 0; border-radius: 8px; border: none; }
         input, select { background: #0f172a; color: #fff; border: 1px solid #334155; outline: none; }
         button.action-btn { background: #db2777; color: #fff; font-weight: bold; cursor: pointer; }
-        .admin-item { display: flex; justify-content: space-between; align-items: center; background: #0f172a; padding: 8px 12px; border-radius: 6px; margin-bottom: 8px; font-size: 13px; text-align: left; }
-        .delete-btn { background: #ef4444; color: #fff; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
+        .admin-item { display: flex; justify-content: space-between; align-items: center; background: #0f172a; padding: 8px 12px; border-radius: 6px; margin-bottom: 8px; font-size: 12px; text-align: left; gap: 8px; }
+        .delete-btn { background: #ef4444; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; }
+        .link-btn { background: #0284c7; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; }
         .no-video { text-align: center; color: #64748b; padding: 30px; font-size: 14px; }
         .bot-link-box { text-align: center; margin-bottom: 12px; font-size: 13px; color: #94a3b8; }
         .bot-link-box a { color: #38bdf8; text-decoration: none; font-weight: bold; }
@@ -420,7 +470,7 @@
             </div>
 
             <div style="margin-top: 15px;">
-                <h5>যুক্ত করা ভিডিওসমূহ:</h5>
+                <h5>যুক্ত করা ভিডিওসমূহ ও ডাইরেক্ট লিংক:</h5>
                 <div id="adminVideoList" style="margin-top: 8px;"></div>
             </div>
         </div>
