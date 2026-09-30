@@ -1,3 +1,4 @@
+Ry Dg:
 <!DOCTYPE html>
 <html lang="bn">
 <head>
@@ -5,9 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>UNLIMITED VIDS</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <!-- Firebase App (compat) -->
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-    <!-- Firebase Database (compat) -->
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
     <style>
         :root {
@@ -42,7 +41,6 @@
             margin-bottom: 12px;
             border: 1px solid var(--border-color);
             box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-            transition: background 0.3s ease, border-color 0.3s ease;
         }
         .header h2 {
             margin: 0;
@@ -64,7 +62,6 @@
             font-size: 11px;
             cursor: pointer;
             font-weight: bold;
-            transition: all 0.2s ease-in-out;
         }
         .announcement-banner {
             background: linear-gradient(135deg, var(--btn-color), var(--accent-color));
@@ -77,7 +74,6 @@
             justify-content: space-between;
             align-items: center;
             font-weight: bold;
-            transition: background 0.3s ease;
         }
         .dashboard-grid {
             display: grid;
@@ -92,7 +88,6 @@
             border-radius: 10px;
             text-align: center;
             font-size: 12px;
-            transition: background 0.3s ease, border-color 0.3s ease;
         }
         .dash-card b {
             display: block;
@@ -114,7 +109,6 @@
             font-weight: bold;
             cursor: pointer;
             font-size: 12px;
-            transition: all 0.2s ease-in-out;
         }
         .spin-btn { background: #ff9800 !important; }
         .leaderboard-btn { background: #00bcd4 !important; }
@@ -128,11 +122,11 @@
             background: var(--card-bg);
             border: 1px solid var(--border-color);
             border-radius: 10px;
-            color: var(--text-color);
+
+color: var(--text-color);
             font-size: 14px;
             box-sizing: border-box;
             outline: none;
-            transition: border-color 0.3s ease;
         }
         .categories {
             display: flex;
@@ -153,26 +147,13 @@
             border-radius: 20px;
             font-size: 13px;
             cursor: pointer;
-            transition: all 0.2s ease-in-out;
+            transition: 0.3s;
         }
         .cat-btn.active, .cat-btn:hover {
             background: var(--btn-color);
             color: white;
             border-color: var(--btn-color);
         }
-
-        /* অ্যানিমেশন ও ট্রানজিশন অংশ */
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(15px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
         .card {
             background: var(--card-bg);
             border-radius: 14px;
@@ -180,15 +161,7 @@
             margin-bottom: 15px;
             border: 1px solid var(--border-color);
             box-shadow: 0 4px 15px rgba(0,0,0,0.4);
-            animation: fadeInUp 0.4s ease-out forwards;
-            transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.3s ease;
         }
-        .card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 25px rgba(156, 39, 176, 0.25);
-            border-color: var(--accent-color);
-        }
-
         .card-img-container {
             position: relative;
             width: 100%;
@@ -199,10 +172,6 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            transition: transform 0.3s ease;
-        }
-        .card:hover .card-img {
-            transform: scale(1.03);
         }
         .preview-badge {
             position: absolute;
@@ -237,10 +206,6 @@
             padding: 6px 10px;
             border-radius: 50%;
             cursor: pointer;
-            transition: transform 0.2s ease;
-        }
-        .fav-icon:active {
-            transform: scale(0.85);
         }
         .fav-icon.active {
             color: #ff4444;
@@ -273,10 +238,6 @@
             display: flex;
             align-items: center;
             gap: 5px;
-            transition: transform 0.2s ease;
-        }
-        .like-btn:active {
-            transform: scale(0.9);
         }
         .like-btn.liked {
             color: #ff4444;
@@ -297,7 +258,8 @@
             background: linear-gradient(135deg, var(--btn-color), var(--accent-color));
             color: white;
             border: none;
-            padding: 10px;
+
+padding: 10px;
             border-radius: 8px;
             font-size: 13px;
             font-weight: bold;
@@ -306,12 +268,7 @@
             align-items: center;
             justify-content: center;
             gap: 6px;
-            transition: all 0.2s ease-in-out;
         }
-        button:active, .unlock-btn:active, .action-btn:active {
-            transform: scale(0.96);
-        }
-
         #no-result {
             text-align: center;
             color: #8b949e;
@@ -354,18 +311,6 @@
             justify-content: center;
             align-items: center;
         }
-
-        @keyframes modalScale {
-            from {
-                opacity: 0;
-                transform: scale(0.85);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
-        }
-
         .modal-content {
             background-color: var(--card-bg);
             padding: 20px;
@@ -377,7 +322,6 @@
             box-shadow: 0 6px 20px rgba(0,0,0,0.6);
             max-height: 85vh;
             overflow-y: auto;
-            animation: modalScale 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
         }
         .close-modal {
             float: right;
@@ -385,7 +329,6 @@
             font-weight: bold;
             cursor: pointer;
             color: #8b949e;
-            transition: color 0.2s ease;
         }
         .close-modal:hover { color: #fff; }
         .comment-input, .admin-input {
@@ -434,7 +377,6 @@
             border-radius: 6px;
             cursor: pointer;
             font-weight: bold;
-            transition: transform 0.2s ease;
         }
         .theme-picker-row {
             display: flex;
@@ -443,16 +385,13 @@
             margin-top: 6px;
         }
         .color-bubble {
-            width: 24px;
+
+width: 24px;
             height: 24px;
             border-radius: 50%;
             cursor: pointer;
             border: 2px solid white;
             display: inline-block;
-            transition: transform 0.2s ease;
-        }
-        .color-bubble:hover {
-            transform: scale(1.15);
         }
         .manage-item {
             display: flex;
@@ -496,7 +435,7 @@
             <b id="userCoins" style="color: #ffeb3b;">50</b>
         </div>
         <div class="dash-card">
-            <span>🎖️ ইউজার র‍্যাংক</span>
+            <span>🎖️ ইউজার র‍‍্যাংক</span>
             <b id="userRank" style="color: #00e5ff;">Bronze</b>
         </div>
         <div class="dash-card">
@@ -546,7 +485,8 @@
         <div class="modal-content">
             <span class="close-modal" onclick="closeSpinModal()">&#10005;</span>
             <h3 style="color: #ff9800; margin-top: 5px; font-size: 18px;">🎡 Daily Lucky Spin</h3>
-            <p style="font-size: 13px; color: #b0bec5; margin: 10px 0;">চাকা ঘুরিয়ে প্রতিদিন ফ্রি কয়েন জিতে নিন!</p>
+
+<p style="font-size: 13px; color: #b0bec5; margin: 10px 0;">চাকা ঘুরিয়ে প্রতিদিন ফ্রি কয়েন জিতে নিন!</p>
             <div id="spinBox" style="font-size: 26px; padding: 20px; background: var(--border-color); border-radius: 10px; margin-bottom: 12px; font-weight: bold; color: #ffeb3b;">🎁 ?</div>
             <button id="spinActionBtn" onclick="executeSpin()" style="width: 100%; background: #ff9800; color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer;">SPIN NOW</button>
         </div>
@@ -608,7 +548,8 @@
 
     <!-- অ্যাডমিন প্যানেল মডাল -->
     <div id="adminModal" class="modal">
-        <div class="modal-content">
+
+<div class="modal-content">
             <span class="close-modal" onclick="closeAdminModal()">&#10005;</span>
             <h3 style="color: #e91e63; margin-top: 5px; font-size: 18px; margin-bottom: 12px;">🔐 Admin Panel</h3>
             <input type="text" id="adminVidTitle" class="admin-input" placeholder="ভিডিও টাইটেল">
@@ -617,331 +558,4 @@
             <button onclick="addNewVideo()" style="width: 100%; background: #e91e63; color: white; border: none; padding: 10px; border-radius: 6px; font-weight: bold; cursor: pointer; margin-bottom: 15px;">নতুন ভিডিও যোগ করুন</button>
             <div id="adminVideoManageList" style="max-height: 120px; overflow-y: auto;"></div>
         </div>
-    </div>
-
-    <!-- স্ক্রিপ্ট লজিক -->
-    <script>
-        const firebaseConfig = {
-            databaseURL: "https://saifulappbot-default-rtdb.firebaseio.com/"
-        };
-        
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
-        }
-        const db = firebase.database();
-
-        let tg = window.Telegram.WebApp;
-        tg.expand();
-
-        let currentUser = tg.initDataUnsafe?.user || { id: 12345, first_name: "Saiful Islam", username: "SAIFUL676" };
-
-        let videosData = [];
-        let unlockedVideos = JSON.parse(localStorage.getItem('unlocked_videos') || '[]');
-        let favorites = JSON.parse(localStorage.getItem('fav_videos') || '[]');
-        let userCoins = parseInt(localStorage.getItem('user_coins') || '50');
-        
-        let currentFilter = 'all';
-        let activeVideoId = null;
-        let activeVideoLink = '';
-        let currentAdProgress = 0;
-
-        document.getElementById('tgUserName').innerText = `${currentUser.first_name} (@${currentUser.username || 'user'})`;
-        document.getElementById('userCoins').innerText = userCoins;
-        document.getElementById('unlockedCount').innerText = unlockedVideos.length;
-
-        window.onload = function() {
-            fetchDatabaseData();
-        };
-
-        function fetchDatabaseData() {
-            db.ref('videos').on('value', snapshot => {
-                const data = snapshot.val();
-                videosData = [];
-                if(data) {
-                    Object.keys(data).forEach(key => {
-                        videosData.push({ id: key, ...data[key] });
-                    });
-                }
-                renderVideos();
-                renderAdminManageList();
-            }, error => {
-                console.error("Firebase Read Error:", error);
-                showToast("ডাটা লোড করতে সমস্যা হচ্ছে!");
-            });
-        }
-
-        function showToast(text) {
-            let t = document.getElementById("toast");
-            t.innerText = text;
-            t.className = "show";
-            setTimeout(() => { t.className = t.className.replace("show", ""); }, 2300);
-        }
-
-        function renderVideos() {
-            let container = document.getElementById('card-container');
-            container.innerHTML = '';
-            let searchText = document.getElementById('searchInput').value.toLowerCase();
-            
-            let filtered = videosData.filter(v => {
-                let matchSearch = v.title && v.title.toLowerCase().includes(searchText);
-                if(!matchSearch) return false;
-                if(currentFilter === 'favorites') return favorites.includes(v.id);
-                if(currentFilter === 'liked') return (v.likes || 0) > 0;
-                return true;
-            });
-
-            if(filtered.length === 0) {
-                document.getElementById('no-result').style.display = 'block';
-                return;
-            } else {
-                document.getElementById('no-result').style.display = 'none';
-            }
-
-            filtered.forEach(v => {
-                let isUnlocked = unlockedVideos.includes(v.id);
-                let isFav = favorites.includes(v.id);
-                let likesCount = v.likes || 0;
-                let isLiked = v.likedUsers && v.likedUsers[currentUser.id];
-
-                let html = `
-                    <div class="card">
-                        <div class="card-img-container">
-                            <img class="card-img" src="${v.image}" alt="thumb">
-                            <div class="preview-badge">✨ Exclusive</div>
-                            <div class="duration-badge">⏱️ 05:20</div>
-                            <button class="fav-icon ${isFav ? 'active' : ''}" onclick="toggleFavorite('${v.id}')">&#9733;</button>
-                        </div>
-                        <div class="card-body">
-                            <div class="card-title">${v.title}</div>
-                            <div class="card-footer-info">
-                                <button class="like-btn ${isLiked ? 'liked' : ''}" onclick="handleLike('${v.id}')">👍 <span>${likesCount}</span> Likes</button>
-                                <span>👁️ ${v.views || 120} Views</span>
-                            </div>
-                            <button class="comment-section-btn" onclick="openCommentModal('${v.id}')">💬 কমেন্ট দেখুন ও লিখুন</button>
-                            <button class="unlock-btn" onclick="handleVideoAccess('${v.id}', '${v.link}')">
-                                ${isUnlocked ? '▶ WATCH NOW (UNLOCKED)' : '🔒 UNLOCK FULL VIDEO'}
-                            </button>
-                        </div>
-                    </div>
-                `;
-                container.innerHTML += html;
-            });
-        }
-
-        function filterCategory(cat, btn) {
-            currentFilter = cat;
-            document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            renderVideos();
-        }
-
-        function filterContent() {
-            renderVideos();
-        }
-
-        function toggleFavorite(id) {
-            if(favorites.includes(id)) {
-                favorites = favorites.filter(item => item !== id);
-                showToast("ফেভারিট থেকে সরানো হয়েছে!");
-            } else {
-                favorites.push(id);
-                showToast("ফেভারিটে যোগ করা হয়েছে!");
-            }
-            localStorage.setItem('fav_videos', JSON.stringify(favorites));
-            renderVideos();
-        }
-
-        function handleLike(id) {
-            let vidRef = db.ref('videos/' + id);
-            vidRef.once('value', snapshot => {
-                let val = snapshot.val() || {};
-                let likedUsers = val.likedUsers || {};
-                let likes = val.likes || 0;
-
-                if(likedUsers[currentUser.id]) {
-                    likes = Math.max(0, likes - 1);
-                    delete likedUsers[currentUser.id];
-                    showToast("লাইক তুলে নেওয়া হয়েছে!");
-                } else {
-                    likes += 1;
-                    likedUsers[currentUser.id] = true;
-                    showToast("লাইক দেওয়া হয়েছে!");
-                }
-                vidRef.update({ likes: likes, likedUsers: likedUsers });
-            });
-        }
-
-        function handleVideoAccess(id, link) {
-            activeVideoId = id;
-            activeVideoLink = link;
-            if(unlockedVideos.includes(id)) {
-                window.open(link, '_blank');
-                db.ref('videos/' + id + '/views').transaction(v => (v || 0) + 1);
-            } else {
-                currentAdProgress = 0;
-                updateAdModalUI();
-                document.getElementById('adModal').style.display = 'flex';
-            }
-        }
-
-        function closeModal() {
-            document.getElementById('adModal').style.display = 'none';
-        }
-
-        function updateAdModalUI() {
-            document.getElementById('adStatusText').innerHTML = `Progress: <b style="color: #ffeb3b;">${currentAdProgress}/3</b>`;
-            let btn = document.getElementById('watchAdBtn');
-            if(currentAdProgress < 3) {
-                btn.innerText = `🔓 WATCH AD ${currentAdProgress + 1}/3`;
-            } else {
-                btn.innerText = `🎉 UNLOCK NOW!`;
-            }
-        }
-
-        function watchNextAd() {
-            if(currentAdProgress < 3) {
-                currentAdProgress++;
-                updateAdModalUI();
-                showToast(`বিজ্ঞাপন ${currentAdProgress} দেখা সম্পন্ন হয়েছে!`);
-            }
-            if(currentAdProgress >= 3) {
-                unlockedVideos.push(activeVideoId);
-                localStorage.setItem('unlocked_videos', JSON.stringify(unlockedVideos));
-                document.getElementById('unlockedCount').innerText = unlockedVideos.length;
-                closeModal();
-                showToast("ভিডিও সফলভাবে আনলক হয়েছে!");
-                renderVideos();
-                window.open(activeVideoLink, '_blank');
-            }
-        }
-
-        function openSpinModal() { document.getElementById('spinModal').style.display = 'flex'; }
-        function closeSpinModal() { document.getElementById('spinModal').style.display = 'none'; }
-        function executeSpin() {
-            let rewards = [10, 20, 50, 100, 5, 25];
-            let won = rewards[Math.floor(Math.random() * rewards.length)];
-            document.getElementById('spinBox').innerText = `🎉 +${won} Coins!`;
-            userCoins += won;
-            localStorage.setItem('user_coins', userCoins);
-            document.getElementById('userCoins').innerText = userCoins;
-            showToast(`অভিনন্দন! আপনি ${won} কয়েন জিতেছেন।`);
-        }
-
-        function openLeaderboardModal() { document.getElementById('leaderboardModal').style.display = 'flex'; }
-        function closeLeaderboardModal() { document.getElementById('leaderboardModal').style.display = 'none'; }
-        
-        function openSettingsModal() { document.getElementById('settingsModal').style.display = 'flex'; }
-        function closeSettingsModal() { document.getElementById('settingsModal').style.display = 'none'; }
-        
-        function toggleTheme() {
-            document.body.classList.toggle('light-theme');
-        }
-
-        function setThemeAccent(primary, btnDark) {
-            document.documentElement.style.setProperty('--accent-color', primary);
-            document.documentElement.style.setProperty('--btn-color', btnDark);
-            showToast("থিম পরিবর্তন করা হয়েছে!");
-        }
-
-        function shareApp() {
-            let shareText = encodeURIComponent("🔥 অসাধারণ সব ভিডিও দেখতে এই টেলিগ্রাম অ্যাপটিতে জয়েন করুন!");
-            let shareUrl = `https://t.me/share/url?url=https://t.me/${currentUser.username || 'saifulappbot'}&text=${shareText}`;
-            window.open(shareUrl, '_blank');
-        }
-
-        function openCommentModal(id) {
-            activeVideoId = id;
-            document.getElementById('commentModal').style.display = 'flex';
-            loadComments(id);
-        }
-        function closeCommentModal() { document.getElementById('commentModal').style.display = 'none'; }
-
-        function loadComments(id) {
-            let list = document.getElementById('commentList');
-            list.innerHTML = 'লোড হচ্ছে...';
-            db.ref('comments/' + id).on('value', snapshot => {
-                list.innerHTML = '';
-                let data = snapshot.val();
-                if(data) {
-                    Object.values(data).forEach(c => {
-                        list.innerHTML += `<div class="comment-item"><b>${c.name}:</b> ${c.text}</div>`;
-                    });
-                } else {
-                    list.innerHTML = '<div style="color: #8b949e;">কোনো কমেন্ট নেই। প্রথম কমেন্ট করুন!</div>';
-                }
-            });
-        }
-
-        function postComment() {
-            let text = document.getElementById('commentInputBox').value.trim();
-            if(!text) return;
-            db.ref('comments/' + activeVideoId).push({
-                name: currentUser.first_name,
-                text: text
-            });
-            document.getElementById('commentInputBox').value = '';
-            showToast("কমেন্ট পোস্ট করা হয়েছে!");
-        }
-
-        function promptAdminPassword() {
-            let pass = prompt("অ্যাডমিন পাসওয়ার্ড দিন:");
-            if(pass === "Lamiya" || pass === "admin") {
-                closeSettingsModal();
-                document.getElementById('adminModal').style.display = 'flex';
-            } else if(pass !== null) {
-                showToast("ভুল পাসওয়ার্ড!");
-            }
-        }
-        function closeAdminModal() { document.getElementById('adminModal').style.display = 'none'; }
-
-        function addNewVideo() {
-            let title = document.getElementById('adminVidTitle').value.trim();
-            let image = document.getElementById('adminVidImage').value.trim();
-            let link = document.getElementById('adminVidLink').value.trim();
-
-            if(title && image && link) {
-                let newVideoData = {
-                    title: title,
-                    image: image,
-                    link: link,
-                    views: 120,
-                    likes: 0
-                };
-
-                db.ref('videos').push(newVideoData).then(() => {
-                    showToast("সফলভাবে নতুন ভিডিও যোগ করা হয়েছে!");
-                    document.getElementById('adminVidTitle').value = '';
-                    document.getElementById('adminVidImage').value = '';
-                    document.getElementById('adminVidLink').value = '';
-                }).catch((error) => {
-                    console.error("Firebase Write Error:", error);
-                    showToast("ত্রুটি: " + error.message);
-                });
-            } else {
-                showToast("দয়া করে সব ফিল্ড পূরণ করুন!");
-            }
-        }
-
-        function renderAdminManageList() {
-            let list = document.getElementById('adminVideoManageList');
-            list.innerHTML = '';
-            videosData.forEach(v => {
-                list.innerHTML += `
-                    <div class="manage-item">
-                        <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px;">${v.title}</span>
-                        <button onclick="deleteVideo('${v.id}')">Delete</button>
-                    </div>
-                `;
-            });
-        }
-
-        function deleteVideo(id) {
-            if(confirm("ভিডিওটি ডিলিট করতে চান?")) {
-                db.ref('videos/' + id).remove().then(() => {
-                    showToast("ভিডিও ডিলিট করা হয়েছে!");
-                });
-            }
-        }
-    </script>
-</body>
-</html>
+    </di
