@@ -53,15 +53,14 @@
             videoListContainer.innerHTML = '';
             const searchQuery = searchInput.value.toLowerCase();
             
-            let filteredKeys = Object.keys(allVideosData).filter(id => {
+            let keys = Object.keys(allVideosData).reverse(); // নতুন ভিডিও আগে দেখানোর জন্য রভার্স করা হলো
+            
+            let filteredKeys = keys.filter(id => {
                 let video = allVideosData[id];
                 let matchesSearch = video.title.toLowerCase().includes(searchQuery);
                 let matchesCategory = currentCategory === 'All' || video.category === currentCategory;
                 return matchesSearch && matchesCategory;
             });
-
-            // নতুন যোগ করা ভিডিও যেন সবসময় উপরে থাকে, তাই রিভার্স করা হলো
-            filteredKeys.reverse();
 
             if (filteredKeys.length === 0) {
                 videoListContainer.innerHTML = '<div class="no-video">কোনো ভিডিও পাওয়া যায়নি।</div>';
@@ -116,15 +115,14 @@
             update(videoRef, { views: currentViews });
         }
 
-        // অ্যাডমিন লিস্ট রেন্ডার করা (এডমিন প্যানেলেও নতুনগুলো উপরে দেখানোর জন্য reverse করা হলো)
+        // অ্যাডমিন লিস্ট রেন্ডার করা
         function renderAdminList() {
             adminVideoList.innerHTML = '';
-            let keys = Object.keys(allVideosData);
+            let keys = Object.keys(allVideosData).reverse();
             if(keys.length === 0) {
                 adminVideoList.innerHTML = '<div style="color:#64748b; font-size:12px;">কোনো ভিডিও নেই</div>';
                 return;
             }
-            keys.reverse();
             keys.forEach((id) => {
                 let video = allVideosData[id];
                 adminVideoList.innerHTML += `
@@ -182,7 +180,6 @@
         .app-title { font-size: 18px; font-weight: bold; }
         .icon-btn { background: #1e293b; border: none; color: #fff; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 13px; }
         
-        /* সার্চ বার ও ক্যাটাগরি স্টাইল */
         .search-box { width: 100%; padding: 10px; background: #1e293b; border: 1px solid #334155; border-radius: 8px; color: #fff; margin-bottom: 12px; font-size: 14px; outline: none; }
         .categories-container { display: flex; gap: 8px; overflow-x: auto; margin-bottom: 15px; padding-bottom: 5px; }
         .categories-container::-webkit-scrollbar { display: none; }
