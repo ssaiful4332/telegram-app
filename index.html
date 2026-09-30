@@ -101,7 +101,7 @@
                     <div class="video-card" id="vid-${id}">
                         <div class="thumbnail-container">
                             <span class="preview-badge">${video.category || 'General'}</span>
-                            <span class="duration-badge">⏱️️ ${duration}</span>
+                            <span class="duration-badge">⏱️ ${duration}</span>
                             ${isHot ? '<span class="hot-badge">🔥 Hot</span>' : ''}
                             <img src="${video.thumb}" alt="Thumbnail" oncontextmenu="return false;">
                         </div>
@@ -178,7 +178,7 @@
             let directLink = baseUrl + '#vid-' + id;
             
             navigator.clipboard.writeText(directLink).then(() => {
-                alert(`সফল! ভিডিওটির ডাইরেক্ট লিংক কপি হয়েছে。\n\nলিংক: ${directLink}`);
+                alert(`সফল! ভিডিওটির ডাইরেক্ট লিংক কপি হয়েছে।\n\nলিংক: ${directLink}`);
             }).catch(err => {
                 prompt("লিংকটি কপি করে নিন:", directLink);
             });
@@ -222,19 +222,19 @@
             update(videoRef, { views: currentViews });
         }
 
-        // অ্যাডমিন লিস্ট রেন্ডার করা
+        // অ্যাডমিন লিস্ট রেন্ডার করা (যেখানে আলাদা আলাদা বা একসাথে ডিলিট করার অপশন আছে)
         function renderAdminList() {
             adminVideoList.innerHTML = '';
             let keys = Object.keys(allVideosData).reverse();
             if(keys.length === 0) {
-                adminVideoList.innerHTML = '<div style="color:#64748b; font-size:12px;">কোনো ভিডিও নেই</div>';
+                adminVideoList.innerHTML = '<div style="color:#64748b; font-size:12px; text-align:center; padding: 10px;">কোনো ভিডিও নেই</div>';
                 return;
             }
             keys.forEach((id) => {
                 let video = allVideosData[id];
                 adminVideoList.innerHTML += `
                     <div class="admin-item">
-                        <div style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 170px;">
+                        <div style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 160px;">
                             <b>${video.title}</b><br>
                             <span style="font-size:10px; color:#38bdf8;">ID: ${id}</span>
                         </div>
@@ -251,7 +251,7 @@
         window.addNewVideo = function() {
             const title = document.getElementById('vidTitle').value;
             const thumb = document.getElementById('vidThumb').value;
-            const link = document.getElementById('vidLink,').value || document.getElementById('vidLink').value;
+            const link = document.getElementById('vidLink').value;
             const duration = document.getElementById('vidDuration').value || '2:30';
             const category = document.getElementById('vidCategory').value;
 
@@ -280,14 +280,14 @@
             });
         }
 
-        // নির্দিষ্ট ভিডিও ডিলিট করা
+        // নির্দিষ্ট ভিডিও আলাদাভাবে ডিলিট করা
         window.deleteVideo = function(id) {
             if(confirm('আপনি কি এই ভিডিওটি ডিলিট করতে চান?')) {
                 remove(ref(db, 'videos/' + id));
             }
         }
 
-        // সব ভিডিও একসাথে ডিলিট করার নতুন ফাংশন
+        // আগের সব ভিডিও একসাথে ডিলিট করা
         window.deleteAllVideos = function() {
             if(confirm('সতর্কবার্তা! আপনি কি সত্যিই ডাটাবেসের আগের সব ভিডিও একসাথে ডিলিট করতে চান? এই প্রক্রিয়াটি আর ফিরিয়ে আনা যাবে না।')) {
                 remove(videosRef).then(() => {
@@ -494,8 +494,8 @@
 
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                 <h5>যুক্ত করা ভিডিওসমূহ ও আইডি:</h5>
-                <!-- আগের সব ভিডিও একসাথে ডিলিট করার বাটন -->
-                <button class="delete-btn" style="font-size: 10px; padding: 5px 8px;" onclick="deleteAllVideos()">🗑️ সব ভিডিও মুছুন</button>
+                <!-- একসাথে সব ভিডিও ডিলিট করার বাটন -->
+                <button class="delete-btn" style="font-size: 10px; padding: 5px 8px;" onclick="deleteAllVideos()">🗑️ সব ডিলিট (All)</button>
             </div>
             <div id="adminVideoList" style="margin-top: 8px; max-height: 200px; overflow-y: auto;"></div>
         </div>
