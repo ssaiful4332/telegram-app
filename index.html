@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>UNLIMITED VIDS</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <!-- Firebase App (compat) -->
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <!-- Firebase Database (compat) -->
     <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
     <style>
         :root {
@@ -556,10 +558,15 @@
 
     <!-- স্ক্রিপ্ট লজিক -->
     <script>
+        // ফায়ারবেস কনফিগারেশন
         const firebaseConfig = {
             databaseURL: "https://saifulappbot-default-rtdb.firebaseio.com/"
         };
-        firebase.initializeApp(firebaseConfig);
+        
+        // ফায়ারবেস চেক ও ইনিশিয়ালাইজেশন
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
         const db = firebase.database();
 
         let tg = window.Telegram.WebApp;
@@ -596,6 +603,9 @@
                 }
                 renderVideos();
                 renderAdminManageList();
+            }, error => {
+                console.error("Firebase Read Error:", error);
+                showToast("ডাটা লোড করতে সমস্যা হচ্ছে!");
             });
         }
 
@@ -843,6 +853,7 @@
                     document.getElementById('adminVidImage').value = '';
                     document.getElementById('adminVidLink').value = '';
                 }).catch((error) => {
+                    console.error("Firebase Write Error:", error);
                     showToast("ত্রুটি: " + error.message);
                 });
             } else {
