@@ -38,7 +38,7 @@
         const noticeText = document.getElementById('noticeText');
 
         let allVideosData = {};
-        let currentCategory = 'All'; // 'All', 'Favorites', বা নির্দিষ্ট ক্যাটাগরি
+        let currentCategory = 'All'; 
         let pendingUnlockLink = '';
         let favoritesList = JSON.parse(localStorage.getItem('my_favorites') || '[]');
 
@@ -91,21 +91,23 @@
             filteredKeys.forEach((id) => {
                 let video = allVideosData[id];
                 let likes = video.likes || 0;
-                let views = video.views || 1200;
+                let views = video.views || 0;
+                let duration = video.duration || '0:00';
                 let isFav = favoritesList.includes(id);
-                let isHot = views > 1250 || likes > 5; // হট বা টপ ব্যাজ লজিক
+                let isHot = views > 10 || likes > 5; // হট বা টপ ব্যাজ লজিক
 
                 videoListContainer.innerHTML += `
                     <div class="video-card">
                         <div class="thumbnail-container">
                             <span class="preview-badge">${video.category || 'General'}</span>
+                            <span class="duration-badge">⏱️ ${duration}</span>
                             ${isHot ? '<span class="hot-badge">🔥 Hot</span>' : ''}
                             <img src="${video.thumb}" alt="Thumbnail" oncontextmenu="return false;">
                         </div>
                         <div class="video-info">
                             <div class="video-title">${video.title}</div>
                             <div class="video-meta">
-                                <span>👁️ ${views} Views</span>
+                                <span>👁️ <span id="view-count-${id}">${views}</span> Views</span>
                                 <div style="display: flex; gap: 6px; align-items: center;">
                                     <button class="fav-btn-action" onclick="toggleFavorite('${id}')">${isFav ? '❤️' : '🤍'}</button>
                                     <button class="like-btn-action" onclick="handleLike('${id}')">❤️ <span id="like-count-${id}">${likes}</span></button>
@@ -143,7 +145,7 @@
             }
         }
 
-        // আনলক মডাল ওপেন করা
+        // আনলক মডাল ওপেন করা ও ভিউ রিয়েলটাইম আপডেট করা
         window.openUnlockModal = function(link, id) {
             pendingUnlockLink = link;
             incrementView(id);
@@ -167,17 +169,17 @@
             renderVideos();
         }
 
-        // লাইক বাড়ানোর ফাংশন
+        // রিয়েলটাইম লাইক বাড়ানোর ফাংশন
         window.handleLike = function(id) {
             let videoRef = ref(db, 'videos/' + id);
             let currentLikes = (allVideosData[id].likes || 0) + 1;
             update(videoRef, { likes: currentLikes });
         }
 
-        // ভিউ বাড়ানোর ফাংশন
+        // রিয়েলটাইম ভিউ বাড়ানোর ফাংশন
         window.incrementView = function(id) {
             let videoRef = ref(db, 'videos/' + id);
-            let currentViews = (allVideosData[id].views || 1200) + 1;
+            let currentViews = (allVideosData[id].views || 0) + 1;
             update(videoRef, { views: currentViews });
         }
 
@@ -193,18 +195,19 @@
                 let video = allVideosData[id];
                 adminVideoList.innerHTML += `
                     <div class="admin-item">
-                        <span>${video.title.substring(0, 20)}...</span>
+                        <span>${video.title.substring(0, 18)}... (${video.duration || '0:00'})</span>
                         <button class="delete-btn" onclick="deleteVideo('${id}')">ডিলিট</button>
                     </div>
                 `;
             });
         }
 
-        // নতুন ভিডিও যোগ করা
+        // নতুন ভিডিও যোগ করা (সময়সীমা সহ)
         window.addNewVideo = function() {
             const title = document.getElementById('vidTitle').value;
             const thumb = document.getElementById('vidThumb').value;
             const link = document.getElementById('vidLink').value;
+            const duration = document.getElementById('vidDuration').value || '2:30';
             const category = document.getElementById('vidCategory').value;
 
             if(!title || !thumb || !link) {
@@ -216,14 +219,16 @@
                 title: title,
                 thumb: thumb,
                 link: link,
+                duration: duration,
                 category: category,
                 likes: 0,
-                views: 1200,
+                views: 0,
                 createdAt: Date.now()
             }).then(() => {
                 document.getElementById('vidTitle').value = '';
                 document.getElementById('vidThumb').value = '';
                 document.getElementById('vidLink').value = '';
+                document.getElementById('vidDuration').value = '';
                 alert('ভিডিও সফলভাবে যুক্ত করা হয়েছে!');
             }).catch((error) => {
                 alert('ভিডিও যোগ করতে সমস্যা হয়েছে: ' + error.message);
@@ -290,6 +295,7 @@
         .thumbnail-container { position: relative; width: 100%; height: 180px; }
         .thumbnail-container img { width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
         .preview-badge { position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.7); color: #fbbf24; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; }
+        .duration-badge { position: absolute; bottom: 10px; right: 10px; background: rgba(0,0,0,0.8); color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: bold; }
         .hot-badge { position: absolute; top: 10px; right: 10px; background: #ef4444; color: #fff; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; }
         
         .video-info { padding: 12px; }
@@ -348,7 +354,7 @@
         <!-- সার্চ বার -->
         <input type="text" id="searchInput" class="search-box" placeholder="🔍 ভিডিও সার্চ করুন..." onkeyup="renderVideos()">
 
-        <!-- ক্যাটাগরি ট্যাব (ফেভারিট সহ) -->
+        <!-- ক্যাটাগরি ট্যাব -->
         <div class="categories-container">
             <button class="cat-tab active-cat" onclick="filterCategory('All', this)">All</button>
             <button class="cat-tab" onclick="filterCategory('Favorites', this)">❤️ Favorites</button>
@@ -404,6 +410,7 @@
                 <input type="text" id="vidTitle" placeholder="ভিডিও টাইটেল...">
                 <input type="text" id="vidThumb" placeholder="থাম্বনেইল ইমেজ URL...">
                 <input type="text" id="vidLink" placeholder="আনলক লিংক (Telegram/Web)...">
+                <input type="text" id="vidDuration" placeholder="সময়সীমা (যেমন: 2:45 min)">
                 <select id="vidCategory">
                     <option value="Trending">Trending</option>
                     <option value="Latest">Latest</option>
