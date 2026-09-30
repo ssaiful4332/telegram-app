@@ -1,561 +1,143 @@
-Ry Dg:
 <!DOCTYPE html>
 <html lang="bn">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UNLIMITED VIDS</title>
+    <title>Telegram Mini App - Video Unlocker</title>
+    <!-- টেলিগ্রাম ওয়েব অ্যাপ এসডিকে -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
     <style>
-        :root {
-            --bg-color: #0b0713;
-            --card-bg: #151022;
-            --text-color: #ffffff;
-            --accent-color: #9c27b0;
-            --btn-color: #7b1fa2;
-            --border-color: #2a2040;
-        }
-        body.light-theme {
-            --bg-color: #f4f4f9;
-            --card-bg: #ffffff;
-            --text-color: #333333;
-            --border-color: #dddddd;
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         body {
-            font-family: Arial, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            margin: 0;
-            padding: 8px;
-            transition: 0.3s;
-        }
-        .header {
+            background-color: #0f172a;
+            color: #ffffff;
             display: flex;
-            justify-content: space-between;
+            justify-content: center;
             align-items: center;
-            background: var(--card-bg);
-            padding: 12px 15px;
-            border-radius: 12px;
-            margin-bottom: 12px;
-            border: 1px solid var(--border-color);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-        }
-        .header h2 {
-            margin: 0;
-            font-size: 18px;
-            letter-spacing: 1px;
-            color: var(--accent-color);
-        }
-        .header-right {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .action-btn {
-            background: var(--border-color);
-            border: 1px solid var(--border-color);
-            color: var(--text-color);
-            padding: 6px 10px;
-            border-radius: 8px;
-            font-size: 11px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        .announcement-banner {
-            background: linear-gradient(135deg, var(--btn-color), var(--accent-color));
-            color: white;
-            padding: 10px 14px;
-            border-radius: 10px;
-            font-size: 13px;
-            margin-bottom: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-weight: bold;
-        }
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-            margin-bottom: 12px;
-        }
-        .dash-card {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            padding: 10px;
-            border-radius: 10px;
-            text-align: center;
-            font-size: 12px;
-        }
-        .dash-card b {
-            display: block;
-            font-size: 14px;
-            margin-top: 4px;
-        }
-        .action-row {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 12px;
-        }
-        .action-row button {
-            flex: 1;
-            background: var(--btn-color);
-            color: white;
-            border: none;
-            padding: 10px;
-            border-radius: 10px;
-            font-weight: bold;
-            cursor: pointer;
-            font-size: 12px;
-        }
-        .spin-btn { background: #ff9800 !important; }
-        .leaderboard-btn { background: #00bcd4 !important; }
-
-        .search-box {
-            margin-bottom: 12px;
-        }
-        .search-input {
-            width: 100%;
-            padding: 10px 15px;
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 10px;
-
-color: var(--text-color);
-            font-size: 14px;
-            box-sizing: border-box;
-            outline: none;
-        }
-        .categories {
-            display: flex;
-            gap: 8px;
-            overflow-x: auto;
-            padding-bottom: 8px;
-            white-space: nowrap;
-            margin-bottom: 12px;
-        }
-        .categories::-webkit-scrollbar {
-            display: none;
-        }
-        .cat-btn {
-            background: var(--card-bg);
-            color: var(--text-color);
-            border: 1px solid var(--border-color);
-            padding: 8px 14px;
-            border-radius: 20px;
-            font-size: 13px;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-        .cat-btn.active, .cat-btn:hover {
-            background: var(--btn-color);
-            color: white;
-            border-color: var(--btn-color);
+            min-height: 100vh;
+            padding: 15px;
         }
         .card {
-            background: var(--card-bg);
-            border-radius: 14px;
-            overflow: hidden;
-            margin-bottom: 15px;
-            border: 1px solid var(--border-color);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
-        }
-        .card-img-container {
-            position: relative;
+            background: #1e293b;
             width: 100%;
-            height: 190px;
+            max-width: 400px;
+            border-radius: 12px;
             overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
         }
-        .card-img {
+        .card img {
             width: 100%;
-            height: 100%;
+            height: 200px;
             object-fit: cover;
         }
-        .preview-badge {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            background: rgba(156, 39, 176, 0.85);
-            color: white;
-            padding: 3px 8px;
-            font-size: 11px;
-            border-radius: 6px;
-            font-weight: bold;
+        .card-content {
+            padding: 15px;
         }
-        .duration-badge {
-            position: absolute;
-            bottom: 10px;
-            right: 10px;
-            background: rgba(0, 0, 0, 0.8);
-            color: white;
-            padding: 3px 8px;
-            font-size: 12px;
-            border-radius: 6px;
-            font-weight: bold;
-        }
-        .fav-icon {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: rgba(0, 0, 0, 0.6);
-            border: none;
-            color: white;
+        .title {
             font-size: 16px;
-            padding: 6px 10px;
-            border-radius: 50%;
-            cursor: pointer;
-        }
-        .fav-icon.active {
-            color: #ff4444;
-        }
-        .card-body {
-            padding: 12px;
-        }
-        .card-title {
-            font-size: 14px;
             font-weight: bold;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
             line-height: 1.4;
         }
-        .card-footer-info {
+        .stats {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
+            gap: 15px;
             font-size: 13px;
-            color: #b0bec5;
-            margin-bottom: 10px;
-            border-top: 1px solid var(--border-color);
-            padding-top: 8px;
+            color: #94a3b8;
+            margin-bottom: 15px;
         }
-        .like-btn {
-            background: none;
-            border: none;
-            color: inherit;
-            cursor: pointer;
-            font-size: 13px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-        .like-btn.liked {
-            color: #ff4444;
-            font-weight: bold;
-        }
-        .comment-section-btn {
-            background: none;
-            border: none;
-            color: var(--accent-color);
-            cursor: pointer;
-            font-size: 13px;
-            font-weight: bold;
-            margin-bottom: 10px;
-            display: block;
-        }
-        .unlock-btn {
-            width: 100%;
-            background: linear-gradient(135deg, var(--btn-color), var(--accent-color));
-            color: white;
-            border: none;
-
-padding: 10px;
+        .task-box {
+            background: #0f172a;
+            padding: 12px;
             border-radius: 8px;
-            font-size: 13px;
-            font-weight: bold;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-        }
-        #no-result {
+            margin-bottom: 15px;
             text-align: center;
-            color: #8b949e;
-            padding: 20px;
-            display: none;
         }
-        #toast {
-            visibility: hidden;
-            min-width: 200px;
-            background-color: var(--card-bg);
-            color: var(--text-color);
-            text-align: center;
-            border-radius: 8px;
-            padding: 10px;
-            position: fixed;
-            z-index: 200;
-            left: 50%;
-            bottom: 30px;
-            transform: translateX(-50%);
-            font-size: 13px;
-            border: 1px solid var(--border-color);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        .progress-text {
+            font-size: 14px;
+            margin-bottom: 8px;
+            color: #cbd5e1;
         }
-        #toast.show {
-            visibility: visible;
-            animation: fadein 0.3s, fadeout 0.3s 2s;
-        }
-        @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
-        @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
-
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 100;
-            left: 0;
-            top: 0;
+        .btn {
             width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.85);
-            justify-content: center;
-            align-items: center;
-        }
-        .modal-content {
-            background-color: var(--card-bg);
-            padding: 20px;
-            border-radius: 14px;
-            width: 88%;
-            max-width: 350px;
-            text-align: center;
-            border: 1px solid var(--border-color);
-            box-shadow: 0 6px 20px rgba(0,0,0,0.6);
-            max-height: 85vh;
-            overflow-y: auto;
-        }
-        .close-modal {
-            float: right;
-            font-size: 20px;
-            font-weight: bold;
-            cursor: pointer;
-            color: #8b949e;
-        }
-        .close-modal:hover { color: #fff; }
-        .comment-input, .admin-input {
-            width: 100%;
-            padding: 9px;
-            background: var(--border-color);
-            border: 1px solid var(--border-color);
-            color: var(--text-color);
-            border-radius: 6px;
-            font-size: 12px;
-            margin-bottom: 10px;
-            box-sizing: border-box;
-            outline: none;
-        }
-        .comment-list {
-            text-align: left;
-            max-height: 120px;
-            overflow-y: auto;
-            font-size: 12px;
-            margin-bottom: 10px;
-            border-top: 1px solid var(--border-color);
-            padding-top: 5px;
-        }
-        .comment-item {
-            background: var(--border-color);
-            padding: 5px 8px;
-            border-radius: 5px;
-            margin-bottom: 5px;
-        }
-        .setting-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: var(--border-color);
-            padding: 10px 14px;
-            border-radius: 8px;
-            margin-bottom: 10px;
-            font-size: 13px;
-            text-align: left;
-        }
-        .setting-item button {
-            background: var(--btn-color);
-            color: white;
+            padding: 12px;
             border: none;
-            padding: 5px 10px;
-            border-radius: 6px;
-            cursor: pointer;
+            border-radius: 8px;
+            font-size: 15px;
             font-weight: bold;
-        }
-        .theme-picker-row {
-            display: flex;
-            gap: 6px;
-            justify-content: center;
-            margin-top: 6px;
-        }
-        .color-bubble {
-
-width: 24px;
-            height: 24px;
-            border-radius: 50%;
             cursor: pointer;
-            border: 2px solid white;
+            transition: 0.2s;
+            text-align: center;
+            text-decoration: none;
             display: inline-block;
         }
-        .manage-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: var(--border-color);
-            padding: 8px 10px;
-            border-radius: 6px;
-            margin-bottom: 6px;
-            font-size: 12px;
-            text-align: left;
+        .btn-primary {
+            background: linear-gradient(135deg, #8b5cf6, #ec4899);
+            color: #ffffff;
         }
-        .manage-item button {
-            background: #d32f2f;
-            color: white;
-            border: none;
-            padding: 4px 8px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: bold;
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
+        .btn-success {
+            background: #22c55e;
+            color: #ffffff;
+            display: none;
         }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <h2>UNLIMITED VIDS</h2>
-        <div class="header-right">
-            <button class="action-btn" onclick="openSettingsModal()">⚙️ Settings</button>
-            <button class="action-btn" onclick="shareApp()">🔗 Share</button>
-        </div>
-    </div>
-
-    <div class="announcement-banner">
-        <span id="bannerTextDisplay">🔥 নতুন আপডেট! লেভেল আপ করুন, স্পিন করুন এবং লিডারবোর্ডে থাকুন।</span>
-    </div>
-
-    <div class="dashboard-grid">
-        <div class="dash-card">
-            <span>🪙 কয়েন</span>
-            <b id="userCoins" style="color: #ffeb3b;">50</b>
-        </div>
-        <div class="dash-card">
-            <span>🎖️ ইউজার র‍‍্যাংক</span>
-            <b id="userRank" style="color: #00e5ff;">Bronze</b>
-        </div>
-        <div class="dash-card">
-            <span>👥 মোট রেফার</span>
-            <b id="referCount" style="color: #ab47bc;">0 জন</b>
-        </div>
-        <div class="dash-card">
-            <span>🔓 আনলকড ভিডিও</span>
-            <b id="unlockedCount" style="color: #66bb6a;">0টি</b>
-        </div>
-    </div>
-
-    <div class="action-row">
-        <button class="spin-btn" onclick="openSpinModal()">🎡 Lucky Spin</button>
-        <button class="leaderboard-btn" onclick="openLeaderboardModal()">🏆 Leaderboard</button>
-    </div>
-
-    <div class="search-box">
-        <input type="text" id="searchInput" class="search-input" placeholder="🔍 সার্চ করুন..." onkeyup="filterContent()">
-    </div>
-
-    <div class="categories" id="categoryContainer">
-        <button class="cat-btn active" onclick="filterCategory('all', this)">📹 All Videos</button>
-        <button class="cat-btn" onclick="filterCategory('favorites', this)">⭐ Favorites</button>
-        <button class="cat-btn" onclick="filterCategory('trending', this)">🔥 Trending</button>
-        <button class="cat-btn" onclick="filterCategory('liked', this)">👍 Top Liked</button>
-    </div>
-
-    <div id="no-result">কোনো কনটেন্ট পাওয়া যায়নি! ❌</div>
-    <div id="card-container"></div>
-    <div id="toast">বিজ্ঞপ্তি</div>
-
-    <!-- অ্যাড লক মডাল (Watch 3 ads) -->
-    <div id="adModal" class="modal">
-        <div class="modal-content">
-            <span class="close-modal" onclick="closeModal()">&#10005;</span>
-            <h3 style="color: inherit; margin-top: 10px; font-size: 18px;">🔒 Watch 3 ads to unlock</h3>
-            <div id="modalBodyContent">
-                <p id="adStatusText" style="font-size: 14px; margin: 12px 0;">Progress: <b style="color: #ffeb3b;">0/3</b></p>
-                <button id="watchAdBtn" onclick="watchNextAd()" style="width: 100%; background: var(--btn-color); color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer;">🔓 WATCH AD 1/3</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- স্পিন হুইল মডাল -->
-    <div id="spinModal" class="modal">
-        <div class="modal-content">
-            <span class="close-modal" onclick="closeSpinModal()">&#10005;</span>
-            <h3 style="color: #ff9800; margin-top: 5px; font-size: 18px;">🎡 Daily Lucky Spin</h3>
-
-<p style="font-size: 13px; color: #b0bec5; margin: 10px 0;">চাকা ঘুরিয়ে প্রতিদিন ফ্রি কয়েন জিতে নিন!</p>
-            <div id="spinBox" style="font-size: 26px; padding: 20px; background: var(--border-color); border-radius: 10px; margin-bottom: 12px; font-weight: bold; color: #ffeb3b;">🎁 ?</div>
-            <button id="spinActionBtn" onclick="executeSpin()" style="width: 100%; background: #ff9800; color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer;">SPIN NOW</button>
-        </div>
-    </div>
-
-    <!-- লিডারবোর্ড মডাল -->
-    <div id="leaderboardModal" class="modal">
-        <div class="modal-content">
-            <span class="close-modal" onclick="closeLeaderboardModal()">&#10005;</span>
-            <h3 style="color: #00e5ff; margin-top: 5px; font-size: 18px; margin-bottom: 12px;">🏆 Leaderboard</h3>
-            <div id="leaderboardList" style="text-align: left; font-size: 13px; max-height: 180px; overflow-y: auto;">
-                <div style="background: var(--border-color); padding: 8px; border-radius: 6px; margin-bottom: 6px; display: flex; justify-content: space-between;"><span>1. 👑 Saiful Islam</span> <b>24 Refers</b></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- কমেন্ট মডাল -->
-    <div id="commentModal" class="modal">
-        <div class="modal-content">
-            <span class="close-modal" onclick="closeCommentModal()">&#10005;</span>
-            <h3 style="color: inherit; margin-top: 5px; font-size: 16px; margin-bottom: 10px;">💬 ভিডিও কমেন্ট বক্স</h3>
-            <div id="commentList" class="comment-list"></div>
-            <input type="text" id="commentInputBox" class="comment-input" placeholder="আপনার মন্তব্য লিখুন...">
-            <button onclick="postComment()" style="width: 100%; background: var(--btn-color); color: white; border: none; padding: 8px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 12px;">কমেন্ট পোস্ট করুন</button>
-        </div>
-    </div>
-
-    <!-- সেটিংস মডাল -->
-    <div id="settingsModal" class="modal">
-        <div class="modal-content">
-            <span class="close-modal" onclick="closeSettingsModal()">&#10005;</span>
-            <h3 style="color: inherit; margin-top: 5px; font-size: 18px; margin-bottom: 15px;">⚙️ Personal Settings</h3>
+    <div class="card">
+        <!-- ভিডিওর থাম্বনেইল বা ব্যানার -->
+        <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=500&auto=format&fit=crop" alt="Video Thumbnail">
+        
+        <div class="card-content">
+            <div class="title">🔥 নতুন ভাইরাল কলেজ ছাত্রী ও তার বয়ফ্রেন্ডের ভিডিও! ক্লাস রুমে রোমান্সের ভিডিও দেখতে নিচে ক্লিক করুন।</div>
             
-            <div id="tgUserSection" style="margin-bottom: 12px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; text-align: left; font-size: 13px;">
-                <p style="margin: 0 0 4px 0; color: #b0bec5;">Telegram User:</p>
-                <b id="tgUserName" style="color: #ffeb3b;">Loading...</b>
-            </div>
-            
-            <div class="setting-item">
-                <span>🎨 Dark / Light Mode</span>
-                <button onclick="toggleTheme()">Switch</button>
+            <div class="stats">
+                <span>❤️️ 14 Likes</span>
+                <span>👁️ 1077 Views</span>
+                <span>🎬 3 clips</span>
             </div>
 
-            <div class="setting-item" style="flex-direction: column; align-items: flex-start; gap: 8px;">
-                <span>🎨 থিম কালার সিলেক্ট করুন:</span>
-                <div class="theme-picker-row">
-                    <span class="color-bubble" style="background: #9c27b0;" onclick="setThemeAccent('#9c27b0', '#7b1fa2')"></span>
-                    <span class="color-bubble" style="background: #2196f3;" onclick="setThemeAccent('#2196f3', '#1976d2')"></span>
-                    <span class="color-bubble" style="background: #e91e63;" onclick="setThemeAccent('#e91e63', '#c2185b')"></span>
-                </div>
+            <!-- টাস্ক ও প্রোগ্রেস সেকশন -->
+            <div class="task-box">
+                <div class="progress-text" id="statusText">▶️ Watch 3 ads to unlock</div>
+                <button class="btn btn-primary" id="watchAdBtn" onclick="simulateAdWatch()">UNLOCK VIDEO</button>
             </div>
 
-            <div class="setting-item">
-                <span>🔐 Admin Panel</span>
-                <button onclick="promptAdminPassword()" style="background: #e91e63;">Open</button>
-            </div>
+            <!-- আনলক হওয়ার পর ফাইনাল লিংক বা বাটন -->
+            <a href="https://t.me/your_channel_link" target="_blank" class="btn btn-success" id="downloadBtn">🔓 OPEN FULL VIDEO</a>
         </div>
     </div>
 
-    <!-- অ্যাডমিন প্যানেল মডাল -->
-    <div id="adminModal" class="modal">
+    <script>
+        // টেলিগ্রাম ওয়েব অ্যাপ ইনিশিয়ালাইজ করা
+        let tg = window.Telegram.WebApp;
+        tg.expand();
 
-<div class="modal-content">
-            <span class="close-modal" onclick="closeAdminModal()">&#10005;</span>
-            <h3 style="color: #e91e63; margin-top: 5px; font-size: 18px; margin-bottom: 12px;">🔐 Admin Panel</h3>
-            <input type="text" id="adminVidTitle" class="admin-input" placeholder="ভিডিও টাইটেল">
-            <input type="text" id="adminVidImage" class="admin-input" placeholder="থাম্বনেইল ইমেজ URL">
-            <input type="text" id="adminVidLink" class="admin-input" placeholder="মূল ভিডিও লিঙ্ক (Unlock Link)">
-            <button onclick="addNewVideo()" style="width: 100%; background: #e91e63; color: white; border: none; padding: 10px; border-radius: 6px; font-weight: bold; cursor: pointer; margin-bottom: 15px;">নতুন ভিডিও যোগ করুন</button>
-            <div id="adminVideoManageList" style="max-height: 120px; overflow-y: auto;"></div>
-        </div>
-    </di
+        let adsWatched = 0;
+        const totalAds = 3;
+
+        function simulateAdWatch() {
+            // এখানে আপনি এড নেটওয়ার্কের (যেমন Adsterra) কোড বসাতে পারেন
+            adsWatched++;
+
+            if (adsWatched < totalAds) {
+                document.getElementById('statusText').innerText = `⏳ Progress: ${adsWatched}/${totalAds} (अगले विज्ञापन देखें)`;
+                alert(`বিজ্ঞাপন দেখা সম্পন্ন হয়েছে (${adsWatched}/${totalAds})। পরবর্তী ধাপ সম্পন্ন করুন।`);
+            } else {
+                // সব অ্যাড দেখা শেষ হলে আনলক হয়ে যাবে
+                document.getElementById('statusText').innerText = "✅ Video Unlocked Successfully!";
+                document.getElementById('watchAdBtn').style.display = 'none';
+                document.getElementById('downloadBtn').style.display = 'inline-block';
+            }
+        }
+    </script>
+</body>
+</html>
