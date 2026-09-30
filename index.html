@@ -48,7 +48,7 @@
             renderAdminList();
         });
 
-        // ভিডিও রেন্ডার ও ফিল্টার করার ফাংশন
+        // ভিডিও রেন্ডার ও ফিল্টার করার ফাংশন (নতুন ভিডিও উপরে দেখানোর জন্য reverse() করা হয়েছে)
         window.renderVideos = function() {
             videoListContainer.innerHTML = '';
             const searchQuery = searchInput.value.toLowerCase();
@@ -59,6 +59,9 @@
                 let matchesCategory = currentCategory === 'All' || video.category === currentCategory;
                 return matchesSearch && matchesCategory;
             });
+
+            // নতুন যোগ করা ভিডিও যেন সবসময় উপরে থাকে, তাই রিভার্স করা হলো
+            filteredKeys.reverse();
 
             if (filteredKeys.length === 0) {
                 videoListContainer.innerHTML = '<div class="no-video">কোনো ভিডিও পাওয়া যায়নি।</div>';
@@ -113,7 +116,7 @@
             update(videoRef, { views: currentViews });
         }
 
-        // অ্যাডমিন লিস্ট রেন্ডার করা
+        // অ্যাডমিন লিস্ট রেন্ডার করা (এডমিন প্যানেলেও নতুনগুলো উপরে দেখানোর জন্য reverse করা হলো)
         function renderAdminList() {
             adminVideoList.innerHTML = '';
             let keys = Object.keys(allVideosData);
@@ -121,6 +124,7 @@
                 adminVideoList.innerHTML = '<div style="color:#64748b; font-size:12px;">কোনো ভিডিও নেই</div>';
                 return;
             }
+            keys.reverse();
             keys.forEach((id) => {
                 let video = allVideosData[id];
                 adminVideoList.innerHTML += `
