@@ -39,7 +39,6 @@
 
         let allVideosData = {};
         let currentCategory = 'All'; 
-        let pendingUnlockLink = '';
         let favoritesList = JSON.parse(localStorage.getItem('my_favorites') || '[]');
 
         // রিয়েলটাইম ডাটাবেস থেকে ভিডিও এবং নোটিশ লোড করা
@@ -120,7 +119,7 @@
                                 </div>
                             </div>
                             
-                            <button class="unlock-btn" onclick="openUnlockModal('${video.link}', '${id}')">🔒 UNLOCK FULL VIDEO</button>
+                            <button class="unlock-btn" onclick="openDirectVideo('${video.link}', '${id}')">🔒 UNLOCK FULL VIDEO</button>
                         </div>
                     </div>
                 `;
@@ -173,25 +172,16 @@
             let directLink = baseUrl + '#vid-' + id;
             
             navigator.clipboard.writeText(directLink).then(() => {
-                alert(`সফল! ভিডিওটির ডাইরেক্ট লিংক কপি হয়েছে।\n\nলিংক: ${directLink}`);
+                alert(`সফল! ভিডিওটির ডাইরেক্ট লিংক কপি হয়েছে。\n\nলিংক: ${directLink}`);
             }).catch(err => {
                 prompt("লিংকটি কপি করে নিন:", directLink);
             });
         }
 
-        window.openUnlockModal = function(link, id) {
-            pendingUnlockLink = link;
+        // সরাসরি নতুন ট্যাবে ভিডিও লিংক ওপেন করবে (টেলিগ্রাম জয়েন পপআপ ছাড়াই)
+        window.openDirectVideo = function(link, id) {
             incrementView(id);
-            document.getElementById('unlockModal').style.display = 'flex';
-        }
-
-        window.closeUnlockModal = function() {
-            document.getElementById('unlockModal').style.display = 'none';
-        }
-
-        window.proceedToVideo = function() {
-            window.open(pendingUnlockLink, '_blank');
-            closeUnlockModal();
+            window.open(link, '_blank');
         }
 
         window.filterCategory = function(cat, btn) {
@@ -429,23 +419,6 @@
         <!-- ভিডিও লিস্ট কনটেইনার -->
         <div id="videoListContainer">
             <div class="no-video">লোড হচ্ছে...</div>
-        </div>
-    </div>
-
-    <!-- চ্যানেল জয়েন শর্তযুক্ত আনলক পপ-আপ মডাল -->
-    <div class="modal" id="unlockModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>⚠ ভিডিও আনলক করতে হবে</h3>
-                <button class="close-btn" onclick="closeUnlockModal()">✕</button>
-            </div>
-            <p style="font-size: 13px; color: #94a3b8; margin-bottom: 15px; line-height: 1.5;">
-                ফুল ভিডিও দেখতে হলে প্রথমে আমাদের টেলিগ্রাম চ্যানেলে জয়েন করুন, এরপর ভিডিওটি দেখতে পাবেন।
-            </p>
-            <a href="https://t.me/saifulappbot" target="_blank">
-                <button class="action-btn" style="background: #2563eb; margin-bottom: 8px;">📢 টেলিগ্রাম চ্যানেলে জয়েন করুন</button>
-            </a>
-            <button class="action-btn" onclick="proceedToVideo()">✅ ভিডিও দেখুন</button>
         </div>
     </div>
 
