@@ -41,7 +41,6 @@
         let currentCategory = 'All'; 
         let pendingUnlockLink = '';
         let favoritesList = JSON.parse(localStorage.getItem('my_favorites') || '[]');
-        let isAdminLoggedIn = false; // অ্যাডমিন লগইন স্ট্যাটাস চেক করার জন্য
 
         // রিয়েলটাইম ডাটাবেস থেকে ভিডিও এবং নোটিশ লোড করা
         const videosRef = ref(db, 'videos');
@@ -97,13 +96,6 @@
                 let isFav = favoritesList.includes(id);
                 let isHot = views > 10 || likes > 5; 
 
-                // যদি অ্যাডমিন লগইন করা থাকে, তবে ভিডিও কার্ডের ভেতরেই সরাসরি ডিলিট বাটন দেখাবে
-                let adminDeleteBtnHtml = isAdminLoggedIn ? `
-                    <div style="margin-top: 8px;">
-                        <button class="card-delete-btn" onclick="deleteVideo('${id}')">🗑️ এই ভিডিওটি ডিলিট করুন</button>
-                    </div>
-                ` : '';
-
                 videoListContainer.innerHTML += `
                     <div class="video-card" id="vid-${id}">
                         <div class="thumbnail-container">
@@ -129,8 +121,6 @@
                             </div>
                             
                             <button class="unlock-btn" onclick="openUnlockModal('${video.link}', '${id}')">🔒 UNLOCK FULL VIDEO</button>
-                            
-                            ${adminDeleteBtnHtml}
                         </div>
                     </div>
                 `;
@@ -305,8 +295,6 @@
         window.openSettings = function() {
             let pass = prompt('অ্যাডমিন পাসওয়ার্ড দিন:');
             if(pass === 'Lamiya') {
-                isAdminLoggedIn = true; // অ্যাডমিন পাসওয়ার্ড সঠিক হলে লগইন স্ট্যাটাস অন হবে
-                renderVideos(); // ভিডিও কার্ডগুলোতে ডিলিট বাটন দেখানোর জন্য রি-রেন্ডার
                 document.getElementById('settingsModal').style.display = 'flex';
             } else if(pass !== null) {
                 alert('ভুল পাসওয়ার্ড!');
@@ -375,9 +363,6 @@
         .like-btn-action { background: #0f172a; border: 1px solid #334155; color: #f43f5e; padding: 4px 10px; border-radius: 6px; cursor: pointer; font-size: 12px; }
         .fav-btn-action { background: #0f172a; border: 1px solid #334155; padding: 4px 8px; border-radius: 6px; cursor: pointer; font-size: 12px; }
         .unlock-btn { width: 100%; background: linear-gradient(135deg, #7c3aed, #db2777); color: #fff; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; }
-        
-        /* ভিডিও কার্ডের ভেতরের ডিলিট বাটন স্টাইল */
-        .card-delete-btn { width: 100%; background: #ef4444; color: #fff; border: none; padding: 8px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 12px; margin-top: 6px; }
 
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); justify-content: center; align-items: center; z-index: 1000; padding: 15px; }
         .modal-content { background: #1e293b; width: 100%; max-width: 400px; border-radius: 12px; padding: 20px; max-height: 90vh; overflow-y: auto; text-align: center; }
