@@ -45,7 +45,7 @@
         let pendingVideoLink = '';
         let pendingVideoId = '';
         let currentShareCount = 0;
-        const requiredShares = 3; // মোট ৩ বার শেয়ার করতে হবে
+        const requiredShares = 3; // মোট ৩ জন
 
         if(localStorage.getItem('theme') === 'light') {
             document.body.classList.add('light-theme');
@@ -188,7 +188,7 @@
             }
         }
 
-        // শেয়ার লক চেক
+        // শেয়ার চেক এবং লক ওপেন
         window.checkShareAndUnlock = function(link, id) {
             let unlockedVideos = JSON.parse(localStorage.getItem('unlocked_vids') || '[]');
             if(unlockedVideos.includes(id)) {
@@ -198,12 +198,12 @@
 
             pendingVideoLink = link;
             pendingVideoId = id;
-            currentShareCount = 0; // নতুন ভিডিওর জন্য শেয়ার কাউন্ট শূন্য থেকে শুরু
+            currentShareCount = 0; // রিসেট
             updateShareModalUI();
             document.getElementById('shareModal').style.display = 'flex';
         }
 
-        // টেলিগ্রামে শেয়ার ওপেন করা
+        // টেলিগ্রামে শেয়ার ওপেন করা (নেটিভ মেথড)
         window.shareToTelegram = function() {
             let botUrl = "https://t.me/unlimited_vids_bot";
             let shareText = "🔥 সেরা সব এক্সক্লুসিভ ভিডিও দেখতে আমাদের মিনি অ্যাপে ভিজিট করুন:";
@@ -214,17 +214,40 @@
             } else {
                 window.open(telegramShareUrl, '_blank');
             }
+
+            // টেলিগ্রামে যাওয়ার পর একটি ট্যাগ সেট করা যাতে বোঝা যায় ইউজার শেয়ার উইন্ডোতে গেছিল
+            sessionStorage.setItem('telegram_share_triggered', 'true');
         }
 
-        // ইউজার শেয়ার করে ফিরে আসার পর চেক বাটন চাপলে কাউন্ট বাড়বে
+        // ইউজার শেয়ার করে ফিরে আসার পর ভেরিফাই বাটন চাপলে
         window.verifyShareStep = function() {
-            if (currentShareCount < requiredShares) {
-                currentShareCount++;
-                updateShareModalUI();
+            let hasTriggered = sessionStorage.getItem('telegram_share_triggered');
 
-                if (currentShareCount < requiredShares) {
-                    alert(`✅ ${currentShareCount} জন কে শেয়ার হইছে! আরও ${requiredShares - currentShareCount} জনকে শেয়ার করুন।`);
-                }
+            if (!hasTriggered) {
+                alert('⚠️ আগে "টেলিগ্রামে লিংক শেয়ার করুন" বাটনে ক্লিক করে শেয়ার করুন!');
+                return;
+            }
+
+            // ইউজারকে একটি প্রম্পট বা অপশন দেওয়া যাতে সে সিলেক্ট করতে পারে সে কয়জনকে শেয়ার করেছে
+            let sharedCountInput = prompt("আপনি টেলিগ্রামে কয়টি গ্রুপ বা চ্যাটে শেয়ার করেছেন তা সংখ্যায় লিখুন (যেমন: 1, 2 বা 3):", "1");
+            
+            let count = parseInt(sharedCountInput);
+            if (isNaN(count) || count <= 0) {
+                alert('দয়া করে সঠিক সংখ্যা লিখুন!');
+                return;
+            }
+
+            currentShareCount += count;
+            sessionStorage.removeItem('telegram_share_triggered'); // রিসেট
+
+            if (currentShareCount >= requiredShares) {
+                currentShareCount = requiredShares;
+                updateShareModalUI();
+                alert(`🎉 অভিনন্দন! ৩ জন বা তার বেশি জনের কাছে শেয়ার করা হয়েছে! এখন ভিডিও আনলক করতে পারবেন।`);
+            } else {
+                let remaining = requiredShares - currentShareCount;
+                updateShareModalUI();
+                alert(`❌ মাত্র ${currentShareCount} জনকে শেয়ার করা হয়েছে! শর্ত পূরণের জন্য আরও অন্তত ${remaining} জনকে শেয়ার করতেই হবে।`);
             }
         }
 
@@ -234,13 +257,13 @@
             let finalUnlockBtn = document.getElementById('finalUnlockBtn');
 
             if (currentShareCount >= requiredShares) {
-                statusText.innerHTML = `🎉 অভিনন্দন! ৩ জনকে শেয়ার করা সম্পন্ন হয়েছে (${currentShareCount}/${requiredShares})`;
+                statusText.innerHTML = `🎉 অভিনন্দন! ৩ জনের কাছে শেয়ার করা সফল হয়েছে (${currentShareCount}/${requiredShares})`;
                 verifyBtn.style.display = 'none';
                 finalUnlockBtn.style.display = 'block';
             } else {
-                statusText.innerHTML = `⚠️ ভিডিওটি আনলক করতে টেলিগ্রামে মোট ৩ জনকে শেয়ার করতে হবে!<br><b>(শেয়ার হয়েছে: ${currentShareCount} / ${requiredShares} জন)</b>`;
+                statusText.innerHTML = `⚠️ ভিডিওটি আনলক করতে টেলিগ্রামে মোট ৩ জনকে শেয়ার করতেই হবে!<br><b>(মোট শেয়ার হয়েছে: ${currentShareCount} / ${requiredShares} জন)</b>`;
                 verifyBtn.style.display = 'block';
-                verifyBtn.innerText = `🔄 ${currentShareCount + 1}ম বার শেয়ার করে এখানে চাপুন`;
+                verifyBtn.innerText = `🔄 আমি শেয়ার করেছি, চেক করুন`;
                 finalUnlockBtn.style.display = 'none';
             }
         }
@@ -259,6 +282,7 @@
 
         window.closeShareModal = function() {
             document.getElementById('shareModal').style.display = 'none';
+            sessionStorage.removeItem('telegram_share_triggered');
         }
 
         window.toggleFavorite = function(id) {
@@ -569,11 +593,11 @@
                 <button class="close-btn" onclick="closeShareModal()">✕</button>
             </div>
             <p style="font-size: 13px; color: #94a3b8; margin-bottom: 15px; line-height: 1.4;" id="shareStatusText">
-                ভিডিওটি আনলক করতে টেলিগ্রামে মোট ৩ জনকে শেয়ার করতে হবে!<br><b>(শেয়ার হয়েছে: ০ / ৩ জন)</b>
+                ভিডিওটি আনলক করতে টেলিগ্রামে মোট ৩ জনকে শেয়ার করতেই হবে!<br><b>(মোট শেয়ার হয়েছে: ০ / ৩ জন)</b>
             </p>
 
             <button class="action-btn" style="background: #0088cc; margin-bottom: 8px;" onclick="shareToTelegram()">📢 টেলিগ্রামে লিংক শেয়ার করুন</button>
-            <button class="action-btn" id="verifyShareBtn" style="background: #0284c7; display: block;" onclick="verifyShareStep()">🔄 শেয়ার করে এখানে চাপুন</button>
+            <button class="action-btn" id="verifyShareBtn" style="background: #0284c7; display: block;" onclick="verifyShareStep()">🔄 আমি শেয়ার করেছি, চেক করুন</button>
             <button class="action-btn" id="finalUnlockBtn" style="background: #10b981; display: none;" onclick="confirmAndUnlock()">🎉 ভিডিও আনলক করুন</button>
         </div>
     </div>
