@@ -42,11 +42,9 @@
         let historyList = JSON.parse(localStorage.getItem('watch_history') || '[]');
         let currentAdminPass = 'Lamiya'; 
 
-        // শেয়ার লক ভেরিয়েবল
         let pendingVideoLink = '';
         let pendingVideoId = '';
-        let shareCount = 0;
-        const requiredShares = 3; // কয়বার শেয়ার করতে হবে
+        let isSharingInProgress = false;
 
         if(localStorage.getItem('theme') === 'light') {
             document.body.classList.add('light-theme');
@@ -166,82 +164,61 @@
                                 </div>
                             </div>
                             
-                            <button class="unlock-btn" onclick="checkShareAndUnlock('${video.link}', '${id}')">🔒 UNLOCK FULL VIDEO</button>
+                            <button class="unlock-btn" onclick="openShareLockModal('${video.link}', '${id}')">🔒 UNLOCK FULL VIDEO</button>
                         </div>
                     </div>
                 `;
             });
         }
 
-        // ফোর্চ শেয়ার চেক সিস্টেম
-        window.checkShareAndUnlock = function(link, id) {
-            // যদি ইউজার ইতিমধ্যে এই সেশনে বা আগে শেয়ার করে থাকে অথবা লোকালস্টোরেজে আনলক করা থাকে
+        // টেলিগ্রাম শেয়ার লক মডাল ওপেন করা
+        window.openShareLockModal = function(link, id) {
             let unlockedVideos = JSON.parse(localStorage.getItem('unlocked_vids') || '[]');
             if(unlockedVideos.includes(id)) {
                 openDirectVideo(link, id);
                 return;
             }
 
-            // নয়তো শেয়ার পপআপ দেখাবে
             pendingVideoLink = link;
             pendingVideoId = id;
-            shareCount = 0;
-            updateShareUI();
+            isSharingInProgress = false;
+
+            document.getElementById('shareActionBtn').innerText = '📢 টেলিগ্রামে শেয়ার করুন';
+            document.getElementById('shareActionBtn').style.background = '#0088cc'; // টেলিগ্রাম ব্লু কালার
+            document.getElementById('shareStatusText').innerText = 'ভিডিওটি দেখতে প্রথমে নিচের বাটনে ক্লিক করে টেলিগ্রামে বট/অ্যাপের লিংক শেয়ার করুন।';
             document.getElementById('shareModal').style.display = 'flex';
         }
 
-        window.updateShareUI = function() {
-            let progressPercent = (shareCount / requiredShares) * 100;
-            document.getElementById('shareProgressBar').style.width = progressPercent + '%';
-            document.getElementById('shareCountText').innerText = `শেয়ার সম্পন্ন হয়েছে: ${shareCount} / ${requiredShares} বার`;
-
-            if(shareCount >= requiredShares) {
-                document.getElementById('finalUnlockBtn').style.display = 'block';
-                document.getElementById('shareActionBtn').innerText = '✅ শেয়ার সম্পন্ন!';
-                document.getElementById('shareActionBtn').style.background = '#10b981';
-            } else {
-                document.getElementById('finalUnlockBtn').style.display = 'none';
-                document.getElementById('shareActionBtn').innerText = '🔗 বন্ধুদের কাছে শেয়ার করুন';
-                document.getElementById('shareActionBtn').style.background = '#7c3aed';
-            }
-        }
-
-        window.performShareAction = function() {
+        // টেলিগ্রামে সরাসরি শেয়ার উইন্ডো ওপেন করা (Telegram Share URL)
+        window.startTelegramShare = function() {
             let botUrl = "https://t.me/unlimited_vids_bot";
-            if (navigator.share) {
-                navigator.share({
-                    title: 'Unlimited Vids',
-                    text: 'সেরা সব এক্সক্লুসিভ ভিডিও দেখতে আমাদের মিনি অ্যাপে ভিজিট করুন:',
-                    url: botUrl,
-                }).then(() => {
-                    incrementShareCount();
-                }).catch(() => {
-                    // শেয়ার ক্যান্সেল করলেও ট্র্যাকিং বা কাউন্ট বাড়াতে ইউজারকে হেল্প করার জন্য
-                    incrementShareCount();
-                });
+            let shareText = encodeURIComponent("🔥 সেরা সব এক্সক্লুসিভ ভিডিও দেখতে আমাদের মিনি অ্যাপে ভিজিট করুন:");
+            let telegramShareLink = `https://t.me/share/url?url=${encodeURIComponent(botUrl)}&text=${shareText}`;
+
+            // টেলিগ্রাম অ্যাপে শেয়ার উইন্ডো ওপেন হবে
+            window.open(telegramShareLink, '_blank');
+
+            isSharingInProgress = true;
+            document.getElementById('shareStatusText').innerText = '⏳ শেয়ার সম্পন্ন হয়েছে কি না যাচাই করা হচ্ছে... অ্যাপে ফিরে আসুন।';
+            document.getElementById('shareActionBtn').innerText = '✅ শেয়ার নিশ্চিত করুন (Unlock)';
+            document.getElementById('shareActionBtn').style.background = '#10b981';
+        }
+
+        // শেয়ার করার পর আনলক বাটন কনফার্ম করা
+        window.handleShareButtonClick = function() {
+            if (!isSharingInProgress) {
+                startTelegramShare();
             } else {
-                navigator.clipboard.writeText(botUrl);
-                alert('লিংক কপি হয়েছে! গ্রুপ বা বন্ধুদের কাছে পেস্ট করুন।');
-                incrementShareCount();
-            }
-        }
+                // ইউজার শেয়ার করে ফিরে আসার পর ক্লিক করলে ভিডিও আনলক হয়ে যাবে
+                let unlockedVideos = JSON.parse(localStorage.getItem('unlocked_vids') || '[]');
+                if(!unlockedVideos.includes(pendingVideoId)) {
+                    unlockedVideos.push(pendingVideoId);
+                    localStorage.setItem('unlocked_vids', JSON.stringify(unlockedVideos));
+                }
 
-        function incrementShareCount() {
-            if(shareCount < requiredShares) {
-                shareCount++;
-                updateShareUI();
+                closeShareModal();
+                openDirectVideo(pendingVideoLink, pendingVideoId);
             }
-        }
-
-        window.finalizeUnlock = function() {
-            let unlockedVideos = JSON.parse(localStorage.getItem('unlocked_vids') || '[]');
-            if(!unlockedVideos.includes(pendingVideoId)) {
-                unlockedVideos.push(pendingVideoId);
-                localStorage.setItem('unlocked_vids', JSON.stringify(unlockedVideos));
-            }
-
-            closeShareModal();
-            openDirectVideo(pendingVideoLink, pendingVideoId);
         }
 
         window.closeShareModal = function() {
@@ -260,11 +237,8 @@
 
         window.shareApp = function() {
             let botUrl = "https://t.me/unlimited_vids_bot";
-            if (navigator.share) {
-                navigator.share({ title: 'Unlimited Vids', text: 'সেরা সব ভিডিও দেখতে আমাদের মিনি অ্যাপে ভিজিট করুন:', url: botUrl }).catch(() => {});
-            } else {
-                prompt("অ্যাপটির লিংক কপি করুন:", botUrl);
-            }
+            let shareText = encodeURIComponent("🔥 সেরা সব ভিডিও দেখতে আমাদের মিনি অ্যাপে ভিজিট করুন:");
+            window.open(`https://t.me/share/url?url=${encodeURIComponent(botUrl)}&text=${shareText}`, '_blank');
         }
 
         window.copyVideoDirectLink = function(id) {
@@ -477,10 +451,6 @@
         input, select { background: #0f172a; color: #fff; border: 1px solid #334155; outline: none; }
         button.action-btn { background: #db2777; color: #fff; font-weight: bold; cursor: pointer; }
 
-        /* শেয়ার লক মডাল স্টাইল */
-        .progress-bar-container { width: 100%; background: #0f172a; border-radius: 10px; height: 12px; margin: 15px 0; overflow: hidden; border: 1px solid #334155; }
-        .progress-bar-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #7c3aed, #db2777); transition: width 0.3s ease; }
-
         .thumb-preview-box { width: 100%; height: 120px; border: 1px dashed #334155; border-radius: 8px; margin-bottom: 8px; display: none; object-fit: cover; background: #0f172a; }
 
         .admin-list-container { max-height: 220px; overflow-y: auto; padding-right: 4px; margin-top: 8px; border: 1px solid #334155; border-radius: 8px; padding: 8px; background: #0b0f19; }
@@ -544,24 +514,18 @@
         </div>
     </div>
 
-    <!-- শেয়ার লক পপআপ মডাল -->
+    <!-- টেলিগ্রাম শেয়ার লক পপআপ মডাল -->
     <div id="shareModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
                 <h3>🔒 Video Locked!</h3>
                 <button class="close-btn" onclick="closeShareModal()">✕</button>
             </div>
-            <p style="font-size: 13px; color: #94a3b8; margin-bottom: 10px; line-height: 1.4;">
-                এই ভিডিওটি আনলক করতে প্রথমে নিচের বাটনে ক্লিক করে ৩ বার বন্ধু বা গ্রুপে শেয়ার করুন!
+            <p style="font-size: 13px; color: #94a3b8; margin-bottom: 15px; line-height: 1.4;" id="shareStatusText">
+                ভিডিওটি দেখতে প্রথমে নিচের বাটনে ক্লিক করে টেলিগ্রামে বট/অ্যাপের লিংক শেয়ার করুন।
             </p>
-            
-            <div style="font-size: 12px; font-weight: bold; color: #fbbf24;" id="shareCountText">শেয়ার সম্পন্ন হয়েছে: 0 / 3 বার</div>
-            <div class="progress-bar-container">
-                <div class="progress-bar-fill" id="shareProgressBar"></div>
-            </div>
 
-            <button class="action-btn" id="shareActionBtn" onclick="performShareAction()">🔗 বন্ধুদের কাছে শেয়ার করুন</button>
-            <button class="action-btn" id="finalUnlockBtn" style="background: #10b981; display: none;" onclick="finalizeUnlock()">🎉 ভিডিও আনলক করুন</button>
+            <button class="action-btn" id="shareActionBtn" style="background: #0088cc;" onclick="handleShareButtonClick()">📢 টেলিগ্রামে শেয়ার করুন</button>
         </div>
     </div>
 
