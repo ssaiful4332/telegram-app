@@ -28,29 +28,30 @@
 
         let tg = window.Telegram.WebApp;
         tg.expand();
-        if(tg.initDataUnsafe && tg.initDataUnsafe.user) {
-            const userEl = document.getElementById('tgUser');
-            if(userEl) {
-                userEl.innerText = "@" + (tg.initDataUnsafe.user.username || tg.initDataUnsafe.user.first_name);
-            }
-        }
 
         const videoListContainer = document.getElementById('videoListContainer');
         const adminVideoList = document.getElementById('adminVideoList');
         const searchInput = document.getElementById('searchInput');
         const noticeText = document.getElementById('noticeText');
+        const vidThumbInput = document.getElementById('vidThumb');
+        const thumbPreviewImg = document.getElementById('thumbPreviewImg');
 
         let allVideosData = {};
         let currentCategory = 'All'; 
         let favoritesList = JSON.parse(localStorage.getItem('my_favorites') || '[]');
-        let currentAdminPass = 'Lamiya'; // ডিফল্ট পাসওয়ার্ড
+        let historyList = JSON.parse(localStorage.getItem('watch_history') || '[]');
+        let currentAdminPass = 'Lamiya'; 
 
-        // সেভ করা থিম লোড করা
+        // শেয়ার লক ভেরিয়েবল
+        let pendingVideoLink = '';
+        let pendingVideoId = '';
+        let shareCount = 0;
+        const requiredShares = 3; // কয়বার শেয়ার করতে হবে
+
         if(localStorage.getItem('theme') === 'light') {
             document.body.classList.add('light-theme');
         }
 
-        // রিয়েলটাইম ডাটাবেস রেফারেন্স
         const videosRef = ref(db, 'videos');
         const noticeRef = ref(db, 'notice');
         const adminPassRef = ref(db, 'admin_password');
@@ -70,7 +71,6 @@
             }
         });
 
-        // ফায়ারবেস থেকে ডায়নামিক পাসওয়ার্ড লোড করা
         onValue(adminPassRef, (snapshot) => {
             const savedPass = snapshot.val();
             if(savedPass) {
@@ -78,33 +78,46 @@
             }
         });
 
-        // মোট পরিসংখ্যান আপডেট করার ফাংশন
         function updateStats() {
             let totalVideos = Object.keys(allVideosData).length;
             let totalViews = 0;
-
             Object.values(allVideosData).forEach(video => {
                 totalViews += (video.views || 0);
             });
-
             document.getElementById('totalVideosCount').innerText = totalVideos;
             document.getElementById('totalViewsCount').innerText = totalViews;
         }
 
-        // ভিডিও রেন্ডার ও ফিল্টার করার ফাংশন
+        if(vidThumbInput) {
+            vidThumbInput.addEventListener('input', function() {
+                let url = this.value.trim();
+                if(url) {
+                    thumbPreviewImg.src = url;
+                    thumbPreviewImg.style.display = 'block';
+                } else {
+                    thumbPreviewImg.style.display = 'none';
+                }
+            });
+        }
+
         window.renderVideos = function() {
             videoListContainer.innerHTML = '';
             const searchQuery = searchInput.value.toLowerCase();
+            let keys = Object.keys(allVideosData);
 
-            let keys = Object.keys(allVideosData).reverse(); 
+            if (currentCategory === 'Popular') {
+                keys.sort((a, b) => (allVideosData[b].views || 0) - (allVideosData[a].views || 0));
+            } else {
+                keys.reverse();
+            }
 
             let filteredKeys = keys.filter(id => {
                 let video = allVideosData[id];
                 let matchesSearch = video.title.toLowerCase().includes(searchQuery) || id.toLowerCase().includes(searchQuery);
 
-                if (currentCategory === 'Favorites') {
-                    return matchesSearch && favoritesList.includes(id);
-                }
+                if (currentCategory === 'Favorites') return matchesSearch && favoritesList.includes(id);
+                if (currentCategory === 'History') return matchesSearch && historyList.includes(id);
+                if (currentCategory === 'Popular') return matchesSearch;
 
                 let matchesCategory = currentCategory === 'All' || video.category === currentCategory;
                 return matchesSearch && matchesCategory;
@@ -113,6 +126,8 @@
             if (filteredKeys.length === 0) {
                 if(currentCategory === 'Favorites') {
                     videoListContainer.innerHTML = '<div class="no-video">আপনার কোনো ফেভারিট ভিডিও নেই! ❤️ আইকনে ক্লিক করে সেভ করুন।</div>';
+                } else if(currentCategory === 'History') {
+                    videoListContainer.innerHTML = '<div class="no-video">আপনি এখনো কোনো ভিডিও দেখেননি!</div>';
                 } else {
                     videoListContainer.innerHTML = '<div class="no-video">কোনো ভিডিও পাওয়া যায়নি।</div>';
                 }
@@ -129,7 +144,7 @@
 
                 videoListContainer.innerHTML += `
                     <div class="video-card" id="vid-${id}">
-                        <div class="thumbnail-container">
+                        <div class="thumbnail-container" id="thumb-card-${id}">
                             <span class="preview-badge">${video.category || 'General'}</span>
                             <span class="duration-badge">⏱️ ${duration}</span>
                             ${isHot ? '<span class="hot-badge">🔥 Hot</span>' : ''}
@@ -138,7 +153,7 @@
                         <div class="video-info">
                             <div class="video-title">${video.title}</div>
                             
-                            <div class="video-id-section" onclick="copyVideoDirectLink('${id}', '${video.title.replace(/'/g, "")}')">
+                            <div class="video-id-section" onclick="copyVideoDirectLink('${id}')">
                                 <span>🔑 ID: ${id}</span>
                                 <span class="copy-hint-text">📋 কপি লিংক</span>
                             </div>
@@ -147,33 +162,90 @@
                                 <span>👁️ <span id="view-count-${id}">${views}</span> Views</span>
                                 <div style="display: flex; gap: 6px; align-items: center;">
                                     <button class="fav-btn-action" onclick="toggleFavorite('${id}')">${isFav ? '❤️' : '🤍'}</button>
-                                    <button class="like-btn-action" onclick="handleLike('${id}')">❤️ <span id="like-count-${id}">${likes}</span></button>
+                                    <button class="like-btn-action" onclick="handleLike('${id}', event)">❤️ <span id="like-count-${id}">${likes}</span></button>
                                 </div>
                             </div>
                             
-                            <button class="unlock-btn" onclick="openDirectVideo('${video.link}', '${id}')">🔒 UNLOCK FULL VIDEO</button>
+                            <button class="unlock-btn" onclick="checkShareAndUnlock('${video.link}', '${id}')">🔒 UNLOCK FULL VIDEO</button>
                         </div>
                     </div>
                 `;
             });
-
-            checkUrlHashAndScroll();
         }
 
-        function checkUrlHashAndScroll() {
-            const hash = window.location.hash; 
-            if (hash) {
-                const targetElement = document.querySelector(hash);
-                if (targetElement) {
-                    setTimeout(() => {
-                        targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        targetElement.classList.add('highlight-flash');
-                        setTimeout(() => {
-                            targetElement.classList.remove('highlight-flash');
-                        }, 3000);
-                    }, 600);
-                }
+        // ফোর্চ শেয়ার চেক সিস্টেম
+        window.checkShareAndUnlock = function(link, id) {
+            // যদি ইউজার ইতিমধ্যে এই সেশনে বা আগে শেয়ার করে থাকে অথবা লোকালস্টোরেজে আনলক করা থাকে
+            let unlockedVideos = JSON.parse(localStorage.getItem('unlocked_vids') || '[]');
+            if(unlockedVideos.includes(id)) {
+                openDirectVideo(link, id);
+                return;
             }
+
+            // নয়তো শেয়ার পপআপ দেখাবে
+            pendingVideoLink = link;
+            pendingVideoId = id;
+            shareCount = 0;
+            updateShareUI();
+            document.getElementById('shareModal').style.display = 'flex';
+        }
+
+        window.updateShareUI = function() {
+            let progressPercent = (shareCount / requiredShares) * 100;
+            document.getElementById('shareProgressBar').style.width = progressPercent + '%';
+            document.getElementById('shareCountText').innerText = `শেয়ার সম্পন্ন হয়েছে: ${shareCount} / ${requiredShares} বার`;
+
+            if(shareCount >= requiredShares) {
+                document.getElementById('finalUnlockBtn').style.display = 'block';
+                document.getElementById('shareActionBtn').innerText = '✅ শেয়ার সম্পন্ন!';
+                document.getElementById('shareActionBtn').style.background = '#10b981';
+            } else {
+                document.getElementById('finalUnlockBtn').style.display = 'none';
+                document.getElementById('shareActionBtn').innerText = '🔗 বন্ধুদের কাছে শেয়ার করুন';
+                document.getElementById('shareActionBtn').style.background = '#7c3aed';
+            }
+        }
+
+        window.performShareAction = function() {
+            let botUrl = "https://t.me/unlimited_vids_bot";
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Unlimited Vids',
+                    text: 'সেরা সব এক্সক্লুসিভ ভিডিও দেখতে আমাদের মিনি অ্যাপে ভিজিট করুন:',
+                    url: botUrl,
+                }).then(() => {
+                    incrementShareCount();
+                }).catch(() => {
+                    // শেয়ার ক্যান্সেল করলেও ট্র্যাকিং বা কাউন্ট বাড়াতে ইউজারকে হেল্প করার জন্য
+                    incrementShareCount();
+                });
+            } else {
+                navigator.clipboard.writeText(botUrl);
+                alert('লিংক কপি হয়েছে! গ্রুপ বা বন্ধুদের কাছে পেস্ট করুন।');
+                incrementShareCount();
+            }
+        }
+
+        function incrementShareCount() {
+            if(shareCount < requiredShares) {
+                shareCount++;
+                updateShareUI();
+            }
+        }
+
+        window.finalizeUnlock = function() {
+            let unlockedVideos = JSON.parse(localStorage.getItem('unlocked_vids') || '[]');
+            if(!unlockedVideos.includes(pendingVideoId)) {
+                unlockedVideos.push(pendingVideoId);
+                localStorage.setItem('unlocked_vids', JSON.stringify(unlockedVideos));
+            }
+
+            closeShareModal();
+            openDirectVideo(pendingVideoLink, pendingVideoId);
+        }
+
+        window.closeShareModal = function() {
+            document.getElementById('shareModal').style.display = 'none';
         }
 
         window.toggleFavorite = function(id) {
@@ -189,22 +261,17 @@
         window.shareApp = function() {
             let botUrl = "https://t.me/unlimited_vids_bot";
             if (navigator.share) {
-                navigator.share({
-                    title: 'Unlimited Vids',
-                    text: 'সেরা সব ভিডিও দেখতে আমাদের মিনি অ্যাপে ভিজিট করুন:',
-                    url: botUrl,
-                }).catch(() => {});
+                navigator.share({ title: 'Unlimited Vids', text: 'সেরা সব ভিডিও দেখতে আমাদের মিনি অ্যাপে ভিজিট করুন:', url: botUrl }).catch(() => {});
             } else {
                 prompt("অ্যাপটির লিংক কপি করুন:", botUrl);
             }
         }
 
-        window.copyVideoDirectLink = function(id, title) {
+        window.copyVideoDirectLink = function(id) {
             let baseUrl = window.location.href.split('#')[0].split('?')[0];
             let directLink = baseUrl + '#vid-' + id;
-
             navigator.clipboard.writeText(directLink).then(() => {
-                alert(`সফল! ভিডিওটির ডাইরেক্ট লিংক কপি হয়েছে।\n\nলিংক: ${directLink}`);
+                alert(`সফল! ভিডিওটির ডাইরেক্ট লিংক কপি হয়েছে。\n\nলিংক: ${directLink}`);
             }).catch(err => {
                 prompt("লিংকটি কপি করে নিন:", directLink);
             });
@@ -212,6 +279,11 @@
 
         window.openDirectVideo = function(link, id) {
             incrementView(id);
+            if(!historyList.includes(id)) {
+                historyList.unshift(id);
+                if(historyList.length > 30) historyList.pop();
+                localStorage.setItem('watch_history', JSON.stringify(historyList));
+            }
             window.open(link, '_blank');
         }
 
@@ -222,10 +294,21 @@
             renderVideos();
         }
 
-        window.handleLike = function(id) {
+        window.handleLike = function(id, event) {
             let videoRef = ref(db, 'videos/' + id);
             let currentLikes = (allVideosData[id].likes || 0) + 1;
             update(videoRef, { likes: currentLikes });
+
+            let cardThumb = document.getElementById('thumb-card-' + id);
+            if(cardThumb) {
+                let emoji = document.createElement('div');
+                emoji.className = 'floating-heart';
+                emoji.innerHTML = Math.random() > 0.5 ? '❤️' : '🔥';
+                emoji.style.left = (event.clientX - cardThumb.getBoundingClientRect().left - 15) + 'px';
+                emoji.style.bottom = '20px';
+                cardThumb.appendChild(emoji);
+                setTimeout(() => { emoji.remove(); }, 1000);
+            }
         }
 
         window.incrementView = function(id) {
@@ -234,7 +317,6 @@
             update(videoRef, { views: currentViews });
         }
 
-        // অ্যাডমিন লিস্ট রেন্ডার
         function renderAdminList() {
             adminVideoList.innerHTML = '';
             let keys = Object.keys(allVideosData).reverse();
@@ -251,7 +333,7 @@
                             <span style="font-size:10px; color:#38bdf8;">ID: ${id}</span>
                         </div>
                         <div style="display: flex; gap: 4px;">
-                            <button class="link-btn" onclick="copyVideoDirectLink('${id}', '${video.title.replace(/'/g, "")}')">লিংক</button>
+                            <button class="link-btn" onclick="copyVideoDirectLink('${id}')">লিংক</button>
                             <button class="delete-btn" onclick="deleteVideo('${id}')">ডিলিট</button>
                         </div>
                     </div>
@@ -272,22 +354,14 @@
             }
 
             push(videosRef, {
-                title: title,
-                thumb: thumb,
-                link: link,
-                duration: duration,
-                category: category,
-                likes: 0,
-                views: 0,
-                createdAt: Date.now()
+                title: title, thumb: thumb, link: link, duration: duration, category: category, likes: 0, views: 0, createdAt: Date.now()
             }).then(() => {
                 document.getElementById('vidTitle').value = '';
                 document.getElementById('vidThumb').value = '';
                 document.getElementById('vidLink').value = '';
                 document.getElementById('vidDuration').value = '';
+                thumbPreviewImg.style.display = 'none';
                 alert('নতুন ভিডিও সফলভাবে যুক্ত হয়েছে!');
-            }).catch((error) => {
-                alert('ভিডিও যোগ করতে সমস্যা হয়েছে: ' + error.message);
             });
         }
 
@@ -299,28 +373,19 @@
 
         window.updateNotice = function() {
             const newNotice = document.getElementById('noticeInput').value;
-            if(!newNotice) {
-                alert('নোটিশ লিখুন!');
-                return;
-            }
+            if(!newNotice) { alert('নোটিশ লিখুন!'); return; }
             set(noticeRef, newNotice).then(() => {
                 alert('নোটিশ আপডেট সফল হয়েছে!');
                 document.getElementById('noticeInput').value = '';
             });
         }
 
-        // ডায়নামিক পাসওয়ার্ড পরিবর্তনের ফাংশন
         window.changeAdminPassword = function() {
             const newPass = document.getElementById('newPassInput').value.trim();
-            if(!newPass || newPass.length < 4) {
-                alert('কমপক্ষে ৪ অক্ষরের নতুন পাসওয়ার্ড বা পিন দিন!');
-                return;
-            }
+            if(!newPass || newPass.length < 4) { alert('কমপক্ষে ৪ অক্ষরের পাসওয়ার্ড বা পিন দিন!'); return; }
             set(adminPassRef, newPass).then(() => {
                 alert('সফল! অ্যাডমিন পাসওয়ার্ড পরিবর্তন হয়ে গেছে।');
                 document.getElementById('newPassInput').value = '';
-            }).catch((error) => {
-                alert('সমস্যা হয়েছে: ' + error.message);
             });
         }
 
@@ -335,7 +400,7 @@
             if(pass === currentAdminPass) {
                 document.getElementById('settingsModal').style.display = 'flex';
             } else if(pass !== null) {
-                alert('ভুল পাসওয়ার্ড! আবার চেষ্টা করুন।');
+                alert('ভুল পাসওয়ার্ড!');
             }
         }
 
@@ -380,12 +445,11 @@
 
         .video-card { background: #1e293b; border-radius: 12px; overflow: hidden; margin-bottom: 15px; border: 1px solid #334155; transition: all 0.3s ease; }
 
-        @keyframes glowFlash {
-            0% { border-color: #7c3aed; box-shadow: 0 0 20px #7c3aed; transform: scale(1.02); }
-            50% { border-color: #db2777; box-shadow: 0 0 25px #db2777; transform: scale(1.02); }
-            100% { border-color: #334155; box-shadow: none; transform: scale(1); }
+        @keyframes floatUp {
+            0% { transform: translateY(0) scale(0.8); opacity: 1; }
+            100% { transform: translateY(-120px) scale(1.4); opacity: 0; }
         }
-        .highlight-flash { animation: glowFlash 3s ease-in-out; }
+        .floating-heart { position: absolute; font-size: 24px; animation: floatUp 1s ease-out forwards; pointer-events: none; z-index: 10; }
 
         .thumbnail-container { position: relative; width: 100%; height: 180px; }
         .thumbnail-container img { width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
@@ -413,7 +477,12 @@
         input, select { background: #0f172a; color: #fff; border: 1px solid #334155; outline: none; }
         button.action-btn { background: #db2777; color: #fff; font-weight: bold; cursor: pointer; }
 
-        /* অ্যাডমিন প্যানেল লিস্ট */
+        /* শেয়ার লক মডাল স্টাইল */
+        .progress-bar-container { width: 100%; background: #0f172a; border-radius: 10px; height: 12px; margin: 15px 0; overflow: hidden; border: 1px solid #334155; }
+        .progress-bar-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #7c3aed, #db2777); transition: width 0.3s ease; }
+
+        .thumb-preview-box { width: 100%; height: 120px; border: 1px dashed #334155; border-radius: 8px; margin-bottom: 8px; display: none; object-fit: cover; background: #0f172a; }
+
         .admin-list-container { max-height: 220px; overflow-y: auto; padding-right: 4px; margin-top: 8px; border: 1px solid #334155; border-radius: 8px; padding: 8px; background: #0b0f19; }
         .admin-item { display: flex; justify-content: space-between; align-items: center; background: #1e293b; padding: 8px 10px; border-radius: 6px; margin-bottom: 6px; font-size: 12px; text-align: left; gap: 8px; border: 1px solid #334155; }
         .delete-btn { background: #ef4444; color: #fff; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold; }
@@ -450,7 +519,9 @@
         <div class="categories-container">
             <button class="cat-tab active-cat" onclick="filterCategory('All', this)">All</button>
             <button class="cat-tab" onclick="filterCategory('Favorites', this)">❤️ Favorites</button>
-            <button class="cat-tab" onclick="filterCategory('Trending', this)">🔥 Trending</button>
+            <button class="cat-tab" onclick="filterCategory('Popular', this)">🔥 Popular</button>
+            <button class="cat-tab" onclick="filterCategory('History', this)">🕒 History</button>
+            <button class="cat-tab" onclick="filterCategory('Trending', this)">⚡ Trending</button>
             <button class="cat-tab" onclick="filterCategory('Latest', this)">✨ Latest</button>
             <button class="cat-tab" onclick="filterCategory('Exclusive', this)">⭐ Exclusive</button>
         </div>
@@ -473,6 +544,27 @@
         </div>
     </div>
 
+    <!-- শেয়ার লক পপআপ মডাল -->
+    <div id="shareModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>🔒 Video Locked!</h3>
+                <button class="close-btn" onclick="closeShareModal()">✕</button>
+            </div>
+            <p style="font-size: 13px; color: #94a3b8; margin-bottom: 10px; line-height: 1.4;">
+                এই ভিডিওটি আনলক করতে প্রথমে নিচের বাটনে ক্লিক করে ৩ বার বন্ধু বা গ্রুপে শেয়ার করুন!
+            </p>
+            
+            <div style="font-size: 12px; font-weight: bold; color: #fbbf24;" id="shareCountText">শেয়ার সম্পন্ন হয়েছে: 0 / 3 বার</div>
+            <div class="progress-bar-container">
+                <div class="progress-bar-fill" id="shareProgressBar"></div>
+            </div>
+
+            <button class="action-btn" id="shareActionBtn" onclick="performShareAction()">🔗 বন্ধুদের কাছে শেয়ার করুন</button>
+            <button class="action-btn" id="finalUnlockBtn" style="background: #10b981; display: none;" onclick="finalizeUnlock()">🎉 ভিডিও আনলক করুন</button>
+        </div>
+    </div>
+
     <!-- অ্যাডমিন সেটিংস মডাল -->
     <div id="settingsModal" class="modal">
         <div class="modal-content">
@@ -484,6 +576,7 @@
             <div style="text-align: left; font-size: 13px; margin-bottom: 5px; color: #94a3b8;">নতুন ভিডিও যোগ করুন:</div>
             <input type="text" id="vidTitle" placeholder="ভিডিওর শিরোনাম (Title)">
             <input type="text" id="vidThumb" placeholder="থাম্বনেইল ইমেজ লিংক (Thumbnail URL)">
+            <img id="thumbPreviewImg" class="thumb-preview-box" alt="Thumbnail Preview">
             <input type="text" id="vidLink" placeholder="মূল ভিডিওর লিংক (Direct/Telegram Link)">
             <input type="text" id="vidDuration" placeholder="সময়কাল যেমন 2:30 (Option)">
             <select id="vidCategory">
