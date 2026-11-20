@@ -42,11 +42,6 @@
         let historyList = JSON.parse(localStorage.getItem('watch_history') || '[]');
         let currentAdminPass = 'Lamiya'; 
 
-        let pendingVideoLink = '';
-        let pendingVideoId = '';
-        let clickShareCount = 0;
-        const requiredShares = 3; // মোট ৩ বার ক্লিক করে শেয়ার করতে হবে
-
         if(localStorage.getItem('theme') === 'light') {
             document.body.classList.add('light-theme');
         }
@@ -141,12 +136,6 @@
                 let isFav = favoritesList.includes(id);
                 let isHot = views > 10 || likes > 5; 
 
-                // চেক করা ভিডিওটি বর্তমানে ১ মিনিটের মধ্যে আনলক আছে কি না
-                let unlockedData = JSON.parse(localStorage.getItem('unlocked_vids') || '{}');
-                let isUnlocked = unlockedData[id] && (Date.now() < unlockedData[id]);
-                let btnText = isUnlocked ? '🔓 WATCH NOW (UNLOCKED)' : '🔒 UNLOCK FULL VIDEO';
-                let btnBg = isUnlocked ? 'background: linear-gradient(135deg, #059669, #10b981);' : '';
-
                 videoListContainer.innerHTML += `
                     <div class="video-card" id="vid-${id}">
                         <div class="thumbnail-container" id="thumb-card-${id}">
@@ -171,7 +160,7 @@
                                 </div>
                             </div>
                             
-                            <button class="unlock-btn" style="${btnBg}" onclick="checkShareAndUnlock('${video.link}', '${id}')">${btnText}</button>
+                            <button class="unlock-btn" onclick="openDirectVideo('${video.link}', '${id}')">▶ WATCH VIDEO</button>
                         </div>
                     </div>
                 `;
@@ -192,74 +181,6 @@
                     }, 400);
                 }
             }
-        }
-
-        window.checkShareAndUnlock = function(link, id) {
-            let unlockedData = JSON.parse(localStorage.getItem('unlocked_vids') || '{}');
-            
-            // যদি ১ মিনিটের মেয়াদ এখনো থাকে, তবে সরাসরি ভিডিও ওপেন হবে
-            if(unlockedData[id] && Date.now() < unlockedData[id]) {
-                openDirectVideo(link, id);
-                return;
-            }
-
-            // মেয়াদ শেষ বা আনলক করা না থাকলে শেয়ার মডাল আসবে
-            pendingVideoLink = link;
-            pendingVideoId = id;
-            clickShareCount = 0; 
-            updateShareModalUI();
-            document.getElementById('shareModal').style.display = 'flex';
-        }
-
-        window.performShareStep = function() {
-            let botUrl = "https://t.me/unlimited_vids_bot";
-            let shareText = "🔥 সেরা সব এক্সক্লুসিভ ভিডিও দেখতে আমাদের মিনি অ্যাপে ভিজিট করুন:";
-            let telegramShareUrl = `https://t.me/share/url?url=${encodeURIComponent(botUrl)}&text=${encodeURIComponent(shareText)}`;
-
-            if (tg && tg.openTelegramLink) {
-                tg.openTelegramLink(telegramShareUrl);
-            } else {
-                window.open(telegramShareUrl, '_blank');
-            }
-
-            if (clickShareCount < requiredShares) {
-                clickShareCount++;
-                updateShareModalUI();
-            }
-        }
-
-        function updateShareModalUI() {
-            let statusText = document.getElementById('shareStatusText');
-            let shareBtn = document.getElementById('shareActionBtn');
-            let finalUnlockBtn = document.getElementById('finalUnlockBtn');
-
-            if (clickShareCount >= requiredShares) {
-                statusText.innerHTML = `🎉 অভিনন্দন! ৩ বার শেয়ার করা সম্পন্ন হয়েছে (${clickShareCount}/${requiredShares})`;
-                shareBtn.style.display = 'none';
-                finalUnlockBtn.style.display = 'block';
-            } else {
-                statusText.innerHTML = `⚠️ ভিডিওটি আনলক করতে নিচের বাটনে ক্লিক করে ভিন্ন ৩টি গ্রুপ বা চ্যাটে শেয়ার করুন!<br><b>(শেয়ার হয়েছে: ${clickShareCount} / ${requiredShares} বার)</b>`;
-                shareBtn.style.display = 'block';
-                shareBtn.innerText = `📢 টেলিগ্রামে শেয়ার করুন (${clickShareCount}/${requiredShares})`;
-                finalUnlockBtn.style.display = 'none';
-            }
-        }
-
-        // ভিডিও আনলক হওয়ার পর ঠিক ১ মিনিট (৬০,০০০ মিলিগ্রাম) সময় সেট করা
-        window.confirmAndUnlock = function() {
-            let unlockedData = JSON.parse(localStorage.getItem('unlocked_vids') || '{}');
-            let expireTime = Date.now() + (60 * 1000); // বর্তমান সময় + ১ মিনিট
-            
-            unlockedData[pendingVideoId] = expireTime;
-            localStorage.setItem('unlocked_vids', JSON.stringify(unlockedData));
-
-            closeShareModal();
-            renderVideos(); // বাটন আপডেট করার জন্য
-            openDirectVideo(pendingVideoLink, pendingVideoId);
-        }
-
-        window.closeShareModal = function() {
-            document.getElementById('shareModal').style.display = 'none';
         }
 
         window.toggleFavorite = function(id) {
@@ -559,22 +480,6 @@
         <!-- ভিডিও লিস্ট কন্টেইনার -->
         <div id="videoListContainer">
             <!-- ভিডিও কার্ডগুলো এখানে রেন্ডার হবে -->
-        </div>
-    </div>
-
-    <!-- টেলিগ্রাম অটো-ক্লিক শেয়ার লক মডাল -->
-    <div id="shareModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>🔒 Video Locked!</h3>
-                <button class="close-btn" onclick="closeShareModal()">✕</button>
-            </div>
-            <p style="font-size: 13px; color: #94a3b8; margin-bottom: 15px; line-height: 1.4;" id="shareStatusText">
-                ভিডিওটি আনলক করতে নিচের বাটনে ক্লিক করে ভিন্ন ৩টি গ্রুপ বা চ্যাটে শেয়ার করুন!<br><b>(শেয়ার হয়েছে: ০ / ৩ বার)</b>
-            </p>
-
-            <button class="action-btn" id="shareActionBtn" style="background: #0088cc; margin-bottom: 8px;" onclick="performShareStep()">📢 টেলিগ্রামে শেয়ার করুন (0/3)</button>
-            <button class="action-btn" id="finalUnlockBtn" style="background: #10b981; display: none;" onclick="confirmAndUnlock()">🎉 ভিডিও আনলক করুন</button>
         </div>
     </div>
 
