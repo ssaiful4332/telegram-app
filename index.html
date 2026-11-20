@@ -6,7 +6,7 @@
     <title>Unlimited Vids</title>
     <!-- টেলিগ্রাম ওয়েব অ্যাপ এসডিকে -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    
+
     <!-- Firebase SDK for Realtime Database -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -29,7 +29,10 @@
         let tg = window.Telegram.WebApp;
         tg.expand();
         if(tg.initDataUnsafe && tg.initDataUnsafe.user) {
-            document.getElementById('tgUser').innerText = "@" + (tg.initDataUnsafe.user.username || tg.initDataUnsafe.user.first_name);
+            const userEl = document.getElementById('tgUser');
+            if(userEl) {
+                userEl.innerText = "@" + (tg.initDataUnsafe.user.username || tg.initDataUnsafe.user.first_name);
+            }
         }
 
         const videoListContainer = document.getElementById('videoListContainer');
@@ -40,16 +43,24 @@
         let allVideosData = {};
         let currentCategory = 'All'; 
         let favoritesList = JSON.parse(localStorage.getItem('my_favorites') || '[]');
+        let currentAdminPass = 'Lamiya'; // ডিফল্ট পাসওয়ার্ড
 
-        // রিয়েলটাইম ডাটাবেস থেকে ভিডিও এবং নোটিশ লোড করা
+        // সেভ করা থিম লোড করা
+        if(localStorage.getItem('theme') === 'light') {
+            document.body.classList.add('light-theme');
+        }
+
+        // রিয়েলটাইম ডাটাবেস রেফারেন্স
         const videosRef = ref(db, 'videos');
         const noticeRef = ref(db, 'notice');
+        const adminPassRef = ref(db, 'admin_password');
 
         onValue(videosRef, (snapshot) => {
             const data = snapshot.val();
             allVideosData = data || {};
             renderVideos();
             renderAdminList();
+            updateStats();
         });
 
         onValue(noticeRef, (snapshot) => {
@@ -59,21 +70,42 @@
             }
         });
 
+        // ফায়ারবেস থেকে ডায়নামিক পাসওয়ার্ড লোড করা
+        onValue(adminPassRef, (snapshot) => {
+            const savedPass = snapshot.val();
+            if(savedPass) {
+                currentAdminPass = String(savedPass);
+            }
+        });
+
+        // মোট পরিসংখ্যান আপডেট করার ফাংশন
+        function updateStats() {
+            let totalVideos = Object.keys(allVideosData).length;
+            let totalViews = 0;
+
+            Object.values(allVideosData).forEach(video => {
+                totalViews += (video.views || 0);
+            });
+
+            document.getElementById('totalVideosCount').innerText = totalVideos;
+            document.getElementById('totalViewsCount').innerText = totalViews;
+        }
+
         // ভিডিও রেন্ডার ও ফিল্টার করার ফাংশন
         window.renderVideos = function() {
             videoListContainer.innerHTML = '';
             const searchQuery = searchInput.value.toLowerCase();
-            
+
             let keys = Object.keys(allVideosData).reverse(); 
-            
+
             let filteredKeys = keys.filter(id => {
                 let video = allVideosData[id];
                 let matchesSearch = video.title.toLowerCase().includes(searchQuery) || id.toLowerCase().includes(searchQuery);
-                
+
                 if (currentCategory === 'Favorites') {
                     return matchesSearch && favoritesList.includes(id);
                 }
-                
+
                 let matchesCategory = currentCategory === 'All' || video.category === currentCategory;
                 return matchesSearch && matchesCategory;
             });
@@ -155,7 +187,7 @@
         }
 
         window.shareApp = function() {
-            let botUrl = "https://t.me/saifulappbot";
+            let botUrl = "https://t.me/unlimited_vids_bot";
             if (navigator.share) {
                 navigator.share({
                     title: 'Unlimited Vids',
@@ -170,15 +202,14 @@
         window.copyVideoDirectLink = function(id, title) {
             let baseUrl = window.location.href.split('#')[0].split('?')[0];
             let directLink = baseUrl + '#vid-' + id;
-            
+
             navigator.clipboard.writeText(directLink).then(() => {
-                alert(`সফল! ভিডিওটির ডাইরেক্ট লিংক কপি হয়েছে。\n\nলিংক: ${directLink}`);
+                alert(`সফল! ভিডিওটির ডাইরেক্ট লিংক কপি হয়েছে।\n\nলিংক: ${directLink}`);
             }).catch(err => {
                 prompt("লিংকটি কপি করে নিন:", directLink);
             });
         }
 
-        // সরাসরি নতুন ট্যাবে ভিডিও লিংক ওপেন করবে (টেলিগ্রাম জয়েন পপআপ ছাড়াই)
         window.openDirectVideo = function(link, id) {
             incrementView(id);
             window.open(link, '_blank');
@@ -278,16 +309,33 @@
             });
         }
 
+        // ডায়নামিক পাসওয়ার্ড পরিবর্তনের ফাংশন
+        window.changeAdminPassword = function() {
+            const newPass = document.getElementById('newPassInput').value.trim();
+            if(!newPass || newPass.length < 4) {
+                alert('কমপক্ষে ৪ অক্ষরের নতুন পাসওয়ার্ড বা পিন দিন!');
+                return;
+            }
+            set(adminPassRef, newPass).then(() => {
+                alert('সফল! অ্যাডমিন পাসওয়ার্ড পরিবর্তন হয়ে গেছে।');
+                document.getElementById('newPassInput').value = '';
+            }).catch((error) => {
+                alert('সমস্যা হয়েছে: ' + error.message);
+            });
+        }
+
         window.toggleTheme = function() {
             document.body.classList.toggle('light-theme');
+            let theme = document.body.classList.contains('light-theme') ? 'light' : 'dark';
+            localStorage.setItem('theme', theme);
         }
 
         window.openSettings = function() {
-            let pass = prompt('অ্যাডমিন পাসওয়ার্ড দিন:');
-            if(pass === 'Lamiya') {
+            let pass = prompt('অ্যাডমিন পাসওয়ার্ড বা পিন দিন:');
+            if(pass === currentAdminPass) {
                 document.getElementById('settingsModal').style.display = 'flex';
             } else if(pass !== null) {
-                alert('ভুল পাসওয়ার্ড!');
+                alert('ভুল পাসওয়ার্ড! আবার চেষ্টা করুন।');
             }
         }
 
@@ -299,7 +347,7 @@
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; user-select: none; }
         body { background-color: #0b0f19; color: #ffffff; padding: 10px; display: flex; justify-content: center; transition: 0.3s; scroll-behavior: smooth; }
-        
+
         body.light-theme { background-color: #f1f5f9; color: #0f172a; }
         body.light-theme .container .header .app-title { color: #0f172a; }
         body.light-theme .icon-btn, body.light-theme .search-box, body.light-theme .cat-tab, body.light-theme .stats-box, body.light-theme .stat-item, body.light-theme .video-card, body.light-theme .modal-content, body.light-theme input, body.light-theme select { background: #ffffff; color: #0f172a; border-color: #cbd5e1; }
@@ -313,7 +361,10 @@
         .app-title { font-size: 18px; font-weight: bold; }
         .header-btns { display: flex; gap: 5px; }
         .icon-btn { background: #1e293b; border: none; color: #fff; padding: 6px 8px; border-radius: 8px; cursor: pointer; font-size: 11px; }
-        
+
+        .bot-link-box { text-align: center; margin-bottom: 12px; font-size: 13px; color: #94a3b8; }
+        .bot-link-box a { color: #38bdf8; text-decoration: none; font-weight: bold; }
+
         .notice-board { background: #1e1b4b; border: 1px solid #312e81; color: #c7d2fe; padding: 10px; border-radius: 8px; font-size: 12px; margin-bottom: 12px; text-align: center; }
 
         .search-box { width: 100%; padding: 10px; background: #1e293b; border: 1px solid #334155; border-radius: 8px; color: #fff; margin-bottom: 12px; font-size: 14px; outline: none; }
@@ -326,9 +377,9 @@
         .stat-item { background: #0f172a; padding: 10px; border-radius: 8px; }
         .stat-item span { display: block; font-size: 12px; color: #94a3b8; }
         .stat-item b { font-size: 16px; color: #fbbf24; }
-        
+
         .video-card { background: #1e293b; border-radius: 12px; overflow: hidden; margin-bottom: 15px; border: 1px solid #334155; transition: all 0.3s ease; }
-        
+
         @keyframes glowFlash {
             0% { border-color: #7c3aed; box-shadow: 0 0 20px #7c3aed; transform: scale(1.02); }
             50% { border-color: #db2777; box-shadow: 0 0 25px #db2777; transform: scale(1.02); }
@@ -341,10 +392,10 @@
         .preview-badge { position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.7); color: #fbbf24; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; }
         .duration-badge { position: absolute; bottom: 10px; right: 10px; background: rgba(0,0,0,0.8); color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: bold; }
         .hot-badge { position: absolute; top: 10px; right: 10px; background: #ef4444; color: #fff; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; }
-        
+
         .video-info { padding: 12px; }
         .video-title { font-size: 14px; margin-bottom: 8px; line-height: 1.4; }
-        
+
         .video-id-section { background: #0f172a; border: 1px dashed #334155; padding: 6px 10px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: #38bdf8; margin-bottom: 8px; cursor: pointer; transition: 0.2s; }
         .video-id-section:hover { background: #1e293b; border-color: #38bdf8; }
         .copy-hint-text { background: #1e293b; padding: 2px 6px; border-radius: 4px; font-size: 10px; color: #cbd5e1; }
@@ -361,21 +412,19 @@
         input, select, button.action-btn { width: 100%; padding: 10px; margin: 8px 0; border-radius: 8px; border: none; }
         input, select { background: #0f172a; color: #fff; border: 1px solid #334155; outline: none; }
         button.action-btn { background: #db2777; color: #fff; font-weight: bold; cursor: pointer; }
-        
+
         /* অ্যাডমিন প্যানেল লিস্ট */
         .admin-list-container { max-height: 220px; overflow-y: auto; padding-right: 4px; margin-top: 8px; border: 1px solid #334155; border-radius: 8px; padding: 8px; background: #0b0f19; }
         .admin-item { display: flex; justify-content: space-between; align-items: center; background: #1e293b; padding: 8px 10px; border-radius: 6px; margin-bottom: 6px; font-size: 12px; text-align: left; gap: 8px; border: 1px solid #334155; }
         .delete-btn { background: #ef4444; color: #fff; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold; }
         .link-btn { background: #0284c7; color: #fff; border: none; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 11px; }
-        
+
         .no-video { text-align: center; color: #64748b; padding: 30px; font-size: 14px; }
-        .bot-link-box { text-align: center; margin-bottom: 12px; font-size: 13px; color: #94a3b8; }
-        .bot-link-box a { color: #38bdf8; text-decoration: none; font-weight: bold; }
     </style>
 </head>
 <body>
-
     <div class="container">
+        <!-- হেডার অংশ -->
         <div class="header">
             <div class="app-title">Unlimited Vids</div>
             <div class="header-btns">
@@ -386,79 +435,83 @@
         </div>
 
         <div class="bot-link-box">
-            বট লিংক: <a href="https://t.me/unlimited_vids_bot="_blank">@saifulappbot</a>
+            বট লিংক: <a href="https://t.me/unlimited_vids_bot" target="_blank">@unlimited_vids_bot</a>
         </div>
 
+        <!-- নোটিশ বোর্ড -->
         <div class="notice-board" id="noticeText">
-            📢 নতুন ভিডিও দেখতে চ্যানেলটি পিন করে রাখুন!
+            📢 যেকোনো ভিডিও দেখতে নিচে স্ক্রোল করুন বা ক্যাটাগরি সিলেক্ট করুন!
         </div>
 
-        <div class="stats-box">
-            <div class="stat-item">
-                <span>কয়েন</span>
-                <b>50</b>
-            </div>
-            <div class="stat-item">
-                <span>ইউজার র‍্যাংক</span>
-                <b>Bronze</b>
-            </div>
-        </div>
-
-        <!-- সার্চ বার -->
-        <input type="text" id="searchInput" class="search-box" placeholder="🔍 ভিডিও সার্চ বা আইডি (ID) লিখুন..." onkeyup="renderVideos()">
+        <!-- সার্চ বক্স -->
+        <input type="text" id="searchInput" class="search-box" placeholder="🔍 ভিডিও সার্চ বা আইডি (ID) লিখুন..." oninput="renderVideos()">
 
         <!-- ক্যাটাগরি ট্যাব -->
         <div class="categories-container">
             <button class="cat-tab active-cat" onclick="filterCategory('All', this)">All</button>
-            <button class="cat-tab" onclick="filterCategory('Favorites', this)">❤ Favorites</button>
-            <button class="cat-tab" onclick="filterCategory('Trending', this)">Trending</button>
-            <button class="cat-tab" onclick="filterCategory('Latest', this)">Latest</button>
-            <button class="cat-tab" onclick="filterCategory('Exclusive', this)">Exclusive</button>
+            <button class="cat-tab" onclick="filterCategory('Favorites', this)">❤️ Favorites</button>
+            <button class="cat-tab" onclick="filterCategory('Trending', this)">🔥 Trending</button>
+            <button class="cat-tab" onclick="filterCategory('Latest', this)">✨ Latest</button>
+            <button class="cat-tab" onclick="filterCategory('Exclusive', this)">⭐ Exclusive</button>
         </div>
 
-        <!-- ভিডিও লিস্ট কনটেইনার -->
+        <!-- স্ট্যাটাস বক্স -->
+        <div class="stats-box">
+            <div class="stat-item">
+                <span>মোট ভিডিও</span>
+                <b id="totalVideosCount">0</b>
+            </div>
+            <div class="stat-item">
+                <span>মোট ভিউজ</span>
+                <b id="totalViewsCount">0</b>
+            </div>
+        </div>
+
+        <!-- ভিডিও লিস্ট কন্টেইনার -->
         <div id="videoListContainer">
-            <div class="no-video">লোড হচ্ছে...</div>
+            <!-- ভিডিও কার্ডগুলো এখানে রেন্ডার হবে -->
         </div>
     </div>
 
-    <!-- সেটিংস ও অ্যাডমিন প্যানেল মডাল -->
-    <div class="modal" id="settingsModal">
-        <div class="modal-content" style="text-align: left;">
+    <!-- অ্যাডমিন সেটিংস মডাল -->
+    <div id="settingsModal" class="modal">
+        <div class="modal-content">
             <div class="modal-header">
-                <h3>Admin & Settings</h3>
+                <h3>👑 Admin Panel</h3>
                 <button class="close-btn" onclick="closeSettings()">✕</button>
             </div>
-            <p style="font-size: 13px; color: #94a3b8; margin-bottom: 10px;">Telegram User: <b id="tgUser">@User</b></p>
-            
+
+            <div style="text-align: left; font-size: 13px; margin-bottom: 5px; color: #94a3b8;">নতুন ভিডিও যোগ করুন:</div>
+            <input type="text" id="vidTitle" placeholder="ভিডিওর শিরোনাম (Title)">
+            <input type="text" id="vidThumb" placeholder="থাম্বনেইল ইমেজ লিংক (Thumbnail URL)">
+            <input type="text" id="vidLink" placeholder="মূল ভিডিওর লিংক (Direct/Telegram Link)">
+            <input type="text" id="vidDuration" placeholder="সময়কাল যেমন 2:30 (Option)">
+            <select id="vidCategory">
+                <option value="Trending">Trending</option>
+                <option value="Latest">Latest</option>
+                <option value="Exclusive">Exclusive</option>
+                <option value="General">General</option>
+            </select>
+            <button class="action-btn" onclick="addNewVideo()">➕ ভিডিও পাবলিশ করুন</button>
+
             <hr style="border: 0; border-top: 1px solid #334155; margin: 15px 0;">
 
-            <h4>📢 নোটিশ পরিবর্তন করুন</h4>
-            <div style="margin-top: 8px; margin-bottom: 15px;">
-                <input type="text" id="noticeInput" placeholder="নতুন নোটিশ লিখুন...">
-                <button class="action-btn" style="background: #0284c7;" onclick="updateNotice()">নোটিশ আপডেট করুন</button>
+            <div style="text-align: left; font-size: 13px; margin-bottom: 5px; color: #94a3b8;">নোটিশ বোর্ড আপডেট করুন:</div>
+            <input type="text" id="noticeInput" placeholder="নতুন নোটিশ লিখুন...">
+            <button class="action-btn" style="background: #0284c7;" onclick="updateNotice()">📢 নোটিশ পরিবর্তন করুন</button>
+
+            <hr style="border: 0; border-top: 1px solid #334155; margin: 15px 0;">
+
+            <div style="text-align: left; font-size: 13px; margin-bottom: 5px; color: #94a3b8;">সিকিউরিটি ও পাসওয়ার্ড পরিবর্তন:</div>
+            <input type="password" id="newPassInput" placeholder="নতুন পাসওয়ার্ড বা পিন লিখুন...">
+            <button class="action-btn" style="background: #7c3aed;" onclick="changeAdminPassword()">🔐 পাসওয়ার্ড আপডেট করুন</button>
+
+            <hr style="border: 0; border-top: 1px solid #334155; margin: 15px 0;">
+
+            <div style="text-align: left; font-size: 13px; margin-bottom: 5px; color: #94a3b8;">সকল ভিডিও ম্যানেজমেন্ট:</div>
+            <div class="admin-list-container" id="adminVideoList">
+                <!-- অ্যাডমিন লিস্ট এখানে দেখাবে -->
             </div>
-
-            <hr style="border: 0; border-top: 1px solid #334155; margin: 15px 0;">
-
-            <h4>🛠️ Admin Panel (নতুন ভিডিও)</h4>
-            <div style="margin-top: 8px;">
-                <input type="text" id="vidTitle" placeholder="ভিডিও টাইটেল...">
-                <input type="text" id="vidThumb" placeholder="থাম্বনেইল ইমেজ URL...">
-                <input type="text" id="vidLink" placeholder="আনলক লিংক (Telegram/Web)...">
-                <input type="text" id="vidDuration" placeholder="সময়সীমা (যেমন: 2:45 min)">
-                <select id="vidCategory">
-                    <option value="Trending">Trending</option>
-                    <option value="Latest">Latest</option>
-                    <option value="Exclusive">Exclusive</option>
-                </select>
-                <button class="action-btn" onclick="addNewVideo()">নতুন ভিডিও যোগ করুন</button>
-            </div>
-
-            <hr style="border: 0; border-top: 1px solid #334155; margin: 15px 0;">
-
-            <h5 style="margin-bottom: 5px;">যুক্ত করা ভিডিওসমূহ ও আইডি:</h5>
-            <div class="admin-list-container" id="adminVideoList"></div>
         </div>
     </div>
 </body>
