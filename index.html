@@ -141,6 +141,12 @@
                 let isFav = favoritesList.includes(id);
                 let isHot = views > 10 || likes > 5; 
 
+                // চেক করা ভিডিওটি বর্তমানে ১ মিনিটের মধ্যে আনলক আছে কি না
+                let unlockedData = JSON.parse(localStorage.getItem('unlocked_vids') || '{}');
+                let isUnlocked = unlockedData[id] && (Date.now() < unlockedData[id]);
+                let btnText = isUnlocked ? '🔓 WATCH NOW (UNLOCKED)' : '🔒 UNLOCK FULL VIDEO';
+                let btnBg = isUnlocked ? 'background: linear-gradient(135deg, #059669, #10b981);' : '';
+
                 videoListContainer.innerHTML += `
                     <div class="video-card" id="vid-${id}">
                         <div class="thumbnail-container" id="thumb-card-${id}">
@@ -165,7 +171,7 @@
                                 </div>
                             </div>
                             
-                            <button class="unlock-btn" onclick="checkShareAndUnlock('${video.link}', '${id}')">🔒 UNLOCK FULL VIDEO</button>
+                            <button class="unlock-btn" style="${btnBg}" onclick="checkShareAndUnlock('${video.link}', '${id}')">${btnText}</button>
                         </div>
                     </div>
                 `;
@@ -189,20 +195,22 @@
         }
 
         window.checkShareAndUnlock = function(link, id) {
-            let unlockedVideos = JSON.parse(localStorage.getItem('unlocked_vids') || '[]');
-            if(unlockedVideos.includes(id)) {
+            let unlockedData = JSON.parse(localStorage.getItem('unlocked_vids') || '{}');
+            
+            // যদি ১ মিনিটের মেয়াদ এখনো থাকে, তবে সরাসরি ভিডিও ওপেন হবে
+            if(unlockedData[id] && Date.now() < unlockedData[id]) {
                 openDirectVideo(link, id);
                 return;
             }
 
+            // মেয়াদ শেষ বা আনলক করা না থাকলে শেয়ার মডাল আসবে
             pendingVideoLink = link;
             pendingVideoId = id;
-            clickShareCount = 0; // রিসেট
+            clickShareCount = 0; 
             updateShareModalUI();
             document.getElementById('shareModal').style.display = 'flex';
         }
 
-        // টেলিগ্রামে শেয়ার ওপেন করা এবং অটো কাউন্ট বাড়ানো
         window.performShareStep = function() {
             let botUrl = "https://t.me/unlimited_vids_bot";
             let shareText = "🔥 সেরা সব এক্সক্লুসিভ ভিডিও দেখতে আমাদের মিনি অ্যাপে ভিজিট করুন:";
@@ -214,7 +222,6 @@
                 window.open(telegramShareUrl, '_blank');
             }
 
-            // প্রতিবার ক্লিক করে টেলিগ্রামে গেলে কাউন্ট ১ বাড়বে
             if (clickShareCount < requiredShares) {
                 clickShareCount++;
                 updateShareModalUI();
@@ -238,14 +245,16 @@
             }
         }
 
+        // ভিডিও আনলক হওয়ার পর ঠিক ১ মিনিট (৬০,০০০ মিলিগ্রাম) সময় সেট করা
         window.confirmAndUnlock = function() {
-            let unlockedVideos = JSON.parse(localStorage.getItem('unlocked_vids') || '[]');
-            if(!unlockedVideos.includes(pendingVideoId)) {
-                unlockedVideos.push(pendingVideoId);
-                localStorage.setItem('unlocked_vids', JSON.stringify(unlockedVideos));
-            }
+            let unlockedData = JSON.parse(localStorage.getItem('unlocked_vids') || '{}');
+            let expireTime = Date.now() + (60 * 1000); // বর্তমান সময় + ১ মিনিট
+            
+            unlockedData[pendingVideoId] = expireTime;
+            localStorage.setItem('unlocked_vids', JSON.stringify(unlockedData));
 
             closeShareModal();
+            renderVideos(); // বাটন আপডেট করার জন্য
             openDirectVideo(pendingVideoLink, pendingVideoId);
         }
 
@@ -480,7 +489,7 @@
         .video-meta { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: #94a3b8; margin-bottom: 10px; }
         .like-btn-action { background: #0f172a; border: 1px solid #334155; color: #f43f5e; padding: 4px 10px; border-radius: 6px; cursor: pointer; font-size: 12px; }
         .fav-btn-action { background: #0f172a; border: 1px solid #334155; padding: 4px 8px; border-radius: 6px; cursor: pointer; font-size: 12px; }
-        .unlock-btn { width: 100%; background: linear-gradient(135deg, #7c3aed, #db2777); color: #fff; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .unlock-btn { width: 100%; background: linear-gradient(135deg, #7c3aed, #db2777); color: #fff; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; }
 
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); justify-content: center; align-items: center; z-index: 1000; padding: 15px; }
         .modal-content { background: #1e293b; width: 100%; max-width: 400px; border-radius: 12px; padding: 20px; max-height: 90vh; overflow-y: auto; text-align: center; }
